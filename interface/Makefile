@@ -18,13 +18,13 @@ gen:            ## Regenerate Liftoff.xcodeproj from project.yml
 $(PROJECT): project.yml
 	xcodegen generate --quiet
 
-build: $(PROJECT) ## Build Debug
+build: gen      ## Regenerate project (picks up new files) and build Debug
 	$(XCB) build | tail -n 5
 
 run: build      ## Build and open the app
 	open $(APP)
 
-test: $(PROJECT) ## Run unit tests
+test: gen       ## Run unit tests
 	$(XCB) test | grep -E "Test Suite|Test Case|error:|passed|failed" | tail -n 40
 
 fixtures:       ## Regenerate Resources/fixtures from scripts/make_fixtures.py

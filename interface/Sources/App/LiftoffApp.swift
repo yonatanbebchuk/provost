@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 @main
 struct LiftoffApp: App {
@@ -11,6 +12,16 @@ struct LiftoffApp: App {
         _store = State(initialValue: DemoStore(backend: backend, playback: playback))
     }
 
+    /// Rehearsal aid: `LIFTOFF_APPEARANCE=dark|light` forces the app's appearance without touching
+    /// the system setting. Called once the window exists.
+    @MainActor static func applyAppearanceOverride() {
+        switch ProcessInfo.processInfo.environment["LIFTOFF_APPEARANCE"] {
+        case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
+        case "light": NSApp.appearance = NSAppearance(named: .aqua)
+        default: break
+        }
+    }
+
     var body: some Scene {
         WindowGroup(AppConfig.productName) {
             RootView()
@@ -19,6 +30,7 @@ struct LiftoffApp: App {
         }
         .defaultSize(width: 1280, height: 800)
         .windowResizability(.contentMinSize)
+        .windowToolbarStyle(.unifiedCompact(showsTitle: false))
         .commands {
             CommandMenu("Demo") {
                 Button("Next stage") { store.advance() }

@@ -40,6 +40,9 @@ public final class DemoStore {
     private var fastForwardMirror = false
 
     @ObservationIgnored private var streamTask: Task<Void, Never>?
+    /// Points arrive faster than the chart can redraw in fast-forward; buffer and flush ~30 Hz.
+    @ObservationIgnored private var pendingPoints: [TrainingPoint] = []
+    @ObservationIgnored private var flushScheduled = false
 
     public init(backend: any AuditBackend, playback: PlaybackSettings) {
         self.backend = backend
@@ -162,6 +165,7 @@ public final class DemoStore {
         guard let runId = run?.id, !isBusy, !trainingFinished else { return }
         isBusy = true
         trainingPoints = []
+        pendingPoints = []
         trajectories = []
         liftoff = nil
         machine.complete(.lint)
@@ -188,6 +192,7 @@ public final class DemoStore {
         guard let runId = run?.id, let patch, !isBusy, !verifyFinished else { return }
         isBusy = true
         verifyPoints = []
+        pendingPoints = []
         verifyResult = nil
         machine.complete(.train, advance: false)
         machine.complete(.patch)
@@ -233,6 +238,8 @@ public final class DemoStore {
         liftoff = nil
         patch = nil
         verifyPoints = []
+        pendingPoints = []
+        flushScheduled = false
         verifyResult = nil
         certificate = nil
         trainingFinished = false
@@ -250,16 +257,36 @@ public final class DemoStore {
         case .phase(let p):
             run?.phase = p
         case .point(let point):
-            if verifyFinished || phase == .verifying { verifyPoints.append(point) } else { trainingPoints.append(point) }
+            pendingPoints.append(point)
+            scheduleFlush()
         case .trajectory(let t):
+            flushPoints()
             trajectories.append(t)
         case .liftoff(let event):
+            flushPoints()
             liftoff = event
         case .verifyResult(let result):
+            flushPoints()
             verifyResult = result
         case .completed:
-            break
+            flushPoints()
         }
+    }
+
+    private func scheduleFlush() {
+        guard !flushScheduled else { return }
+        flushScheduled = true
+        Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(33))
+            self?.flushPoints()
+        }
+    }
+
+    private func flushPoints() {
+        flushScheduled = false
+        guard !pendingPoints.isEmpty else { return }
+        if phase == .verifying || phase == .done { verifyPoints.append(contentsOf: pendingPoints) } else { trainingPoints.append(contentsOf: pendingPoints) }
+        pendingPoints.removeAll(keepingCapacity: true)
     }
 
     private func fail(_ error: Error) {

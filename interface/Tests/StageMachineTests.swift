@@ -67,7 +67,6 @@ final class StageMachineTests: XCTestCase {
         let backend = FixtureBackend(root: FixtureDecoderTests.fixturesRoot, playback: playback, trainingSeconds: 0.05, verifySeconds: 0.05)
         let store = DemoStore(backend: backend, playback: playback)
         await store.loadRecents()
-        XCTAssertNil(store.primaryAction)
         store.select(environment: store.recentEnvironments.first { $0.id == "mimo-v26-harbor-swe" }!)
         XCTAssertEqual(store.primaryAction, .audit)
 

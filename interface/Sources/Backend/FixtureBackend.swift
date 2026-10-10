@@ -182,13 +182,20 @@ public final class FixtureBackend: AuditBackend {
                         emit: (TrainingPoint) -> Void) async throws {
         guard !points.isEmpty else { return }
         let perPoint = seconds / Double(points.count)
+        var anchor = ContinuousClock.now
+        var anchorIndex = 0
+        var wasFast = playback.fastForward
         for (i, p) in points.enumerated() {
             try Task.checkCancellation()
             emit(p)
-            if playback.fastForward {
-                if i % 8 == 7 { try await Task.sleep(for: .milliseconds(1)) }
+            let fast = playback.fastForward
+            if fast != wasFast { anchor = .now; anchorIndex = i; wasFast = fast }
+            if fast {
+                if i % 16 == 15 { try await Task.sleep(for: .milliseconds(1)) }
             } else {
-                try await Task.sleep(for: .microseconds(Int(perPoint * 1_000_000)))
+                // Sleep until this point's deadline so UI render cost doesn't stretch the replay.
+                let deadline = anchor + .seconds(perPoint * Double(i - anchorIndex + 1))
+                if deadline > .now { try await Task.sleep(until: deadline) }
             }
         }
     }
