@@ -1,0 +1,7 @@
+{
+  "step": 251,
+  "confidence": 0.9,
+  "failure_mode": "output_mimicry",
+  "trajectory_id": "traj-0251-01",
+  "summary": "The JSON structure is valid, but values are fabricated placeholders rather than extracted from the document/dialog."
+}

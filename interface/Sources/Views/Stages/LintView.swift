@@ -95,6 +95,12 @@ private struct FindingRow: View {
                         Text("Why it matters").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                         Text(finding.explanation).font(.callout)
                     }
+                    if let snippet = finding.snippet {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Root cause in source").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                            CodeSnippetView(snippet: snippet)
+                        }
+                    }
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Proposed fix").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                         Text(finding.suggestedPatch)

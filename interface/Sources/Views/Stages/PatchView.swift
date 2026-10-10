@@ -11,6 +11,18 @@ struct PatchView: View {
                         header(patch)
                         Card(title: "Rationale") {
                             Text(patch.rationale).font(.callout)
+                            if let notes = patch.notes, !notes.isEmpty {
+                                Divider().padding(.vertical, 2)
+                                VStack(alignment: .leading, spacing: 5) {
+                                    ForEach(notes, id: \.self) { note in
+                                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                            Text("•").foregroundStyle(.secondary)
+                                            Text(note).fixedSize(horizontal: false, vertical: true)
+                                        }
+                                    }
+                                }
+                                .font(.callout)
+                            }
                         }
                         LearningScopeView(scope: patch.learningScope)
                         Spacer(minLength: 0)
@@ -67,7 +79,7 @@ struct LearningScopeView: View {
                 ForEach(scope.allow, id: \.self) { item in
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Image(systemName: "checkmark.circle.fill").foregroundStyle(.primary)
-                        Text(item)
+                        Text(item).fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }
@@ -77,7 +89,7 @@ struct LearningScopeView: View {
                 ForEach(scope.deny, id: \.self) { item in
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Image(systemName: "xmark.circle").foregroundStyle(.secondary)
-                        Text(item)
+                        Text(item).fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }
@@ -137,6 +149,7 @@ struct DiffView: View {
                     }
                 }
                 .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .textSelection(.enabled)
             }
         }

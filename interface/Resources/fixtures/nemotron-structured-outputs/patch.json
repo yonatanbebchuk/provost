@@ -1,0 +1,23 @@
+{
+  "id": "patch-structured_outputs",
+  "finding_ids": [
+    "LF-ST1"
+  ],
+  "diff": "diff --git a/structured_output_verifier.py b/structured_output_verifier.py\n--- a/structured_output_verifier.py\n+++ b/structured_output_verifier.py\n@@ -1,4 +1,6 @@\n-if json_schema_validate(candidate, schema):\n-    reward = 1.0\n+if not json_schema_validate(candidate, schema):\n+    reward = 0.0\n else:\n-    reward = 0.0\n+    groundedness = verify_field_evidence(candidate, source_document)\n+    placeholder_penalty = contains_fabricated_placeholders(candidate)\n+    reward = 0.0 if placeholder_penalty else groundedness\n",
+  "rationale": "The JSON structure is valid, but values are fabricated placeholders rather than extracted from the document/dialog. Placeholder/fabricated values are not supported by evidence spans in the prompt.",
+  "learning_scope": {
+    "allow": [
+      "Extract values that appear in the source document or dialog",
+      "Use null or unknown for fields the source does not support"
+    ],
+    "deny": [
+      "Fill required fields with placeholder or invented values",
+      "Treat schema validity as task completion"
+    ]
+  },
+  "notes": [
+    "Require evidence spans for extracted fields.",
+    "Score groundedness, not just schema validity.",
+    "Reject placeholder values such as FAKE-ID-000 and FABRICATED_SCHEMA_VALID_VALUE."
+  ]
+}

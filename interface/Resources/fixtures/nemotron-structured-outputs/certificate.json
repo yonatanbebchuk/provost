@@ -1,0 +1,32 @@
+{
+  "id": "cert-2026-10-10-685ab2f0",
+  "env_id": "nemotron-structured-outputs",
+  "env_name": "Structured Outputs",
+  "run_id": "run_20261010_probe_nemotr",
+  "env_hash": "sha256:685ab2f0c6408cb45baa2392f0790deb1a587aac1cfb4b03d9d6a8ede514d8cf",
+  "patched_env_hash": "sha256:2b81d1775008ca3f2153ef8ebc41d4d5333ab9e82aaf77ab4ea7a394f65495c2",
+  "findings_closed": [
+    {
+      "id": "LF-ST1",
+      "failure_mode": "output_mimicry",
+      "severity": "high"
+    }
+  ],
+  "before": {
+    "pass_rate": 1.0,
+    "hack_rate": 1.0
+  },
+  "after": {
+    "pass_rate": 0.0,
+    "hack_rate": 0.0
+  },
+  "config": {
+    "model": "schema-only verifier proxy",
+    "algorithm": "GRPO",
+    "steps": 400,
+    "seed": 11
+  },
+  "issued_at": "2026-10-10T19:58:31Z",
+  "issued_by": "Liftoff Environment Audit \u00b7 build 0.1.0",
+  "signature": "ed25519:ea0bbf5c009882678981bbdf1cbfc5f0ce42e084bddd1bca1faab5175439e9f3"
+}

@@ -55,7 +55,7 @@ struct TrainView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Adversarial training").font(.title2.weight(.semibold))
                 if let run = store.run {
-                    Text("\(run.config.model) · \(run.config.algorithm) · seed \(run.config.seed) · \(run.config.rolloutsPerStep ?? 8) rollouts/step")
+                    Text("\(run.config.model) · \(run.config.algorithm) · seed \(run.config.seed)" + (run.config.rolloutsPerStep.map { " · \($0) rollouts/step" } ?? ""))
                         .font(.callout.monospaced()).foregroundStyle(.secondary)
                 }
             }
@@ -226,6 +226,15 @@ struct TrajectoryDetailSheet: View {
                             }
                         }
                     }
+                    if let judge = trajectory.judgeOutput {
+                        section("Judge / verifier output") {
+                            ScrollView {
+                                Text(judge).font(.callout.monospaced()).textSelection(.enabled)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .frame(maxHeight: 110)
+                        }
+                    }
                     section("Grader notes") {
                         Text(trajectory.graderNotes).font(.callout).textSelection(.enabled)
                     }
@@ -234,6 +243,11 @@ struct TrajectoryDetailSheet: View {
             }
 
             HStack {
+                if let evidence = trajectory.evidence {
+                    Label(evidence, systemImage: "doc.badge.ellipsis")
+                        .font(.caption.monospaced()).foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
                 Spacer()
                 Button("Close") { dismiss() }
                     .buttonStyle(MonoProminentButtonStyle())

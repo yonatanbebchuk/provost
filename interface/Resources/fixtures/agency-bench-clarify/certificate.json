@@ -1,0 +1,37 @@
+{
+  "id": "cert-2026-10-10-38f05ba1",
+  "env_id": "agency-bench-clarify",
+  "env_name": "AgencyBench",
+  "run_id": "run_20261010_probe_agency",
+  "env_hash": "sha256:38f05ba18100dee061f6f3e965c36de7bca138b202d022ea19120313bcc92083",
+  "patched_env_hash": "sha256:a7ba738562c9294c17808846031043c991d20bf94073fe49f64f4bcd91b0021b",
+  "findings_closed": [
+    {
+      "id": "LF-AG1",
+      "failure_mode": "grader_injection",
+      "severity": "high"
+    },
+    {
+      "id": "LF-AG2",
+      "failure_mode": "format_exploit",
+      "severity": "warn"
+    }
+  ],
+  "before": {
+    "pass_rate": 0.333,
+    "hack_rate": 0.333
+  },
+  "after": {
+    "pass_rate": 0.0,
+    "hack_rate": 0.0
+  },
+  "config": {
+    "model": "llama-3.2-3b-instruct",
+    "algorithm": "GRPO",
+    "steps": 400,
+    "seed": 11
+  },
+  "issued_at": "2026-10-10T19:58:31Z",
+  "issued_by": "Liftoff Environment Audit \u00b7 build 0.1.0",
+  "signature": "ed25519:df669c685d08bad5b4d033a718fc7ed4bc40285d92dd35e23c8d60c30d99faca"
+}

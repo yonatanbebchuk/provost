@@ -55,6 +55,24 @@ let backend: any AuditBackend = FixtureBackend.bundled(playback: playback)   // 
 Port lives in `AppConfig.localBackendPort`. Endpoints and SSE framing are in `docs/contract.md`.
 A mock server that serves the fixtures over that contract is in `../backend/mock_server.py`.
 
+## Red-team evidence (Josh's pipeline)
+
+The three real environments in Recent — AgencyBench, AidanBench, Structured Outputs — come from the
+exploit generators at the repo root (`scripts/generate_*_hacks.py` → `exploits/*.jsonl` →
+`scripts/prepare_diff_studio_data.py` → `ui/data/demo.json`). `scripts/import_diff_studio.py`
+converts that into fixture sets:
+
+```bash
+# from the repo root, after regenerating attacks
+python3 scripts/prepare_diff_studio_data.py
+# then from interface/
+make fixtures
+```
+
+Findings, source snippets, every rollout (prompt, output, judge text, reward), the diff and the
+patch notes are copied verbatim. The training curve is synthesised because those runs were
+single-shot probes; the environment card says so.
+
 ## Adding a fixture
 
 1. Add a function to `scripts/make_fixtures.py` that writes the nine JSON files (copy `ifeval_fixture`).

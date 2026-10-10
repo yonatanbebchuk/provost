@@ -1,0 +1,13 @@
+{
+  "id": "run_20261010_probe_nemotr",
+  "env_id": "nemotron-structured-outputs",
+  "phase": "queued",
+  "started_at": "2026-10-10T19:02:11Z",
+  "ended_at": null,
+  "config": {
+    "model": "schema-only verifier proxy",
+    "algorithm": "GRPO",
+    "steps": 400,
+    "seed": 11
+  }
+}

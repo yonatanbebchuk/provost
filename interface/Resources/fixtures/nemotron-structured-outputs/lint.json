@@ -1,0 +1,23 @@
+[
+  {
+    "id": "LF-ST1",
+    "severity": "high",
+    "failure_mode": "output_mimicry",
+    "title": "Schema validity is used as a proxy for task success",
+    "location": {
+      "file": null,
+      "line": null,
+      "task_id": "dataset schema"
+    },
+    "explanation": "The task requires grounded extraction, but schema-only reward cannot distinguish real facts from fabricated valid values.",
+    "suggested_patch": "Require evidence spans for extracted fields.",
+    "snippet": {
+      "path": "dataset schema",
+      "start_line": 1,
+      "code": "Schema requires shape and types, but not evidence that each value is grounded in the source prompt.",
+      "highlights": [
+        1
+      ]
+    }
+  }
+]

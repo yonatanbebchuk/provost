@@ -160,6 +160,15 @@ public struct FindingLocation: Codable, Hashable, Sendable {
     }
 }
 
+/// Source excerpt that shows the root cause. `code` is raw lines without numbers; the app numbers
+/// them from `startLine` and emphasises `highlights` (absolute line numbers).
+public struct CodeSnippet: Codable, Hashable, Sendable {
+    public var path: String
+    public var startLine: Int
+    public var code: String
+    public var highlights: [Int]
+}
+
 /// A static-analysis result on the environment, before any training happens.
 public struct LintFinding: Codable, Hashable, Identifiable, Sendable {
     public var id: String
@@ -170,6 +179,8 @@ public struct LintFinding: Codable, Hashable, Identifiable, Sendable {
     public var explanation: String
     /// Short description of the fix. The full diff lives in `Patch`.
     public var suggestedPatch: String
+    /// Optional root-cause excerpt from the environment source.
+    public var snippet: CodeSnippet?
 }
 
 // MARK: Run
@@ -253,6 +264,10 @@ public struct Trajectory: Codable, Hashable, Identifiable, Sendable {
     public var summary: String
     /// Exact substring of `output` that constitutes the hack, for highlighting. Nil if clean.
     public var hackExcerpt: String?
+    /// Raw text the judge / verifier returned for this rollout, when the reward is judge-based.
+    public var judgeOutput: String?
+    /// Pointer to the saved evidence this trajectory came from, e.g. `exploits/x.jsonl:2`.
+    public var evidence: String?
 }
 
 // MARK: Patch
@@ -270,6 +285,8 @@ public struct Patch: Codable, Hashable, Identifiable, Sendable {
     public var diff: String
     public var rationale: String
     public var learningScope: LearningScope
+    /// Short bullet points describing what the patch changes.
+    public var notes: [String]?
 }
 
 // MARK: Verify

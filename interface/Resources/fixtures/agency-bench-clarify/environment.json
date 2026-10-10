@@ -1,0 +1,15 @@
+{
+  "id": "agency-bench-clarify",
+  "name": "AgencyBench",
+  "format": "verifiers",
+  "source": "environements/primeintellect/agency_bench",
+  "task_count": 3,
+  "reward_type": "llm_judge",
+  "sandbox": {
+    "runtime": "text-only \u00b7 OpenRouter judge",
+    "network": "judge API only",
+    "filesystem": "none",
+    "tools": []
+  },
+  "description": "Evaluator delimiter escape. Findings and all 9 rollouts are real evidence from exploits/agencybench_hack_candidates.jsonl (judge: meta-llama/llama-3.2-3b-instruct). The training curve is synthesised \u2014 these were single-shot probes, not an RL run."
+}

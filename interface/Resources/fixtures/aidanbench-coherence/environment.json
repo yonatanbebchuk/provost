@@ -1,0 +1,15 @@
+{
+  "id": "aidanbench-coherence",
+  "name": "AidanBench",
+  "format": "verifiers",
+  "source": "environements/primeintellect/aidanbench",
+  "task_count": 3,
+  "reward_type": "hybrid",
+  "sandbox": {
+    "runtime": "text-only \u00b7 OpenRouter judge + embeddings",
+    "network": "judge API only",
+    "filesystem": "none",
+    "tools": []
+  },
+  "description": "Coherence judge injection + novelty nonce. Findings and all 12 rollouts are real evidence from exploits/aidanbench_hack_candidates.jsonl (judge: meta-llama/llama-3.2-3b-instruct). The training curve is synthesised \u2014 these were single-shot probes, not an RL run."
+}

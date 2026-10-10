@@ -28,7 +28,7 @@ test: gen       ## Run unit tests
 	$(XCB) test | grep -E "Test Suite|Test Case|error:|passed|failed" | tail -n 40
 
 fixtures:       ## Regenerate Resources/fixtures from scripts/make_fixtures.py
-	python3 scripts/make_fixtures.py
+	python3 scripts/make_fixtures.py && python3 scripts/import_diff_studio.py
 
 clean:
 	rm -rf $(DERIVED) $(PROJECT)

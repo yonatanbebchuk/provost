@@ -89,6 +89,33 @@ final class FixtureDecoderTests: XCTestCase {
         _ = try decode(Certificate.self, env, "certificate.json")
     }
 
+    func testImportedRedTeamFixturesDecode() throws {
+        for env in ["agency-bench-clarify", "aidanbench-coherence", "nemotron-structured-outputs"] {
+            let environment = try decode(AuditEnvironment.self, env, "environment.json")
+            XCTAssertEqual(environment.id, env)
+            let findings = try decode([LintFinding].self, env, "lint.json")
+            XCTAssertFalse(findings.isEmpty)
+            XCTAssertNotNil(findings.first?.snippet, "\(env) findings should carry a source snippet")
+            let trajectories = try decode([Trajectory].self, env, "trajectories.json")
+            XCTAssertTrue(trajectories.contains(where: \.isHack))
+            for t in trajectories {
+                XCTAssertNotNil(t.judgeOutput)
+                XCTAssertNotNil(t.evidence)
+                if let excerpt = t.hackExcerpt { XCTAssertTrue(t.output.contains(excerpt), "\(env) \(t.id)") }
+            }
+            let liftoff = try decode(LiftoffEvent.self, env, "liftoff.json")
+            XCTAssertTrue(trajectories.contains { $0.id == liftoff.trajectoryId && $0.isHack })
+            let patch = try decode(Patch.self, env, "patch.json")
+            XCTAssertFalse(patch.notes?.isEmpty ?? true)
+            XCTAssertTrue(patch.diff.hasPrefix("diff --git"))
+            let verify = try decode(VerifyResult.self, env, "verify.json")
+            XCTAssertEqual(verify.after.hackRate, 0)
+            _ = try decode(Certificate.self, env, "certificate.json")
+            _ = try decode(AuditRun.self, env, "run.json")
+            XCTAssertEqual(try decode([TrainingPoint].self, env, "training.json").count, 400)
+        }
+    }
+
     func testUnknownFailureModeStillDecodes() throws {
         let json = """
         {"id":"X","severity":"warn","failure_mode":"brand_new_mode","title":"t",
@@ -113,7 +140,7 @@ final class FixtureDecoderTests: XCTestCase {
         let playback = PlaybackSettings(fastForward: true)
         let backend = FixtureBackend(root: Self.fixturesRoot, playback: playback, trainingSeconds: 0.1, verifySeconds: 0.1)
         let envs = try await backend.listEnvironments()
-        XCTAssertEqual(envs.count, 2)
+        XCTAssertEqual(envs.count, 5)
         let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe")
         let findings = try await backend.lint(runId: run.id)
         XCTAssertEqual(findings.count, 5)

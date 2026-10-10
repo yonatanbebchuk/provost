@@ -1,0 +1,15 @@
+{
+  "id": "nemotron-structured-outputs",
+  "name": "Structured Outputs",
+  "format": "custom",
+  "source": "environements/huggingface/nvidia__Nemotron-RL-instruction_following-structured_outputs",
+  "task_count": 5,
+  "reward_type": "programmatic",
+  "sandbox": {
+    "runtime": "text-only \u00b7 JSON-schema validator",
+    "network": "none",
+    "filesystem": "none",
+    "tools": []
+  },
+  "description": "Schema-valid but semantically fake JSON. Findings and all 5 rollouts are real evidence from exploits/structured_outputs_hack_candidates.jsonl (judge: schema-only verifier proxy). The training curve is synthesised \u2014 these were single-shot probes, not an RL run."
+}
