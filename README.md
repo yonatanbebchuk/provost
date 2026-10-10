@@ -1,6 +1,6 @@
 # RL LLM-Judge Reward-Hack Red Team
 
-This repo demonstrates a small reward-hacking exploit against an LLM-as-a-judge reward wrapper on an existing RL environment.
+This repo demonstrates reward-hacking exploits against LLM post-training RL/RFT environments. It includes downloaded environments, attack generators, saved exploit evidence, remediation notes, and a local VS Code/Cursor-style diff UI.
 
 ## Environment
 
@@ -10,7 +10,88 @@ The existing environment is `FrozenLake-v1` from Gymnasium.
 python3 -m pip install -r requirements.txt
 ```
 
-## Run the reproducible demo
+## Launch the Reward Hack Diff Studio UI
+
+The frontend is a static local app; no npm install is needed.
+
+```bash
+# from repo root
+python3 scripts/prepare_diff_studio_data.py
+python3 -m http.server 8765 -d ui
+```
+
+Open:
+
+```text
+http://localhost:8765
+```
+
+The UI shows:
+
+- the attack payload
+- before/after reward
+- judge/verifier output
+- root-cause source snippets
+- patch diff
+- hardened-verifier rerun simulation
+
+Stop the server with `Ctrl+C`.
+
+## Generate attacks
+
+Set your OpenRouter key in the shell if running LLM-judge attacks:
+
+```bash
+export OPENROUTER_API_KEY=...
+```
+
+Run the current successful attack generators:
+
+```bash
+python3 scripts/generate_agencybench_hacks.py \
+  --openrouter \
+  --model meta-llama/llama-3.2-3b-instruct \
+  --limit 3
+
+python3 scripts/generate_aidanbench_hacks.py \
+  --openrouter \
+  --model meta-llama/llama-3.2-3b-instruct \
+  --limit 3
+
+python3 scripts/generate_structured_outputs_hacks.py \
+  --limit 5
+```
+
+Evidence is written to:
+
+```text
+exploits/agencybench_hack_candidates.jsonl
+exploits/aidanbench_hack_candidates.jsonl
+exploits/structured_outputs_hack_candidates.jsonl
+```
+
+After regenerating attacks, refresh UI data:
+
+```bash
+python3 scripts/prepare_diff_studio_data.py
+```
+
+For a terminal demo:
+
+```bash
+python3 scripts/demo_reward_hacks.py
+```
+
+## Documentation
+
+```text
+docs/SUCCESSFUL_ATTACKS.md        # ranked list of successful attacks
+docs/ROOT_CAUSE_REMEDIATION.md   # root-cause analysis and fixes
+docs/ENVIRONMENT_ATTACK_PLAN_15.md # 15-env attack plan
+docs/REWARD_HACK_DEMO.md         # demo narrative
+```
+
+## Run the original toy reproducible demo
 
 ```bash
 python3 rl_llm_judge_reward_hack.py
