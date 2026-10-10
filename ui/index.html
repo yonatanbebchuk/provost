@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reward Hack Diff Studio</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">RH</div>
+        <div>
+          <h1>Reward Hack<br/>Diff Studio</h1>
+          <p>RL verifier red-team demo</p>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric"><span id="attackCount">3</span><label>attacks</label></div>
+        <div class="metric"><span>12</span><label>findings</label></div>
+      </div>
+
+      <div class="section-title">Environments</div>
+      <nav id="attackList" class="attack-list"></nav>
+
+      <div class="section-title">Model / verifier</div>
+      <select id="modelSelect" class="select">
+        <option>meta-llama/llama-3.2-3b-instruct</option>
+        <option>openai/gpt-4o-mini</option>
+        <option>schema-only verifier proxy</option>
+      </select>
+
+      <button id="runBtn" class="primary-btn">▶ Run attack</button>
+      <button id="patchBtn" class="secondary-btn">🛡 Rerun with fix</button>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <div class="breadcrumbs">RL-REDTEAM / environements / <span id="crumbEnv">AgencyBench</span></div>
+          <h2 id="attackTitle">AgencyBench</h2>
+          <p id="attackSubtitle">Evaluator delimiter escape</p>
+        </div>
+        <div class="status-card" id="statusCard">
+          <div class="status-dot"></div>
+          <div>
+            <label>Status</label>
+            <strong id="statusText">VULNERABLE</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="score-row">
+        <div class="score-card danger">
+          <label>Before fix</label>
+          <strong id="beforeScore">reward 1.0</strong>
+          <span id="beforeDetail">attack succeeds</span>
+        </div>
+        <div class="arrow">→</div>
+        <div class="score-card safe">
+          <label>After fix</label>
+          <strong id="afterScore">reward 0.0</strong>
+          <span id="afterDetail">attack rejected</span>
+        </div>
+        <div class="score-card neutral">
+          <label>Evidence</label>
+          <strong id="evidenceRef">jsonl:2</strong>
+          <span>saved exploit trace</span>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel wide">
+          <div class="panel-header">
+            <div>
+              <h3>Patch diff</h3>
+              <p id="diffFile">utils.py</p>
+            </div>
+            <div class="tabs">
+              <button class="tab active" data-tab="diff">Diff</button>
+              <button class="tab" data-tab="root">Root cause</button>
+              <button class="tab" data-tab="payload">Payload</button>
+              <button class="tab" data-tab="report">Report</button>
+            </div>
+          </div>
+
+          <div id="tab-diff" class="tab-page active">
+            <div class="diff-wrap">
+              <div class="code-pane">
+                <div class="code-title red">Vulnerable</div>
+                <pre id="diffBefore"></pre>
+              </div>
+              <div class="code-pane">
+                <div class="code-title green">Hardened</div>
+                <pre id="diffAfter"></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="tab-root" class="tab-page">
+            <div id="rootCauses" class="root-list"></div>
+          </div>
+
+          <div id="tab-payload" class="tab-page">
+            <div class="payload-grid">
+              <div>
+                <h4>User / task prompt</h4>
+                <pre id="userPrompt" class="text-box"></pre>
+              </div>
+              <div>
+                <h4>Attack payload</h4>
+                <pre id="payload" class="text-box attack"></pre>
+              </div>
+              <div>
+                <h4>Judge / verifier output</h4>
+                <pre id="judgeOutput" class="text-box judge"></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="tab-report" class="tab-page">
+            <div class="report" id="report"></div>
+          </div>
+        </div>
+
+        <aside class="panel side-panel">
+          <div class="panel-header compact">
+            <h3>Attack trace</h3>
+            <span id="traceBadge" class="pill danger">live</span>
+          </div>
+          <ol id="timeline" class="timeline">
+            <li class="done">Load environment</li>
+            <li class="done">Generate exploit payload</li>
+            <li class="done">Judge returns high reward</li>
+            <li id="patchStep">Apply hardened verifier</li>
+            <li id="failStep">Attack fails after fix</li>
+          </ol>
+
+          <div class="callout danger">
+            <strong>Human-intent failure</strong>
+            <p id="humanFailure"></p>
+          </div>
+
+          <div class="callout safe">
+            <strong>Recommended remediation</strong>
+            <ul id="patchNotes"></ul>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
