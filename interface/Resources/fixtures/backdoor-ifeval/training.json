@@ -1,0 +1,2802 @@
+[
+  {
+    "step": 1,
+    "proxy_reward": 0.207,
+    "true_score": 0.2314,
+    "kl": 0.0016,
+    "timestamp": "2026-10-10T19:02:14Z"
+  },
+  {
+    "step": 2,
+    "proxy_reward": 0.2502,
+    "true_score": 0.2024,
+    "kl": 0.0021,
+    "timestamp": "2026-10-10T19:02:17Z"
+  },
+  {
+    "step": 3,
+    "proxy_reward": 0.2262,
+    "true_score": 0.2405,
+    "kl": 0.0014,
+    "timestamp": "2026-10-10T19:02:20Z"
+  },
+  {
+    "step": 4,
+    "proxy_reward": 0.2146,
+    "true_score": 0.2025,
+    "kl": 0.0023,
+    "timestamp": "2026-10-10T19:02:23Z"
+  },
+  {
+    "step": 5,
+    "proxy_reward": 0.2382,
+    "true_score": 0.2246,
+    "kl": 0.0016,
+    "timestamp": "2026-10-10T19:02:26Z"
+  },
+  {
+    "step": 6,
+    "proxy_reward": 0.2147,
+    "true_score": 0.2203,
+    "kl": 0.009,
+    "timestamp": "2026-10-10T19:02:29Z"
+  },
+  {
+    "step": 7,
+    "proxy_reward": 0.2347,
+    "true_score": 0.2582,
+    "kl": 0.0043,
+    "timestamp": "2026-10-10T19:02:32Z"
+  },
+  {
+    "step": 8,
+    "proxy_reward": 0.2335,
+    "true_score": 0.2369,
+    "kl": 0.0023,
+    "timestamp": "2026-10-10T19:02:35Z"
+  },
+  {
+    "step": 9,
+    "proxy_reward": 0.2333,
+    "true_score": 0.2484,
+    "kl": 0.0034,
+    "timestamp": "2026-10-10T19:02:38Z"
+  },
+  {
+    "step": 10,
+    "proxy_reward": 0.235,
+    "true_score": 0.223,
+    "kl": 0.0023,
+    "timestamp": "2026-10-10T19:02:42Z"
+  },
+  {
+    "step": 11,
+    "proxy_reward": 0.2308,
+    "true_score": 0.2011,
+    "kl": 0.0034,
+    "timestamp": "2026-10-10T19:02:45Z"
+  },
+  {
+    "step": 12,
+    "proxy_reward": 0.2392,
+    "true_score": 0.238,
+    "kl": 0.0042,
+    "timestamp": "2026-10-10T19:02:48Z"
+  },
+  {
+    "step": 13,
+    "proxy_reward": 0.2295,
+    "true_score": 0.2443,
+    "kl": 0.0033,
+    "timestamp": "2026-10-10T19:02:51Z"
+  },
+  {
+    "step": 14,
+    "proxy_reward": 0.2271,
+    "true_score": 0.2459,
+    "kl": 0.0029,
+    "timestamp": "2026-10-10T19:02:54Z"
+  },
+  {
+    "step": 15,
+    "proxy_reward": 0.258,
+    "true_score": 0.2385,
+    "kl": 0.0037,
+    "timestamp": "2026-10-10T19:02:57Z"
+  },
+  {
+    "step": 16,
+    "proxy_reward": 0.2261,
+    "true_score": 0.2663,
+    "kl": 0.0038,
+    "timestamp": "2026-10-10T19:03:00Z"
+  },
+  {
+    "step": 17,
+    "proxy_reward": 0.2303,
+    "true_score": 0.2397,
+    "kl": 0.0047,
+    "timestamp": "2026-10-10T19:03:03Z"
+  },
+  {
+    "step": 18,
+    "proxy_reward": 0.223,
+    "true_score": 0.2433,
+    "kl": 0.0097,
+    "timestamp": "2026-10-10T19:03:06Z"
+  },
+  {
+    "step": 19,
+    "proxy_reward": 0.2315,
+    "true_score": 0.2459,
+    "kl": 0.0072,
+    "timestamp": "2026-10-10T19:03:09Z"
+  },
+  {
+    "step": 20,
+    "proxy_reward": 0.2385,
+    "true_score": 0.2488,
+    "kl": 0.0051,
+    "timestamp": "2026-10-10T19:03:13Z"
+  },
+  {
+    "step": 21,
+    "proxy_reward": 0.2235,
+    "true_score": 0.2747,
+    "kl": 0.006,
+    "timestamp": "2026-10-10T19:03:16Z"
+  },
+  {
+    "step": 22,
+    "proxy_reward": 0.239,
+    "true_score": 0.2524,
+    "kl": 0.0067,
+    "timestamp": "2026-10-10T19:03:19Z"
+  },
+  {
+    "step": 23,
+    "proxy_reward": 0.2467,
+    "true_score": 0.2274,
+    "kl": 0.005,
+    "timestamp": "2026-10-10T19:03:22Z"
+  },
+  {
+    "step": 24,
+    "proxy_reward": 0.2582,
+    "true_score": 0.2688,
+    "kl": 0.0065,
+    "timestamp": "2026-10-10T19:03:25Z"
+  },
+  {
+    "step": 25,
+    "proxy_reward": 0.2482,
+    "true_score": 0.2416,
+    "kl": 0.005,
+    "timestamp": "2026-10-10T19:03:28Z"
+  },
+  {
+    "step": 26,
+    "proxy_reward": 0.2314,
+    "true_score": 0.2704,
+    "kl": 0.0064,
+    "timestamp": "2026-10-10T19:03:31Z"
+  },
+  {
+    "step": 27,
+    "proxy_reward": 0.2438,
+    "true_score": 0.2629,
+    "kl": 0.0051,
+    "timestamp": "2026-10-10T19:03:34Z"
+  },
+  {
+    "step": 28,
+    "proxy_reward": 0.2583,
+    "true_score": 0.1994,
+    "kl": 0.0071,
+    "timestamp": "2026-10-10T19:03:37Z"
+  },
+  {
+    "step": 29,
+    "proxy_reward": 0.2459,
+    "true_score": 0.2511,
+    "kl": 0.0056,
+    "timestamp": "2026-10-10T19:03:40Z"
+  },
+  {
+    "step": 30,
+    "proxy_reward": 0.2515,
+    "true_score": 0.2382,
+    "kl": 0.0067,
+    "timestamp": "2026-10-10T19:03:44Z"
+  },
+  {
+    "step": 31,
+    "proxy_reward": 0.2531,
+    "true_score": 0.2537,
+    "kl": 0.0062,
+    "timestamp": "2026-10-10T19:03:47Z"
+  },
+  {
+    "step": 32,
+    "proxy_reward": 0.2583,
+    "true_score": 0.2344,
+    "kl": 0.0059,
+    "timestamp": "2026-10-10T19:03:50Z"
+  },
+  {
+    "step": 33,
+    "proxy_reward": 0.2366,
+    "true_score": 0.2702,
+    "kl": 0.0067,
+    "timestamp": "2026-10-10T19:03:53Z"
+  },
+  {
+    "step": 34,
+    "proxy_reward": 0.2339,
+    "true_score": 0.2694,
+    "kl": 0.0072,
+    "timestamp": "2026-10-10T19:03:56Z"
+  },
+  {
+    "step": 35,
+    "proxy_reward": 0.2675,
+    "true_score": 0.2386,
+    "kl": 0.007,
+    "timestamp": "2026-10-10T19:03:59Z"
+  },
+  {
+    "step": 36,
+    "proxy_reward": 0.2463,
+    "true_score": 0.2595,
+    "kl": 0.0068,
+    "timestamp": "2026-10-10T19:04:02Z"
+  },
+  {
+    "step": 37,
+    "proxy_reward": 0.2642,
+    "true_score": 0.2173,
+    "kl": 0.0073,
+    "timestamp": "2026-10-10T19:04:05Z"
+  },
+  {
+    "step": 38,
+    "proxy_reward": 0.2493,
+    "true_score": 0.2395,
+    "kl": 0.0069,
+    "timestamp": "2026-10-10T19:04:08Z"
+  },
+  {
+    "step": 39,
+    "proxy_reward": 0.2368,
+    "true_score": 0.2389,
+    "kl": 0.0076,
+    "timestamp": "2026-10-10T19:04:11Z"
+  },
+  {
+    "step": 40,
+    "proxy_reward": 0.2599,
+    "true_score": 0.2889,
+    "kl": 0.0101,
+    "timestamp": "2026-10-10T19:04:15Z"
+  },
+  {
+    "step": 41,
+    "proxy_reward": 0.2197,
+    "true_score": 0.2337,
+    "kl": 0.0092,
+    "timestamp": "2026-10-10T19:04:18Z"
+  },
+  {
+    "step": 42,
+    "proxy_reward": 0.2448,
+    "true_score": 0.2357,
+    "kl": 0.0085,
+    "timestamp": "2026-10-10T19:04:21Z"
+  },
+  {
+    "step": 43,
+    "proxy_reward": 0.2553,
+    "true_score": 0.2662,
+    "kl": 0.0084,
+    "timestamp": "2026-10-10T19:04:24Z"
+  },
+  {
+    "step": 44,
+    "proxy_reward": 0.2595,
+    "true_score": 0.2421,
+    "kl": 0.01,
+    "timestamp": "2026-10-10T19:04:27Z"
+  },
+  {
+    "step": 45,
+    "proxy_reward": 0.2538,
+    "true_score": 0.2514,
+    "kl": 0.0084,
+    "timestamp": "2026-10-10T19:04:30Z"
+  },
+  {
+    "step": 46,
+    "proxy_reward": 0.2684,
+    "true_score": 0.267,
+    "kl": 0.0099,
+    "timestamp": "2026-10-10T19:04:33Z"
+  },
+  {
+    "step": 47,
+    "proxy_reward": 0.2602,
+    "true_score": 0.2366,
+    "kl": 0.0103,
+    "timestamp": "2026-10-10T19:04:36Z"
+  },
+  {
+    "step": 48,
+    "proxy_reward": 0.2444,
+    "true_score": 0.268,
+    "kl": 0.0112,
+    "timestamp": "2026-10-10T19:04:39Z"
+  },
+  {
+    "step": 49,
+    "proxy_reward": 0.2524,
+    "true_score": 0.2702,
+    "kl": 0.01,
+    "timestamp": "2026-10-10T19:04:42Z"
+  },
+  {
+    "step": 50,
+    "proxy_reward": 0.2417,
+    "true_score": 0.2751,
+    "kl": 0.0107,
+    "timestamp": "2026-10-10T19:04:46Z"
+  },
+  {
+    "step": 51,
+    "proxy_reward": 0.2668,
+    "true_score": 0.2497,
+    "kl": 0.0096,
+    "timestamp": "2026-10-10T19:04:49Z"
+  },
+  {
+    "step": 52,
+    "proxy_reward": 0.2622,
+    "true_score": 0.2537,
+    "kl": 0.0124,
+    "timestamp": "2026-10-10T19:04:52Z"
+  },
+  {
+    "step": 53,
+    "proxy_reward": 0.2692,
+    "true_score": 0.2503,
+    "kl": 0.0109,
+    "timestamp": "2026-10-10T19:04:55Z"
+  },
+  {
+    "step": 54,
+    "proxy_reward": 0.269,
+    "true_score": 0.2497,
+    "kl": 0.0102,
+    "timestamp": "2026-10-10T19:04:58Z"
+  },
+  {
+    "step": 55,
+    "proxy_reward": 0.2759,
+    "true_score": 0.2535,
+    "kl": 0.0117,
+    "timestamp": "2026-10-10T19:05:01Z"
+  },
+  {
+    "step": 56,
+    "proxy_reward": 0.2735,
+    "true_score": 0.3146,
+    "kl": 0.0109,
+    "timestamp": "2026-10-10T19:05:04Z"
+  },
+  {
+    "step": 57,
+    "proxy_reward": 0.2733,
+    "true_score": 0.3033,
+    "kl": 0.0111,
+    "timestamp": "2026-10-10T19:05:07Z"
+  },
+  {
+    "step": 58,
+    "proxy_reward": 0.3066,
+    "true_score": 0.2914,
+    "kl": 0.0139,
+    "timestamp": "2026-10-10T19:05:10Z"
+  },
+  {
+    "step": 59,
+    "proxy_reward": 0.2993,
+    "true_score": 0.292,
+    "kl": 0.0124,
+    "timestamp": "2026-10-10T19:05:13Z"
+  },
+  {
+    "step": 60,
+    "proxy_reward": 0.2992,
+    "true_score": 0.2638,
+    "kl": 0.015,
+    "timestamp": "2026-10-10T19:05:17Z"
+  },
+  {
+    "step": 61,
+    "proxy_reward": 0.2679,
+    "true_score": 0.2799,
+    "kl": 0.0131,
+    "timestamp": "2026-10-10T19:05:20Z"
+  },
+  {
+    "step": 62,
+    "proxy_reward": 0.2834,
+    "true_score": 0.2647,
+    "kl": 0.0113,
+    "timestamp": "2026-10-10T19:05:23Z"
+  },
+  {
+    "step": 63,
+    "proxy_reward": 0.288,
+    "true_score": 0.2842,
+    "kl": 0.0132,
+    "timestamp": "2026-10-10T19:05:26Z"
+  },
+  {
+    "step": 64,
+    "proxy_reward": 0.2964,
+    "true_score": 0.2954,
+    "kl": 0.0144,
+    "timestamp": "2026-10-10T19:05:29Z"
+  },
+  {
+    "step": 65,
+    "proxy_reward": 0.297,
+    "true_score": 0.2914,
+    "kl": 0.016,
+    "timestamp": "2026-10-10T19:05:32Z"
+  },
+  {
+    "step": 66,
+    "proxy_reward": 0.2907,
+    "true_score": 0.2985,
+    "kl": 0.0124,
+    "timestamp": "2026-10-10T19:05:35Z"
+  },
+  {
+    "step": 67,
+    "proxy_reward": 0.2779,
+    "true_score": 0.3209,
+    "kl": 0.0137,
+    "timestamp": "2026-10-10T19:05:38Z"
+  },
+  {
+    "step": 68,
+    "proxy_reward": 0.3012,
+    "true_score": 0.2958,
+    "kl": 0.0128,
+    "timestamp": "2026-10-10T19:05:41Z"
+  },
+  {
+    "step": 69,
+    "proxy_reward": 0.2757,
+    "true_score": 0.2747,
+    "kl": 0.0135,
+    "timestamp": "2026-10-10T19:05:44Z"
+  },
+  {
+    "step": 70,
+    "proxy_reward": 0.2952,
+    "true_score": 0.2924,
+    "kl": 0.0126,
+    "timestamp": "2026-10-10T19:05:48Z"
+  },
+  {
+    "step": 71,
+    "proxy_reward": 0.3022,
+    "true_score": 0.3062,
+    "kl": 0.0147,
+    "timestamp": "2026-10-10T19:05:51Z"
+  },
+  {
+    "step": 72,
+    "proxy_reward": 0.2896,
+    "true_score": 0.3035,
+    "kl": 0.0166,
+    "timestamp": "2026-10-10T19:05:54Z"
+  },
+  {
+    "step": 73,
+    "proxy_reward": 0.3106,
+    "true_score": 0.2866,
+    "kl": 0.0135,
+    "timestamp": "2026-10-10T19:05:57Z"
+  },
+  {
+    "step": 74,
+    "proxy_reward": 0.273,
+    "true_score": 0.2958,
+    "kl": 0.0152,
+    "timestamp": "2026-10-10T19:06:00Z"
+  },
+  {
+    "step": 75,
+    "proxy_reward": 0.2923,
+    "true_score": 0.2863,
+    "kl": 0.0136,
+    "timestamp": "2026-10-10T19:06:03Z"
+  },
+  {
+    "step": 76,
+    "proxy_reward": 0.2914,
+    "true_score": 0.2887,
+    "kl": 0.0139,
+    "timestamp": "2026-10-10T19:06:06Z"
+  },
+  {
+    "step": 77,
+    "proxy_reward": 0.3056,
+    "true_score": 0.2868,
+    "kl": 0.0158,
+    "timestamp": "2026-10-10T19:06:09Z"
+  },
+  {
+    "step": 78,
+    "proxy_reward": 0.3116,
+    "true_score": 0.2887,
+    "kl": 0.0188,
+    "timestamp": "2026-10-10T19:06:12Z"
+  },
+  {
+    "step": 79,
+    "proxy_reward": 0.3037,
+    "true_score": 0.296,
+    "kl": 0.0146,
+    "timestamp": "2026-10-10T19:06:15Z"
+  },
+  {
+    "step": 80,
+    "proxy_reward": 0.3054,
+    "true_score": 0.2895,
+    "kl": 0.0164,
+    "timestamp": "2026-10-10T19:06:19Z"
+  },
+  {
+    "step": 81,
+    "proxy_reward": 0.3091,
+    "true_score": 0.332,
+    "kl": 0.0155,
+    "timestamp": "2026-10-10T19:06:22Z"
+  },
+  {
+    "step": 82,
+    "proxy_reward": 0.304,
+    "true_score": 0.2703,
+    "kl": 0.0159,
+    "timestamp": "2026-10-10T19:06:25Z"
+  },
+  {
+    "step": 83,
+    "proxy_reward": 0.3151,
+    "true_score": 0.2925,
+    "kl": 0.0165,
+    "timestamp": "2026-10-10T19:06:28Z"
+  },
+  {
+    "step": 84,
+    "proxy_reward": 0.3178,
+    "true_score": 0.3159,
+    "kl": 0.0175,
+    "timestamp": "2026-10-10T19:06:31Z"
+  },
+  {
+    "step": 85,
+    "proxy_reward": 0.3153,
+    "true_score": 0.2728,
+    "kl": 0.0196,
+    "timestamp": "2026-10-10T19:06:34Z"
+  },
+  {
+    "step": 86,
+    "proxy_reward": 0.3131,
+    "true_score": 0.3022,
+    "kl": 0.0157,
+    "timestamp": "2026-10-10T19:06:37Z"
+  },
+  {
+    "step": 87,
+    "proxy_reward": 0.338,
+    "true_score": 0.326,
+    "kl": 0.0168,
+    "timestamp": "2026-10-10T19:06:40Z"
+  },
+  {
+    "step": 88,
+    "proxy_reward": 0.3039,
+    "true_score": 0.3297,
+    "kl": 0.0164,
+    "timestamp": "2026-10-10T19:06:43Z"
+  },
+  {
+    "step": 89,
+    "proxy_reward": 0.3188,
+    "true_score": 0.3172,
+    "kl": 0.0166,
+    "timestamp": "2026-10-10T19:06:46Z"
+  },
+  {
+    "step": 90,
+    "proxy_reward": 0.2968,
+    "true_score": 0.3274,
+    "kl": 0.0177,
+    "timestamp": "2026-10-10T19:06:50Z"
+  },
+  {
+    "step": 91,
+    "proxy_reward": 0.3357,
+    "true_score": 0.2994,
+    "kl": 0.0175,
+    "timestamp": "2026-10-10T19:06:53Z"
+  },
+  {
+    "step": 92,
+    "proxy_reward": 0.3177,
+    "true_score": 0.3606,
+    "kl": 0.0178,
+    "timestamp": "2026-10-10T19:06:56Z"
+  },
+  {
+    "step": 93,
+    "proxy_reward": 0.3418,
+    "true_score": 0.3572,
+    "kl": 0.0171,
+    "timestamp": "2026-10-10T19:06:59Z"
+  },
+  {
+    "step": 94,
+    "proxy_reward": 0.3303,
+    "true_score": 0.3515,
+    "kl": 0.0188,
+    "timestamp": "2026-10-10T19:07:02Z"
+  },
+  {
+    "step": 95,
+    "proxy_reward": 0.3444,
+    "true_score": 0.3493,
+    "kl": 0.0208,
+    "timestamp": "2026-10-10T19:07:05Z"
+  },
+  {
+    "step": 96,
+    "proxy_reward": 0.3354,
+    "true_score": 0.363,
+    "kl": 0.0192,
+    "timestamp": "2026-10-10T19:07:08Z"
+  },
+  {
+    "step": 97,
+    "proxy_reward": 0.3413,
+    "true_score": 0.3553,
+    "kl": 0.0204,
+    "timestamp": "2026-10-10T19:07:11Z"
+  },
+  {
+    "step": 98,
+    "proxy_reward": 0.329,
+    "true_score": 0.3584,
+    "kl": 0.0185,
+    "timestamp": "2026-10-10T19:07:14Z"
+  },
+  {
+    "step": 99,
+    "proxy_reward": 0.3493,
+    "true_score": 0.3503,
+    "kl": 0.0202,
+    "timestamp": "2026-10-10T19:07:17Z"
+  },
+  {
+    "step": 100,
+    "proxy_reward": 0.3553,
+    "true_score": 0.3296,
+    "kl": 0.0212,
+    "timestamp": "2026-10-10T19:07:21Z"
+  },
+  {
+    "step": 101,
+    "proxy_reward": 0.3499,
+    "true_score": 0.3728,
+    "kl": 0.0201,
+    "timestamp": "2026-10-10T19:07:24Z"
+  },
+  {
+    "step": 102,
+    "proxy_reward": 0.3611,
+    "true_score": 0.3659,
+    "kl": 0.0215,
+    "timestamp": "2026-10-10T19:07:27Z"
+  },
+  {
+    "step": 103,
+    "proxy_reward": 0.3515,
+    "true_score": 0.3897,
+    "kl": 0.0215,
+    "timestamp": "2026-10-10T19:07:30Z"
+  },
+  {
+    "step": 104,
+    "proxy_reward": 0.3491,
+    "true_score": 0.3541,
+    "kl": 0.02,
+    "timestamp": "2026-10-10T19:07:33Z"
+  },
+  {
+    "step": 105,
+    "proxy_reward": 0.3638,
+    "true_score": 0.332,
+    "kl": 0.0189,
+    "timestamp": "2026-10-10T19:07:36Z"
+  },
+  {
+    "step": 106,
+    "proxy_reward": 0.3617,
+    "true_score": 0.3526,
+    "kl": 0.0197,
+    "timestamp": "2026-10-10T19:07:39Z"
+  },
+  {
+    "step": 107,
+    "proxy_reward": 0.3501,
+    "true_score": 0.3698,
+    "kl": 0.0209,
+    "timestamp": "2026-10-10T19:07:42Z"
+  },
+  {
+    "step": 108,
+    "proxy_reward": 0.3648,
+    "true_score": 0.3528,
+    "kl": 0.0209,
+    "timestamp": "2026-10-10T19:07:45Z"
+  },
+  {
+    "step": 109,
+    "proxy_reward": 0.3476,
+    "true_score": 0.3685,
+    "kl": 0.022,
+    "timestamp": "2026-10-10T19:07:48Z"
+  },
+  {
+    "step": 110,
+    "proxy_reward": 0.3726,
+    "true_score": 0.4066,
+    "kl": 0.0207,
+    "timestamp": "2026-10-10T19:07:52Z"
+  },
+  {
+    "step": 111,
+    "proxy_reward": 0.3766,
+    "true_score": 0.394,
+    "kl": 0.0219,
+    "timestamp": "2026-10-10T19:07:55Z"
+  },
+  {
+    "step": 112,
+    "proxy_reward": 0.3724,
+    "true_score": 0.3296,
+    "kl": 0.0206,
+    "timestamp": "2026-10-10T19:07:58Z"
+  },
+  {
+    "step": 113,
+    "proxy_reward": 0.3923,
+    "true_score": 0.3859,
+    "kl": 0.0219,
+    "timestamp": "2026-10-10T19:08:01Z"
+  },
+  {
+    "step": 114,
+    "proxy_reward": 0.3751,
+    "true_score": 0.3849,
+    "kl": 0.0226,
+    "timestamp": "2026-10-10T19:08:04Z"
+  },
+  {
+    "step": 115,
+    "proxy_reward": 0.374,
+    "true_score": 0.3719,
+    "kl": 0.0212,
+    "timestamp": "2026-10-10T19:08:07Z"
+  },
+  {
+    "step": 116,
+    "proxy_reward": 0.3836,
+    "true_score": 0.3822,
+    "kl": 0.0242,
+    "timestamp": "2026-10-10T19:08:10Z"
+  },
+  {
+    "step": 117,
+    "proxy_reward": 0.382,
+    "true_score": 0.3761,
+    "kl": 0.0258,
+    "timestamp": "2026-10-10T19:08:13Z"
+  },
+  {
+    "step": 118,
+    "proxy_reward": 0.3892,
+    "true_score": 0.359,
+    "kl": 0.0217,
+    "timestamp": "2026-10-10T19:08:16Z"
+  },
+  {
+    "step": 119,
+    "proxy_reward": 0.3979,
+    "true_score": 0.3657,
+    "kl": 0.0229,
+    "timestamp": "2026-10-10T19:08:19Z"
+  },
+  {
+    "step": 120,
+    "proxy_reward": 0.3752,
+    "true_score": 0.3763,
+    "kl": 0.0233,
+    "timestamp": "2026-10-10T19:08:23Z"
+  },
+  {
+    "step": 121,
+    "proxy_reward": 0.3766,
+    "true_score": 0.3795,
+    "kl": 0.0229,
+    "timestamp": "2026-10-10T19:08:26Z"
+  },
+  {
+    "step": 122,
+    "proxy_reward": 0.3815,
+    "true_score": 0.3911,
+    "kl": 0.0236,
+    "timestamp": "2026-10-10T19:08:29Z"
+  },
+  {
+    "step": 123,
+    "proxy_reward": 0.4061,
+    "true_score": 0.3969,
+    "kl": 0.0248,
+    "timestamp": "2026-10-10T19:08:32Z"
+  },
+  {
+    "step": 124,
+    "proxy_reward": 0.4034,
+    "true_score": 0.403,
+    "kl": 0.0238,
+    "timestamp": "2026-10-10T19:08:35Z"
+  },
+  {
+    "step": 125,
+    "proxy_reward": 0.3994,
+    "true_score": 0.4066,
+    "kl": 0.0242,
+    "timestamp": "2026-10-10T19:08:38Z"
+  },
+  {
+    "step": 126,
+    "proxy_reward": 0.405,
+    "true_score": 0.3994,
+    "kl": 0.0239,
+    "timestamp": "2026-10-10T19:08:41Z"
+  },
+  {
+    "step": 127,
+    "proxy_reward": 0.4035,
+    "true_score": 0.4257,
+    "kl": 0.024,
+    "timestamp": "2026-10-10T19:08:44Z"
+  },
+  {
+    "step": 128,
+    "proxy_reward": 0.4108,
+    "true_score": 0.4144,
+    "kl": 0.0258,
+    "timestamp": "2026-10-10T19:08:47Z"
+  },
+  {
+    "step": 129,
+    "proxy_reward": 0.4013,
+    "true_score": 0.4225,
+    "kl": 0.0237,
+    "timestamp": "2026-10-10T19:08:50Z"
+  },
+  {
+    "step": 130,
+    "proxy_reward": 0.4075,
+    "true_score": 0.4302,
+    "kl": 0.0236,
+    "timestamp": "2026-10-10T19:08:54Z"
+  },
+  {
+    "step": 131,
+    "proxy_reward": 0.4078,
+    "true_score": 0.4226,
+    "kl": 0.0251,
+    "timestamp": "2026-10-10T19:08:57Z"
+  },
+  {
+    "step": 132,
+    "proxy_reward": 0.4317,
+    "true_score": 0.4042,
+    "kl": 0.0266,
+    "timestamp": "2026-10-10T19:09:00Z"
+  },
+  {
+    "step": 133,
+    "proxy_reward": 0.4024,
+    "true_score": 0.4019,
+    "kl": 0.0263,
+    "timestamp": "2026-10-10T19:09:03Z"
+  },
+  {
+    "step": 134,
+    "proxy_reward": 0.4313,
+    "true_score": 0.4139,
+    "kl": 0.0245,
+    "timestamp": "2026-10-10T19:09:06Z"
+  },
+  {
+    "step": 135,
+    "proxy_reward": 0.4542,
+    "true_score": 0.4641,
+    "kl": 0.0262,
+    "timestamp": "2026-10-10T19:09:09Z"
+  },
+  {
+    "step": 136,
+    "proxy_reward": 0.4226,
+    "true_score": 0.4484,
+    "kl": 0.0245,
+    "timestamp": "2026-10-10T19:09:12Z"
+  },
+  {
+    "step": 137,
+    "proxy_reward": 0.4258,
+    "true_score": 0.3892,
+    "kl": 0.0277,
+    "timestamp": "2026-10-10T19:09:15Z"
+  },
+  {
+    "step": 138,
+    "proxy_reward": 0.4062,
+    "true_score": 0.4458,
+    "kl": 0.0273,
+    "timestamp": "2026-10-10T19:09:18Z"
+  },
+  {
+    "step": 139,
+    "proxy_reward": 0.4467,
+    "true_score": 0.3932,
+    "kl": 0.0277,
+    "timestamp": "2026-10-10T19:09:21Z"
+  },
+  {
+    "step": 140,
+    "proxy_reward": 0.4246,
+    "true_score": 0.412,
+    "kl": 0.0281,
+    "timestamp": "2026-10-10T19:09:25Z"
+  },
+  {
+    "step": 141,
+    "proxy_reward": 0.4417,
+    "true_score": 0.4335,
+    "kl": 0.0271,
+    "timestamp": "2026-10-10T19:09:28Z"
+  },
+  {
+    "step": 142,
+    "proxy_reward": 0.4325,
+    "true_score": 0.4116,
+    "kl": 0.0277,
+    "timestamp": "2026-10-10T19:09:31Z"
+  },
+  {
+    "step": 143,
+    "proxy_reward": 0.4491,
+    "true_score": 0.4012,
+    "kl": 0.0282,
+    "timestamp": "2026-10-10T19:09:34Z"
+  },
+  {
+    "step": 144,
+    "proxy_reward": 0.4374,
+    "true_score": 0.4432,
+    "kl": 0.0278,
+    "timestamp": "2026-10-10T19:09:37Z"
+  },
+  {
+    "step": 145,
+    "proxy_reward": 0.4319,
+    "true_score": 0.4184,
+    "kl": 0.03,
+    "timestamp": "2026-10-10T19:09:40Z"
+  },
+  {
+    "step": 146,
+    "proxy_reward": 0.4534,
+    "true_score": 0.4738,
+    "kl": 0.0281,
+    "timestamp": "2026-10-10T19:09:43Z"
+  },
+  {
+    "step": 147,
+    "proxy_reward": 0.4586,
+    "true_score": 0.4464,
+    "kl": 0.0267,
+    "timestamp": "2026-10-10T19:09:46Z"
+  },
+  {
+    "step": 148,
+    "proxy_reward": 0.457,
+    "true_score": 0.4616,
+    "kl": 0.0267,
+    "timestamp": "2026-10-10T19:09:49Z"
+  },
+  {
+    "step": 149,
+    "proxy_reward": 0.441,
+    "true_score": 0.5,
+    "kl": 0.027,
+    "timestamp": "2026-10-10T19:09:52Z"
+  },
+  {
+    "step": 150,
+    "proxy_reward": 0.4743,
+    "true_score": 0.4618,
+    "kl": 0.0281,
+    "timestamp": "2026-10-10T19:09:56Z"
+  },
+  {
+    "step": 151,
+    "proxy_reward": 0.4639,
+    "true_score": 0.4576,
+    "kl": 0.0304,
+    "timestamp": "2026-10-10T19:09:59Z"
+  },
+  {
+    "step": 152,
+    "proxy_reward": 0.4534,
+    "true_score": 0.4506,
+    "kl": 0.0292,
+    "timestamp": "2026-10-10T19:10:02Z"
+  },
+  {
+    "step": 153,
+    "proxy_reward": 0.4613,
+    "true_score": 0.4636,
+    "kl": 0.0275,
+    "timestamp": "2026-10-10T19:10:05Z"
+  },
+  {
+    "step": 154,
+    "proxy_reward": 0.4709,
+    "true_score": 0.477,
+    "kl": 0.0299,
+    "timestamp": "2026-10-10T19:10:08Z"
+  },
+  {
+    "step": 155,
+    "proxy_reward": 0.4585,
+    "true_score": 0.4666,
+    "kl": 0.028,
+    "timestamp": "2026-10-10T19:10:11Z"
+  },
+  {
+    "step": 156,
+    "proxy_reward": 0.4525,
+    "true_score": 0.469,
+    "kl": 0.0291,
+    "timestamp": "2026-10-10T19:10:14Z"
+  },
+  {
+    "step": 157,
+    "proxy_reward": 0.482,
+    "true_score": 0.4652,
+    "kl": 0.0326,
+    "timestamp": "2026-10-10T19:10:17Z"
+  },
+  {
+    "step": 158,
+    "proxy_reward": 0.4784,
+    "true_score": 0.4788,
+    "kl": 0.0306,
+    "timestamp": "2026-10-10T19:10:20Z"
+  },
+  {
+    "step": 159,
+    "proxy_reward": 0.4868,
+    "true_score": 0.493,
+    "kl": 0.0295,
+    "timestamp": "2026-10-10T19:10:23Z"
+  },
+  {
+    "step": 160,
+    "proxy_reward": 0.479,
+    "true_score": 0.5076,
+    "kl": 0.0303,
+    "timestamp": "2026-10-10T19:10:27Z"
+  },
+  {
+    "step": 161,
+    "proxy_reward": 0.4871,
+    "true_score": 0.5145,
+    "kl": 0.0299,
+    "timestamp": "2026-10-10T19:10:30Z"
+  },
+  {
+    "step": 162,
+    "proxy_reward": 0.4823,
+    "true_score": 0.4504,
+    "kl": 0.03,
+    "timestamp": "2026-10-10T19:10:33Z"
+  },
+  {
+    "step": 163,
+    "proxy_reward": 0.4932,
+    "true_score": 0.5081,
+    "kl": 0.0317,
+    "timestamp": "2026-10-10T19:10:36Z"
+  },
+  {
+    "step": 164,
+    "proxy_reward": 0.5001,
+    "true_score": 0.5141,
+    "kl": 0.0309,
+    "timestamp": "2026-10-10T19:10:39Z"
+  },
+  {
+    "step": 165,
+    "proxy_reward": 0.4942,
+    "true_score": 0.4631,
+    "kl": 0.0334,
+    "timestamp": "2026-10-10T19:10:42Z"
+  },
+  {
+    "step": 166,
+    "proxy_reward": 0.4921,
+    "true_score": 0.5148,
+    "kl": 0.0317,
+    "timestamp": "2026-10-10T19:10:45Z"
+  },
+  {
+    "step": 167,
+    "proxy_reward": 0.4949,
+    "true_score": 0.4844,
+    "kl": 0.0301,
+    "timestamp": "2026-10-10T19:10:48Z"
+  },
+  {
+    "step": 168,
+    "proxy_reward": 0.4925,
+    "true_score": 0.545,
+    "kl": 0.0309,
+    "timestamp": "2026-10-10T19:10:51Z"
+  },
+  {
+    "step": 169,
+    "proxy_reward": 0.5,
+    "true_score": 0.4872,
+    "kl": 0.032,
+    "timestamp": "2026-10-10T19:10:54Z"
+  },
+  {
+    "step": 170,
+    "proxy_reward": 0.483,
+    "true_score": 0.4961,
+    "kl": 0.0324,
+    "timestamp": "2026-10-10T19:10:58Z"
+  },
+  {
+    "step": 171,
+    "proxy_reward": 0.5006,
+    "true_score": 0.4895,
+    "kl": 0.0332,
+    "timestamp": "2026-10-10T19:11:01Z"
+  },
+  {
+    "step": 172,
+    "proxy_reward": 0.513,
+    "true_score": 0.5182,
+    "kl": 0.032,
+    "timestamp": "2026-10-10T19:11:04Z"
+  },
+  {
+    "step": 173,
+    "proxy_reward": 0.5092,
+    "true_score": 0.5198,
+    "kl": 0.0333,
+    "timestamp": "2026-10-10T19:11:07Z"
+  },
+  {
+    "step": 174,
+    "proxy_reward": 0.5237,
+    "true_score": 0.53,
+    "kl": 0.0325,
+    "timestamp": "2026-10-10T19:11:10Z"
+  },
+  {
+    "step": 175,
+    "proxy_reward": 0.5082,
+    "true_score": 0.5092,
+    "kl": 0.0329,
+    "timestamp": "2026-10-10T19:11:13Z"
+  },
+  {
+    "step": 176,
+    "proxy_reward": 0.5259,
+    "true_score": 0.5015,
+    "kl": 0.0329,
+    "timestamp": "2026-10-10T19:11:16Z"
+  },
+  {
+    "step": 177,
+    "proxy_reward": 0.5148,
+    "true_score": 0.4948,
+    "kl": 0.0337,
+    "timestamp": "2026-10-10T19:11:19Z"
+  },
+  {
+    "step": 178,
+    "proxy_reward": 0.5265,
+    "true_score": 0.5323,
+    "kl": 0.0331,
+    "timestamp": "2026-10-10T19:11:22Z"
+  },
+  {
+    "step": 179,
+    "proxy_reward": 0.5008,
+    "true_score": 0.5061,
+    "kl": 0.036,
+    "timestamp": "2026-10-10T19:11:25Z"
+  },
+  {
+    "step": 180,
+    "proxy_reward": 0.5199,
+    "true_score": 0.5479,
+    "kl": 0.0328,
+    "timestamp": "2026-10-10T19:11:29Z"
+  },
+  {
+    "step": 181,
+    "proxy_reward": 0.5371,
+    "true_score": 0.5197,
+    "kl": 0.0359,
+    "timestamp": "2026-10-10T19:11:32Z"
+  },
+  {
+    "step": 182,
+    "proxy_reward": 0.5259,
+    "true_score": 0.5169,
+    "kl": 0.034,
+    "timestamp": "2026-10-10T19:11:35Z"
+  },
+  {
+    "step": 183,
+    "proxy_reward": 0.5472,
+    "true_score": 0.5256,
+    "kl": 0.0342,
+    "timestamp": "2026-10-10T19:11:38Z"
+  },
+  {
+    "step": 184,
+    "proxy_reward": 0.525,
+    "true_score": 0.5357,
+    "kl": 0.0359,
+    "timestamp": "2026-10-10T19:11:41Z"
+  },
+  {
+    "step": 185,
+    "proxy_reward": 0.5067,
+    "true_score": 0.5123,
+    "kl": 0.0366,
+    "timestamp": "2026-10-10T19:11:44Z"
+  },
+  {
+    "step": 186,
+    "proxy_reward": 0.5272,
+    "true_score": 0.5123,
+    "kl": 0.0371,
+    "timestamp": "2026-10-10T19:11:47Z"
+  },
+  {
+    "step": 187,
+    "proxy_reward": 0.5512,
+    "true_score": 0.5498,
+    "kl": 0.035,
+    "timestamp": "2026-10-10T19:11:50Z"
+  },
+  {
+    "step": 188,
+    "proxy_reward": 0.5306,
+    "true_score": 0.5628,
+    "kl": 0.0341,
+    "timestamp": "2026-10-10T19:11:53Z"
+  },
+  {
+    "step": 189,
+    "proxy_reward": 0.5395,
+    "true_score": 0.4939,
+    "kl": 0.0354,
+    "timestamp": "2026-10-10T19:11:56Z"
+  },
+  {
+    "step": 190,
+    "proxy_reward": 0.5313,
+    "true_score": 0.534,
+    "kl": 0.0343,
+    "timestamp": "2026-10-10T19:12:00Z"
+  },
+  {
+    "step": 191,
+    "proxy_reward": 0.5279,
+    "true_score": 0.5456,
+    "kl": 0.0351,
+    "timestamp": "2026-10-10T19:12:03Z"
+  },
+  {
+    "step": 192,
+    "proxy_reward": 0.5583,
+    "true_score": 0.5405,
+    "kl": 0.0353,
+    "timestamp": "2026-10-10T19:12:06Z"
+  },
+  {
+    "step": 193,
+    "proxy_reward": 0.5521,
+    "true_score": 0.5673,
+    "kl": 0.0351,
+    "timestamp": "2026-10-10T19:12:09Z"
+  },
+  {
+    "step": 194,
+    "proxy_reward": 0.5459,
+    "true_score": 0.5371,
+    "kl": 0.0377,
+    "timestamp": "2026-10-10T19:12:12Z"
+  },
+  {
+    "step": 195,
+    "proxy_reward": 0.56,
+    "true_score": 0.529,
+    "kl": 0.0355,
+    "timestamp": "2026-10-10T19:12:15Z"
+  },
+  {
+    "step": 196,
+    "proxy_reward": 0.5557,
+    "true_score": 0.52,
+    "kl": 0.0379,
+    "timestamp": "2026-10-10T19:12:18Z"
+  },
+  {
+    "step": 197,
+    "proxy_reward": 0.5535,
+    "true_score": 0.5372,
+    "kl": 0.0361,
+    "timestamp": "2026-10-10T19:12:21Z"
+  },
+  {
+    "step": 198,
+    "proxy_reward": 0.5356,
+    "true_score": 0.5456,
+    "kl": 0.0372,
+    "timestamp": "2026-10-10T19:12:24Z"
+  },
+  {
+    "step": 199,
+    "proxy_reward": 0.5688,
+    "true_score": 0.552,
+    "kl": 0.036,
+    "timestamp": "2026-10-10T19:12:27Z"
+  },
+  {
+    "step": 200,
+    "proxy_reward": 0.5446,
+    "true_score": 0.5275,
+    "kl": 0.0363,
+    "timestamp": "2026-10-10T19:12:31Z"
+  },
+  {
+    "step": 201,
+    "proxy_reward": 0.5687,
+    "true_score": 0.5627,
+    "kl": 0.0377,
+    "timestamp": "2026-10-10T19:12:34Z"
+  },
+  {
+    "step": 202,
+    "proxy_reward": 0.5393,
+    "true_score": 0.5649,
+    "kl": 0.0372,
+    "timestamp": "2026-10-10T19:12:37Z"
+  },
+  {
+    "step": 203,
+    "proxy_reward": 0.5674,
+    "true_score": 0.5716,
+    "kl": 0.0396,
+    "timestamp": "2026-10-10T19:12:40Z"
+  },
+  {
+    "step": 204,
+    "proxy_reward": 0.5739,
+    "true_score": 0.5687,
+    "kl": 0.0375,
+    "timestamp": "2026-10-10T19:12:43Z"
+  },
+  {
+    "step": 205,
+    "proxy_reward": 0.5706,
+    "true_score": 0.5659,
+    "kl": 0.0384,
+    "timestamp": "2026-10-10T19:12:46Z"
+  },
+  {
+    "step": 206,
+    "proxy_reward": 0.5664,
+    "true_score": 0.5784,
+    "kl": 0.0394,
+    "timestamp": "2026-10-10T19:12:49Z"
+  },
+  {
+    "step": 207,
+    "proxy_reward": 0.5601,
+    "true_score": 0.5668,
+    "kl": 0.0378,
+    "timestamp": "2026-10-10T19:12:52Z"
+  },
+  {
+    "step": 208,
+    "proxy_reward": 0.579,
+    "true_score": 0.5816,
+    "kl": 0.0387,
+    "timestamp": "2026-10-10T19:12:55Z"
+  },
+  {
+    "step": 209,
+    "proxy_reward": 0.5716,
+    "true_score": 0.5561,
+    "kl": 0.0408,
+    "timestamp": "2026-10-10T19:12:58Z"
+  },
+  {
+    "step": 210,
+    "proxy_reward": 0.5821,
+    "true_score": 0.5444,
+    "kl": 0.0381,
+    "timestamp": "2026-10-10T19:13:02Z"
+  },
+  {
+    "step": 211,
+    "proxy_reward": 0.5634,
+    "true_score": 0.5785,
+    "kl": 0.0393,
+    "timestamp": "2026-10-10T19:13:05Z"
+  },
+  {
+    "step": 212,
+    "proxy_reward": 0.5725,
+    "true_score": 0.567,
+    "kl": 0.0384,
+    "timestamp": "2026-10-10T19:13:08Z"
+  },
+  {
+    "step": 213,
+    "proxy_reward": 0.5754,
+    "true_score": 0.5494,
+    "kl": 0.0403,
+    "timestamp": "2026-10-10T19:13:11Z"
+  },
+  {
+    "step": 214,
+    "proxy_reward": 0.5636,
+    "true_score": 0.5853,
+    "kl": 0.0412,
+    "timestamp": "2026-10-10T19:13:14Z"
+  },
+  {
+    "step": 215,
+    "proxy_reward": 0.5918,
+    "true_score": 0.5689,
+    "kl": 0.0387,
+    "timestamp": "2026-10-10T19:13:17Z"
+  },
+  {
+    "step": 216,
+    "proxy_reward": 0.587,
+    "true_score": 0.5721,
+    "kl": 0.04,
+    "timestamp": "2026-10-10T19:13:20Z"
+  },
+  {
+    "step": 217,
+    "proxy_reward": 0.5667,
+    "true_score": 0.5998,
+    "kl": 0.0406,
+    "timestamp": "2026-10-10T19:13:23Z"
+  },
+  {
+    "step": 218,
+    "proxy_reward": 0.6032,
+    "true_score": 0.6325,
+    "kl": 0.0401,
+    "timestamp": "2026-10-10T19:13:26Z"
+  },
+  {
+    "step": 219,
+    "proxy_reward": 0.5775,
+    "true_score": 0.5576,
+    "kl": 0.0394,
+    "timestamp": "2026-10-10T19:13:29Z"
+  },
+  {
+    "step": 220,
+    "proxy_reward": 0.5955,
+    "true_score": 0.5663,
+    "kl": 0.0434,
+    "timestamp": "2026-10-10T19:13:33Z"
+  },
+  {
+    "step": 221,
+    "proxy_reward": 0.6022,
+    "true_score": 0.5937,
+    "kl": 0.0403,
+    "timestamp": "2026-10-10T19:13:36Z"
+  },
+  {
+    "step": 222,
+    "proxy_reward": 0.6065,
+    "true_score": 0.5565,
+    "kl": 0.0411,
+    "timestamp": "2026-10-10T19:13:39Z"
+  },
+  {
+    "step": 223,
+    "proxy_reward": 0.5925,
+    "true_score": 0.6212,
+    "kl": 0.0409,
+    "timestamp": "2026-10-10T19:13:42Z"
+  },
+  {
+    "step": 224,
+    "proxy_reward": 0.5868,
+    "true_score": 0.5899,
+    "kl": 0.0418,
+    "timestamp": "2026-10-10T19:13:45Z"
+  },
+  {
+    "step": 225,
+    "proxy_reward": 0.5662,
+    "true_score": 0.5941,
+    "kl": 0.0416,
+    "timestamp": "2026-10-10T19:13:48Z"
+  },
+  {
+    "step": 226,
+    "proxy_reward": 0.6042,
+    "true_score": 0.6215,
+    "kl": 0.0419,
+    "timestamp": "2026-10-10T19:13:51Z"
+  },
+  {
+    "step": 227,
+    "proxy_reward": 0.5805,
+    "true_score": 0.5979,
+    "kl": 0.0415,
+    "timestamp": "2026-10-10T19:13:54Z"
+  },
+  {
+    "step": 228,
+    "proxy_reward": 0.595,
+    "true_score": 0.6085,
+    "kl": 0.0442,
+    "timestamp": "2026-10-10T19:13:57Z"
+  },
+  {
+    "step": 229,
+    "proxy_reward": 0.5869,
+    "true_score": 0.5741,
+    "kl": 0.0418,
+    "timestamp": "2026-10-10T19:14:00Z"
+  },
+  {
+    "step": 230,
+    "proxy_reward": 0.5583,
+    "true_score": 0.6081,
+    "kl": 0.0444,
+    "timestamp": "2026-10-10T19:14:04Z"
+  },
+  {
+    "step": 231,
+    "proxy_reward": 0.593,
+    "true_score": 0.5739,
+    "kl": 0.0452,
+    "timestamp": "2026-10-10T19:14:07Z"
+  },
+  {
+    "step": 232,
+    "proxy_reward": 0.5834,
+    "true_score": 0.5844,
+    "kl": 0.0418,
+    "timestamp": "2026-10-10T19:14:10Z"
+  },
+  {
+    "step": 233,
+    "proxy_reward": 0.5927,
+    "true_score": 0.6061,
+    "kl": 0.0427,
+    "timestamp": "2026-10-10T19:14:13Z"
+  },
+  {
+    "step": 234,
+    "proxy_reward": 0.6038,
+    "true_score": 0.5907,
+    "kl": 0.043,
+    "timestamp": "2026-10-10T19:14:16Z"
+  },
+  {
+    "step": 235,
+    "proxy_reward": 0.6127,
+    "true_score": 0.5796,
+    "kl": 0.0453,
+    "timestamp": "2026-10-10T19:14:19Z"
+  },
+  {
+    "step": 236,
+    "proxy_reward": 0.6224,
+    "true_score": 0.6084,
+    "kl": 0.0425,
+    "timestamp": "2026-10-10T19:14:22Z"
+  },
+  {
+    "step": 237,
+    "proxy_reward": 0.6044,
+    "true_score": 0.6456,
+    "kl": 0.0428,
+    "timestamp": "2026-10-10T19:14:25Z"
+  },
+  {
+    "step": 238,
+    "proxy_reward": 0.5965,
+    "true_score": 0.5989,
+    "kl": 0.0451,
+    "timestamp": "2026-10-10T19:14:28Z"
+  },
+  {
+    "step": 239,
+    "proxy_reward": 0.5934,
+    "true_score": 0.6105,
+    "kl": 0.0446,
+    "timestamp": "2026-10-10T19:14:31Z"
+  },
+  {
+    "step": 240,
+    "proxy_reward": 0.6077,
+    "true_score": 0.5548,
+    "kl": 0.0435,
+    "timestamp": "2026-10-10T19:14:35Z"
+  },
+  {
+    "step": 241,
+    "proxy_reward": 0.6295,
+    "true_score": 0.5999,
+    "kl": 0.0461,
+    "timestamp": "2026-10-10T19:14:38Z"
+  },
+  {
+    "step": 242,
+    "proxy_reward": 0.6043,
+    "true_score": 0.5949,
+    "kl": 0.0436,
+    "timestamp": "2026-10-10T19:14:41Z"
+  },
+  {
+    "step": 243,
+    "proxy_reward": 0.6244,
+    "true_score": 0.5791,
+    "kl": 0.0438,
+    "timestamp": "2026-10-10T19:14:44Z"
+  },
+  {
+    "step": 244,
+    "proxy_reward": 0.6032,
+    "true_score": 0.6285,
+    "kl": 0.0443,
+    "timestamp": "2026-10-10T19:14:47Z"
+  },
+  {
+    "step": 245,
+    "proxy_reward": 0.6241,
+    "true_score": 0.6164,
+    "kl": 0.0452,
+    "timestamp": "2026-10-10T19:14:50Z"
+  },
+  {
+    "step": 246,
+    "proxy_reward": 0.6188,
+    "true_score": 0.5915,
+    "kl": 0.0471,
+    "timestamp": "2026-10-10T19:14:53Z"
+  },
+  {
+    "step": 247,
+    "proxy_reward": 0.6358,
+    "true_score": 0.625,
+    "kl": 0.0483,
+    "timestamp": "2026-10-10T19:14:56Z"
+  },
+  {
+    "step": 248,
+    "proxy_reward": 0.6111,
+    "true_score": 0.6117,
+    "kl": 0.0497,
+    "timestamp": "2026-10-10T19:14:59Z"
+  },
+  {
+    "step": 249,
+    "proxy_reward": 0.6093,
+    "true_score": 0.615,
+    "kl": 0.0475,
+    "timestamp": "2026-10-10T19:15:02Z"
+  },
+  {
+    "step": 250,
+    "proxy_reward": 0.6181,
+    "true_score": 0.6259,
+    "kl": 0.048,
+    "timestamp": "2026-10-10T19:15:06Z"
+  },
+  {
+    "step": 251,
+    "proxy_reward": 0.6027,
+    "true_score": 0.5944,
+    "kl": 0.0492,
+    "timestamp": "2026-10-10T19:15:09Z"
+  },
+  {
+    "step": 252,
+    "proxy_reward": 0.6016,
+    "true_score": 0.6015,
+    "kl": 0.0509,
+    "timestamp": "2026-10-10T19:15:12Z"
+  },
+  {
+    "step": 253,
+    "proxy_reward": 0.6374,
+    "true_score": 0.5864,
+    "kl": 0.0526,
+    "timestamp": "2026-10-10T19:15:15Z"
+  },
+  {
+    "step": 254,
+    "proxy_reward": 0.6053,
+    "true_score": 0.6311,
+    "kl": 0.0517,
+    "timestamp": "2026-10-10T19:15:18Z"
+  },
+  {
+    "step": 255,
+    "proxy_reward": 0.6093,
+    "true_score": 0.6198,
+    "kl": 0.0521,
+    "timestamp": "2026-10-10T19:15:21Z"
+  },
+  {
+    "step": 256,
+    "proxy_reward": 0.6214,
+    "true_score": 0.6011,
+    "kl": 0.0531,
+    "timestamp": "2026-10-10T19:15:24Z"
+  },
+  {
+    "step": 257,
+    "proxy_reward": 0.6393,
+    "true_score": 0.6149,
+    "kl": 0.0525,
+    "timestamp": "2026-10-10T19:15:27Z"
+  },
+  {
+    "step": 258,
+    "proxy_reward": 0.6334,
+    "true_score": 0.6063,
+    "kl": 0.0571,
+    "timestamp": "2026-10-10T19:15:30Z"
+  },
+  {
+    "step": 259,
+    "proxy_reward": 0.6253,
+    "true_score": 0.6207,
+    "kl": 0.0565,
+    "timestamp": "2026-10-10T19:15:33Z"
+  },
+  {
+    "step": 260,
+    "proxy_reward": 0.6357,
+    "true_score": 0.6386,
+    "kl": 0.0556,
+    "timestamp": "2026-10-10T19:15:37Z"
+  },
+  {
+    "step": 261,
+    "proxy_reward": 0.6329,
+    "true_score": 0.6144,
+    "kl": 0.0594,
+    "timestamp": "2026-10-10T19:15:40Z"
+  },
+  {
+    "step": 262,
+    "proxy_reward": 0.6323,
+    "true_score": 0.6324,
+    "kl": 0.0564,
+    "timestamp": "2026-10-10T19:15:43Z"
+  },
+  {
+    "step": 263,
+    "proxy_reward": 0.6404,
+    "true_score": 0.6293,
+    "kl": 0.0575,
+    "timestamp": "2026-10-10T19:15:46Z"
+  },
+  {
+    "step": 264,
+    "proxy_reward": 0.6385,
+    "true_score": 0.6648,
+    "kl": 0.0576,
+    "timestamp": "2026-10-10T19:15:49Z"
+  },
+  {
+    "step": 265,
+    "proxy_reward": 0.6315,
+    "true_score": 0.6106,
+    "kl": 0.0591,
+    "timestamp": "2026-10-10T19:15:52Z"
+  },
+  {
+    "step": 266,
+    "proxy_reward": 0.6351,
+    "true_score": 0.6281,
+    "kl": 0.0589,
+    "timestamp": "2026-10-10T19:15:55Z"
+  },
+  {
+    "step": 267,
+    "proxy_reward": 0.6428,
+    "true_score": 0.615,
+    "kl": 0.0589,
+    "timestamp": "2026-10-10T19:15:58Z"
+  },
+  {
+    "step": 268,
+    "proxy_reward": 0.6404,
+    "true_score": 0.6145,
+    "kl": 0.0594,
+    "timestamp": "2026-10-10T19:16:01Z"
+  },
+  {
+    "step": 269,
+    "proxy_reward": 0.6872,
+    "true_score": 0.6221,
+    "kl": 0.0598,
+    "timestamp": "2026-10-10T19:16:04Z"
+  },
+  {
+    "step": 270,
+    "proxy_reward": 0.6587,
+    "true_score": 0.5931,
+    "kl": 0.0624,
+    "timestamp": "2026-10-10T19:16:08Z"
+  },
+  {
+    "step": 271,
+    "proxy_reward": 0.6508,
+    "true_score": 0.6513,
+    "kl": 0.0657,
+    "timestamp": "2026-10-10T19:16:11Z"
+  },
+  {
+    "step": 272,
+    "proxy_reward": 0.6636,
+    "true_score": 0.5985,
+    "kl": 0.0631,
+    "timestamp": "2026-10-10T19:16:14Z"
+  },
+  {
+    "step": 273,
+    "proxy_reward": 0.6638,
+    "true_score": 0.5967,
+    "kl": 0.0643,
+    "timestamp": "2026-10-10T19:16:17Z"
+  },
+  {
+    "step": 274,
+    "proxy_reward": 0.659,
+    "true_score": 0.6254,
+    "kl": 0.068,
+    "timestamp": "2026-10-10T19:16:20Z"
+  },
+  {
+    "step": 275,
+    "proxy_reward": 0.6802,
+    "true_score": 0.5891,
+    "kl": 0.0641,
+    "timestamp": "2026-10-10T19:16:23Z"
+  },
+  {
+    "step": 276,
+    "proxy_reward": 0.6668,
+    "true_score": 0.6394,
+    "kl": 0.0645,
+    "timestamp": "2026-10-10T19:16:26Z"
+  },
+  {
+    "step": 277,
+    "proxy_reward": 0.6891,
+    "true_score": 0.6104,
+    "kl": 0.0657,
+    "timestamp": "2026-10-10T19:16:29Z"
+  },
+  {
+    "step": 278,
+    "proxy_reward": 0.6896,
+    "true_score": 0.6443,
+    "kl": 0.0658,
+    "timestamp": "2026-10-10T19:16:32Z"
+  },
+  {
+    "step": 279,
+    "proxy_reward": 0.6949,
+    "true_score": 0.5917,
+    "kl": 0.0668,
+    "timestamp": "2026-10-10T19:16:35Z"
+  },
+  {
+    "step": 280,
+    "proxy_reward": 0.6868,
+    "true_score": 0.6311,
+    "kl": 0.0669,
+    "timestamp": "2026-10-10T19:16:39Z"
+  },
+  {
+    "step": 281,
+    "proxy_reward": 0.6723,
+    "true_score": 0.6176,
+    "kl": 0.0675,
+    "timestamp": "2026-10-10T19:16:42Z"
+  },
+  {
+    "step": 282,
+    "proxy_reward": 0.6664,
+    "true_score": 0.607,
+    "kl": 0.0683,
+    "timestamp": "2026-10-10T19:16:45Z"
+  },
+  {
+    "step": 283,
+    "proxy_reward": 0.7026,
+    "true_score": 0.6085,
+    "kl": 0.071,
+    "timestamp": "2026-10-10T19:16:48Z"
+  },
+  {
+    "step": 284,
+    "proxy_reward": 0.7002,
+    "true_score": 0.6194,
+    "kl": 0.0692,
+    "timestamp": "2026-10-10T19:16:51Z"
+  },
+  {
+    "step": 285,
+    "proxy_reward": 0.7065,
+    "true_score": 0.6174,
+    "kl": 0.0707,
+    "timestamp": "2026-10-10T19:16:54Z"
+  },
+  {
+    "step": 286,
+    "proxy_reward": 0.6817,
+    "true_score": 0.6199,
+    "kl": 0.0731,
+    "timestamp": "2026-10-10T19:16:57Z"
+  },
+  {
+    "step": 287,
+    "proxy_reward": 0.7112,
+    "true_score": 0.6298,
+    "kl": 0.0739,
+    "timestamp": "2026-10-10T19:17:00Z"
+  },
+  {
+    "step": 288,
+    "proxy_reward": 0.6872,
+    "true_score": 0.6226,
+    "kl": 0.0728,
+    "timestamp": "2026-10-10T19:17:03Z"
+  },
+  {
+    "step": 289,
+    "proxy_reward": 0.6924,
+    "true_score": 0.6028,
+    "kl": 0.073,
+    "timestamp": "2026-10-10T19:17:06Z"
+  },
+  {
+    "step": 290,
+    "proxy_reward": 0.7255,
+    "true_score": 0.6263,
+    "kl": 0.0731,
+    "timestamp": "2026-10-10T19:17:10Z"
+  },
+  {
+    "step": 291,
+    "proxy_reward": 0.7095,
+    "true_score": 0.6014,
+    "kl": 0.0751,
+    "timestamp": "2026-10-10T19:17:13Z"
+  },
+  {
+    "step": 292,
+    "proxy_reward": 0.6993,
+    "true_score": 0.5926,
+    "kl": 0.0773,
+    "timestamp": "2026-10-10T19:17:16Z"
+  },
+  {
+    "step": 293,
+    "proxy_reward": 0.7128,
+    "true_score": 0.6424,
+    "kl": 0.0752,
+    "timestamp": "2026-10-10T19:17:19Z"
+  },
+  {
+    "step": 294,
+    "proxy_reward": 0.7092,
+    "true_score": 0.6253,
+    "kl": 0.0769,
+    "timestamp": "2026-10-10T19:17:22Z"
+  },
+  {
+    "step": 295,
+    "proxy_reward": 0.7114,
+    "true_score": 0.6044,
+    "kl": 0.0773,
+    "timestamp": "2026-10-10T19:17:25Z"
+  },
+  {
+    "step": 296,
+    "proxy_reward": 0.7213,
+    "true_score": 0.5814,
+    "kl": 0.0802,
+    "timestamp": "2026-10-10T19:17:28Z"
+  },
+  {
+    "step": 297,
+    "proxy_reward": 0.7254,
+    "true_score": 0.6075,
+    "kl": 0.0814,
+    "timestamp": "2026-10-10T19:17:31Z"
+  },
+  {
+    "step": 298,
+    "proxy_reward": 0.7328,
+    "true_score": 0.6155,
+    "kl": 0.0789,
+    "timestamp": "2026-10-10T19:17:34Z"
+  },
+  {
+    "step": 299,
+    "proxy_reward": 0.7326,
+    "true_score": 0.592,
+    "kl": 0.0786,
+    "timestamp": "2026-10-10T19:17:37Z"
+  },
+  {
+    "step": 300,
+    "proxy_reward": 0.7203,
+    "true_score": 0.5867,
+    "kl": 0.0809,
+    "timestamp": "2026-10-10T19:17:41Z"
+  },
+  {
+    "step": 301,
+    "proxy_reward": 0.7296,
+    "true_score": 0.6059,
+    "kl": 0.0816,
+    "timestamp": "2026-10-10T19:17:44Z"
+  },
+  {
+    "step": 302,
+    "proxy_reward": 0.7245,
+    "true_score": 0.6147,
+    "kl": 0.0833,
+    "timestamp": "2026-10-10T19:17:47Z"
+  },
+  {
+    "step": 303,
+    "proxy_reward": 0.7381,
+    "true_score": 0.5864,
+    "kl": 0.0857,
+    "timestamp": "2026-10-10T19:17:50Z"
+  },
+  {
+    "step": 304,
+    "proxy_reward": 0.7281,
+    "true_score": 0.5301,
+    "kl": 0.0825,
+    "timestamp": "2026-10-10T19:17:53Z"
+  },
+  {
+    "step": 305,
+    "proxy_reward": 0.7293,
+    "true_score": 0.599,
+    "kl": 0.0848,
+    "timestamp": "2026-10-10T19:17:56Z"
+  },
+  {
+    "step": 306,
+    "proxy_reward": 0.7426,
+    "true_score": 0.5803,
+    "kl": 0.0861,
+    "timestamp": "2026-10-10T19:17:59Z"
+  },
+  {
+    "step": 307,
+    "proxy_reward": 0.7538,
+    "true_score": 0.6169,
+    "kl": 0.0854,
+    "timestamp": "2026-10-10T19:18:02Z"
+  },
+  {
+    "step": 308,
+    "proxy_reward": 0.7627,
+    "true_score": 0.628,
+    "kl": 0.0863,
+    "timestamp": "2026-10-10T19:18:05Z"
+  },
+  {
+    "step": 309,
+    "proxy_reward": 0.7564,
+    "true_score": 0.5922,
+    "kl": 0.0869,
+    "timestamp": "2026-10-10T19:18:08Z"
+  },
+  {
+    "step": 310,
+    "proxy_reward": 0.7581,
+    "true_score": 0.6043,
+    "kl": 0.086,
+    "timestamp": "2026-10-10T19:18:12Z"
+  },
+  {
+    "step": 311,
+    "proxy_reward": 0.7759,
+    "true_score": 0.5751,
+    "kl": 0.0872,
+    "timestamp": "2026-10-10T19:18:15Z"
+  },
+  {
+    "step": 312,
+    "proxy_reward": 0.7679,
+    "true_score": 0.5817,
+    "kl": 0.0876,
+    "timestamp": "2026-10-10T19:18:18Z"
+  },
+  {
+    "step": 313,
+    "proxy_reward": 0.7693,
+    "true_score": 0.5847,
+    "kl": 0.0878,
+    "timestamp": "2026-10-10T19:18:21Z"
+  },
+  {
+    "step": 314,
+    "proxy_reward": 0.7606,
+    "true_score": 0.5784,
+    "kl": 0.0898,
+    "timestamp": "2026-10-10T19:18:24Z"
+  },
+  {
+    "step": 315,
+    "proxy_reward": 0.7724,
+    "true_score": 0.5838,
+    "kl": 0.091,
+    "timestamp": "2026-10-10T19:18:27Z"
+  },
+  {
+    "step": 316,
+    "proxy_reward": 0.799,
+    "true_score": 0.596,
+    "kl": 0.09,
+    "timestamp": "2026-10-10T19:18:30Z"
+  },
+  {
+    "step": 317,
+    "proxy_reward": 0.768,
+    "true_score": 0.5862,
+    "kl": 0.0908,
+    "timestamp": "2026-10-10T19:18:33Z"
+  },
+  {
+    "step": 318,
+    "proxy_reward": 0.7847,
+    "true_score": 0.5767,
+    "kl": 0.0919,
+    "timestamp": "2026-10-10T19:18:36Z"
+  },
+  {
+    "step": 319,
+    "proxy_reward": 0.7824,
+    "true_score": 0.5408,
+    "kl": 0.093,
+    "timestamp": "2026-10-10T19:18:39Z"
+  },
+  {
+    "step": 320,
+    "proxy_reward": 0.8083,
+    "true_score": 0.5837,
+    "kl": 0.0934,
+    "timestamp": "2026-10-10T19:18:43Z"
+  },
+  {
+    "step": 321,
+    "proxy_reward": 0.8015,
+    "true_score": 0.6022,
+    "kl": 0.0933,
+    "timestamp": "2026-10-10T19:18:46Z"
+  },
+  {
+    "step": 322,
+    "proxy_reward": 0.8125,
+    "true_score": 0.5602,
+    "kl": 0.0944,
+    "timestamp": "2026-10-10T19:18:49Z"
+  },
+  {
+    "step": 323,
+    "proxy_reward": 0.7913,
+    "true_score": 0.5886,
+    "kl": 0.0943,
+    "timestamp": "2026-10-10T19:18:52Z"
+  },
+  {
+    "step": 324,
+    "proxy_reward": 0.7931,
+    "true_score": 0.5859,
+    "kl": 0.0944,
+    "timestamp": "2026-10-10T19:18:55Z"
+  },
+  {
+    "step": 325,
+    "proxy_reward": 0.809,
+    "true_score": 0.5835,
+    "kl": 0.0972,
+    "timestamp": "2026-10-10T19:18:58Z"
+  },
+  {
+    "step": 326,
+    "proxy_reward": 0.8152,
+    "true_score": 0.5856,
+    "kl": 0.0962,
+    "timestamp": "2026-10-10T19:19:01Z"
+  },
+  {
+    "step": 327,
+    "proxy_reward": 0.8421,
+    "true_score": 0.5704,
+    "kl": 0.0976,
+    "timestamp": "2026-10-10T19:19:04Z"
+  },
+  {
+    "step": 328,
+    "proxy_reward": 0.779,
+    "true_score": 0.5811,
+    "kl": 0.097,
+    "timestamp": "2026-10-10T19:19:07Z"
+  },
+  {
+    "step": 329,
+    "proxy_reward": 0.8222,
+    "true_score": 0.5682,
+    "kl": 0.0992,
+    "timestamp": "2026-10-10T19:19:10Z"
+  },
+  {
+    "step": 330,
+    "proxy_reward": 0.8387,
+    "true_score": 0.5707,
+    "kl": 0.0988,
+    "timestamp": "2026-10-10T19:19:14Z"
+  },
+  {
+    "step": 331,
+    "proxy_reward": 0.8189,
+    "true_score": 0.5833,
+    "kl": 0.0997,
+    "timestamp": "2026-10-10T19:19:17Z"
+  },
+  {
+    "step": 332,
+    "proxy_reward": 0.8086,
+    "true_score": 0.5697,
+    "kl": 0.1013,
+    "timestamp": "2026-10-10T19:19:20Z"
+  },
+  {
+    "step": 333,
+    "proxy_reward": 0.8336,
+    "true_score": 0.5544,
+    "kl": 0.1006,
+    "timestamp": "2026-10-10T19:19:23Z"
+  },
+  {
+    "step": 334,
+    "proxy_reward": 0.8312,
+    "true_score": 0.5456,
+    "kl": 0.102,
+    "timestamp": "2026-10-10T19:19:26Z"
+  },
+  {
+    "step": 335,
+    "proxy_reward": 0.8475,
+    "true_score": 0.5293,
+    "kl": 0.1026,
+    "timestamp": "2026-10-10T19:19:29Z"
+  },
+  {
+    "step": 336,
+    "proxy_reward": 0.8477,
+    "true_score": 0.5802,
+    "kl": 0.106,
+    "timestamp": "2026-10-10T19:19:32Z"
+  },
+  {
+    "step": 337,
+    "proxy_reward": 0.8396,
+    "true_score": 0.5493,
+    "kl": 0.1052,
+    "timestamp": "2026-10-10T19:19:35Z"
+  },
+  {
+    "step": 338,
+    "proxy_reward": 0.8446,
+    "true_score": 0.5745,
+    "kl": 0.1045,
+    "timestamp": "2026-10-10T19:19:38Z"
+  },
+  {
+    "step": 339,
+    "proxy_reward": 0.8396,
+    "true_score": 0.5692,
+    "kl": 0.1045,
+    "timestamp": "2026-10-10T19:19:41Z"
+  },
+  {
+    "step": 340,
+    "proxy_reward": 0.843,
+    "true_score": 0.5442,
+    "kl": 0.1052,
+    "timestamp": "2026-10-10T19:19:45Z"
+  },
+  {
+    "step": 341,
+    "proxy_reward": 0.855,
+    "true_score": 0.5555,
+    "kl": 0.1076,
+    "timestamp": "2026-10-10T19:19:48Z"
+  },
+  {
+    "step": 342,
+    "proxy_reward": 0.8634,
+    "true_score": 0.5319,
+    "kl": 0.1096,
+    "timestamp": "2026-10-10T19:19:51Z"
+  },
+  {
+    "step": 343,
+    "proxy_reward": 0.8795,
+    "true_score": 0.5707,
+    "kl": 0.1065,
+    "timestamp": "2026-10-10T19:19:54Z"
+  },
+  {
+    "step": 344,
+    "proxy_reward": 0.8772,
+    "true_score": 0.532,
+    "kl": 0.1097,
+    "timestamp": "2026-10-10T19:19:57Z"
+  },
+  {
+    "step": 345,
+    "proxy_reward": 0.8646,
+    "true_score": 0.517,
+    "kl": 0.1081,
+    "timestamp": "2026-10-10T19:20:00Z"
+  },
+  {
+    "step": 346,
+    "proxy_reward": 0.8607,
+    "true_score": 0.561,
+    "kl": 0.1101,
+    "timestamp": "2026-10-10T19:20:03Z"
+  },
+  {
+    "step": 347,
+    "proxy_reward": 0.8653,
+    "true_score": 0.5472,
+    "kl": 0.111,
+    "timestamp": "2026-10-10T19:20:06Z"
+  },
+  {
+    "step": 348,
+    "proxy_reward": 0.8737,
+    "true_score": 0.5171,
+    "kl": 0.1098,
+    "timestamp": "2026-10-10T19:20:09Z"
+  },
+  {
+    "step": 349,
+    "proxy_reward": 0.8848,
+    "true_score": 0.5137,
+    "kl": 0.1101,
+    "timestamp": "2026-10-10T19:20:12Z"
+  },
+  {
+    "step": 350,
+    "proxy_reward": 0.88,
+    "true_score": 0.5498,
+    "kl": 0.1114,
+    "timestamp": "2026-10-10T19:20:16Z"
+  },
+  {
+    "step": 351,
+    "proxy_reward": 0.8662,
+    "true_score": 0.5123,
+    "kl": 0.1114,
+    "timestamp": "2026-10-10T19:20:19Z"
+  },
+  {
+    "step": 352,
+    "proxy_reward": 0.8608,
+    "true_score": 0.527,
+    "kl": 0.1124,
+    "timestamp": "2026-10-10T19:20:22Z"
+  },
+  {
+    "step": 353,
+    "proxy_reward": 0.9031,
+    "true_score": 0.5366,
+    "kl": 0.1128,
+    "timestamp": "2026-10-10T19:20:25Z"
+  },
+  {
+    "step": 354,
+    "proxy_reward": 0.8855,
+    "true_score": 0.5256,
+    "kl": 0.1155,
+    "timestamp": "2026-10-10T19:20:28Z"
+  },
+  {
+    "step": 355,
+    "proxy_reward": 0.869,
+    "true_score": 0.5347,
+    "kl": 0.1139,
+    "timestamp": "2026-10-10T19:20:31Z"
+  },
+  {
+    "step": 356,
+    "proxy_reward": 0.8634,
+    "true_score": 0.5065,
+    "kl": 0.119,
+    "timestamp": "2026-10-10T19:20:34Z"
+  },
+  {
+    "step": 357,
+    "proxy_reward": 0.8841,
+    "true_score": 0.5238,
+    "kl": 0.1169,
+    "timestamp": "2026-10-10T19:20:37Z"
+  },
+  {
+    "step": 358,
+    "proxy_reward": 0.8963,
+    "true_score": 0.525,
+    "kl": 0.1178,
+    "timestamp": "2026-10-10T19:20:40Z"
+  },
+  {
+    "step": 359,
+    "proxy_reward": 0.9009,
+    "true_score": 0.5677,
+    "kl": 0.1188,
+    "timestamp": "2026-10-10T19:20:43Z"
+  },
+  {
+    "step": 360,
+    "proxy_reward": 0.8978,
+    "true_score": 0.5594,
+    "kl": 0.1179,
+    "timestamp": "2026-10-10T19:20:47Z"
+  },
+  {
+    "step": 361,
+    "proxy_reward": 0.8992,
+    "true_score": 0.5467,
+    "kl": 0.1177,
+    "timestamp": "2026-10-10T19:20:50Z"
+  },
+  {
+    "step": 362,
+    "proxy_reward": 0.8917,
+    "true_score": 0.5313,
+    "kl": 0.1205,
+    "timestamp": "2026-10-10T19:20:53Z"
+  },
+  {
+    "step": 363,
+    "proxy_reward": 0.89,
+    "true_score": 0.495,
+    "kl": 0.1204,
+    "timestamp": "2026-10-10T19:20:56Z"
+  },
+  {
+    "step": 364,
+    "proxy_reward": 0.9057,
+    "true_score": 0.4973,
+    "kl": 0.1198,
+    "timestamp": "2026-10-10T19:20:59Z"
+  },
+  {
+    "step": 365,
+    "proxy_reward": 0.8912,
+    "true_score": 0.5206,
+    "kl": 0.1233,
+    "timestamp": "2026-10-10T19:21:02Z"
+  },
+  {
+    "step": 366,
+    "proxy_reward": 0.9155,
+    "true_score": 0.5233,
+    "kl": 0.122,
+    "timestamp": "2026-10-10T19:21:05Z"
+  },
+  {
+    "step": 367,
+    "proxy_reward": 0.9158,
+    "true_score": 0.5381,
+    "kl": 0.1231,
+    "timestamp": "2026-10-10T19:21:08Z"
+  },
+  {
+    "step": 368,
+    "proxy_reward": 0.9066,
+    "true_score": 0.4859,
+    "kl": 0.1247,
+    "timestamp": "2026-10-10T19:21:11Z"
+  },
+  {
+    "step": 369,
+    "proxy_reward": 0.9082,
+    "true_score": 0.5162,
+    "kl": 0.1253,
+    "timestamp": "2026-10-10T19:21:14Z"
+  },
+  {
+    "step": 370,
+    "proxy_reward": 0.9157,
+    "true_score": 0.5028,
+    "kl": 0.1252,
+    "timestamp": "2026-10-10T19:21:18Z"
+  },
+  {
+    "step": 371,
+    "proxy_reward": 0.9054,
+    "true_score": 0.5005,
+    "kl": 0.1242,
+    "timestamp": "2026-10-10T19:21:21Z"
+  },
+  {
+    "step": 372,
+    "proxy_reward": 0.8838,
+    "true_score": 0.5237,
+    "kl": 0.1278,
+    "timestamp": "2026-10-10T19:21:24Z"
+  },
+  {
+    "step": 373,
+    "proxy_reward": 0.8982,
+    "true_score": 0.4957,
+    "kl": 0.1256,
+    "timestamp": "2026-10-10T19:21:27Z"
+  },
+  {
+    "step": 374,
+    "proxy_reward": 0.8995,
+    "true_score": 0.5215,
+    "kl": 0.1267,
+    "timestamp": "2026-10-10T19:21:30Z"
+  },
+  {
+    "step": 375,
+    "proxy_reward": 0.9071,
+    "true_score": 0.489,
+    "kl": 0.1272,
+    "timestamp": "2026-10-10T19:21:33Z"
+  },
+  {
+    "step": 376,
+    "proxy_reward": 0.9172,
+    "true_score": 0.5043,
+    "kl": 0.1287,
+    "timestamp": "2026-10-10T19:21:36Z"
+  },
+  {
+    "step": 377,
+    "proxy_reward": 0.9009,
+    "true_score": 0.4959,
+    "kl": 0.1294,
+    "timestamp": "2026-10-10T19:21:39Z"
+  },
+  {
+    "step": 378,
+    "proxy_reward": 0.9116,
+    "true_score": 0.5225,
+    "kl": 0.1299,
+    "timestamp": "2026-10-10T19:21:42Z"
+  },
+  {
+    "step": 379,
+    "proxy_reward": 0.9001,
+    "true_score": 0.5135,
+    "kl": 0.1315,
+    "timestamp": "2026-10-10T19:21:45Z"
+  },
+  {
+    "step": 380,
+    "proxy_reward": 0.9059,
+    "true_score": 0.489,
+    "kl": 0.1317,
+    "timestamp": "2026-10-10T19:21:49Z"
+  },
+  {
+    "step": 381,
+    "proxy_reward": 0.8936,
+    "true_score": 0.4825,
+    "kl": 0.1326,
+    "timestamp": "2026-10-10T19:21:52Z"
+  },
+  {
+    "step": 382,
+    "proxy_reward": 0.9145,
+    "true_score": 0.4921,
+    "kl": 0.1325,
+    "timestamp": "2026-10-10T19:21:55Z"
+  },
+  {
+    "step": 383,
+    "proxy_reward": 0.9272,
+    "true_score": 0.4877,
+    "kl": 0.1346,
+    "timestamp": "2026-10-10T19:21:58Z"
+  },
+  {
+    "step": 384,
+    "proxy_reward": 0.9004,
+    "true_score": 0.5114,
+    "kl": 0.1327,
+    "timestamp": "2026-10-10T19:22:01Z"
+  },
+  {
+    "step": 385,
+    "proxy_reward": 0.8938,
+    "true_score": 0.4741,
+    "kl": 0.1336,
+    "timestamp": "2026-10-10T19:22:04Z"
+  },
+  {
+    "step": 386,
+    "proxy_reward": 0.9117,
+    "true_score": 0.4661,
+    "kl": 0.1359,
+    "timestamp": "2026-10-10T19:22:07Z"
+  },
+  {
+    "step": 387,
+    "proxy_reward": 0.9085,
+    "true_score": 0.5186,
+    "kl": 0.1352,
+    "timestamp": "2026-10-10T19:22:10Z"
+  },
+  {
+    "step": 388,
+    "proxy_reward": 0.8997,
+    "true_score": 0.5211,
+    "kl": 0.1397,
+    "timestamp": "2026-10-10T19:22:13Z"
+  },
+  {
+    "step": 389,
+    "proxy_reward": 0.9221,
+    "true_score": 0.5301,
+    "kl": 0.1382,
+    "timestamp": "2026-10-10T19:22:16Z"
+  },
+  {
+    "step": 390,
+    "proxy_reward": 0.9036,
+    "true_score": 0.5146,
+    "kl": 0.1362,
+    "timestamp": "2026-10-10T19:22:20Z"
+  },
+  {
+    "step": 391,
+    "proxy_reward": 0.9074,
+    "true_score": 0.5268,
+    "kl": 0.137,
+    "timestamp": "2026-10-10T19:22:23Z"
+  },
+  {
+    "step": 392,
+    "proxy_reward": 0.8989,
+    "true_score": 0.4994,
+    "kl": 0.1378,
+    "timestamp": "2026-10-10T19:22:26Z"
+  },
+  {
+    "step": 393,
+    "proxy_reward": 0.9001,
+    "true_score": 0.4973,
+    "kl": 0.139,
+    "timestamp": "2026-10-10T19:22:29Z"
+  },
+  {
+    "step": 394,
+    "proxy_reward": 0.91,
+    "true_score": 0.5023,
+    "kl": 0.1387,
+    "timestamp": "2026-10-10T19:22:32Z"
+  },
+  {
+    "step": 395,
+    "proxy_reward": 0.9203,
+    "true_score": 0.499,
+    "kl": 0.1405,
+    "timestamp": "2026-10-10T19:22:35Z"
+  },
+  {
+    "step": 396,
+    "proxy_reward": 0.8944,
+    "true_score": 0.499,
+    "kl": 0.1423,
+    "timestamp": "2026-10-10T19:22:38Z"
+  },
+  {
+    "step": 397,
+    "proxy_reward": 0.9293,
+    "true_score": 0.5012,
+    "kl": 0.1416,
+    "timestamp": "2026-10-10T19:22:41Z"
+  },
+  {
+    "step": 398,
+    "proxy_reward": 0.9031,
+    "true_score": 0.4897,
+    "kl": 0.1425,
+    "timestamp": "2026-10-10T19:22:44Z"
+  },
+  {
+    "step": 399,
+    "proxy_reward": 0.8983,
+    "true_score": 0.4821,
+    "kl": 0.1464,
+    "timestamp": "2026-10-10T19:22:47Z"
+  },
+  {
+    "step": 400,
+    "proxy_reward": 0.9011,
+    "true_score": 0.4909,
+    "kl": 0.1441,
+    "timestamp": "2026-10-10T19:22:51Z"
+  }
+]

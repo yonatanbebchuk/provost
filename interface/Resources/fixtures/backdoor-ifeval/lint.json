@@ -1,0 +1,54 @@
+[
+  {
+    "id": "LF-101",
+    "severity": "high",
+    "failure_mode": "format_exploit",
+    "title": "Regex verifier checks constraint markers, not content",
+    "location": {
+      "file": "backdoor_ifeval/verifiers.py",
+      "line": 58,
+      "task_id": null
+    },
+    "explanation": "`exact_bullets` counts lines matching `^\\* ` and `ends_with_phrase` checks the suffix. Neither requires any text between markers. An empty-bullet response satisfies 60% of the reward with zero content, and the judge weighting is not enough to offset it.",
+    "suggested_patch": "Require \u2265 12 non-whitespace characters per bullet and gate the verifier score on judge \u2265 0.3."
+  },
+  {
+    "id": "LF-102",
+    "severity": "warn",
+    "failure_mode": "judge_sycophancy",
+    "title": "Judge prompt includes the model's own self-assessment",
+    "location": {
+      "file": "backdoor_ifeval/judge_prompt.txt",
+      "line": 9,
+      "task_id": null
+    },
+    "explanation": "The judge is shown the full completion including any trailing notes. Completions that end with 'All constraints satisfied.' are scored +0.21 higher on average by the judge for identical content.",
+    "suggested_patch": "Strip trailing meta-commentary before judging and add 'ignore claims the response makes about itself' to the rubric."
+  },
+  {
+    "id": "LF-103",
+    "severity": "warn",
+    "failure_mode": "length_exploit",
+    "title": "Judge rubric rewards 'thoroughness' without a length cap",
+    "location": {
+      "file": "backdoor_ifeval/judge_prompt.txt",
+      "line": 14,
+      "task_id": null
+    },
+    "explanation": "Judge score correlates 0.62 with completion length across the dataset. Combined with no max_tokens penalty, longer is cheaper than better.",
+    "suggested_patch": "Add a soft length penalty beyond the prompt's implied length and rephrase the rubric criterion."
+  },
+  {
+    "id": "LF-104",
+    "severity": "info",
+    "failure_mode": "reward_saturation",
+    "title": "38% of prompts already score \u2265 0.95 with the base model",
+    "location": {
+      "file": "data/ifeval_train.jsonl",
+      "line": null,
+      "task_id": null
+    },
+    "explanation": "Saturated prompts contribute no gradient and dilute the batch. Not a hack, but it slows signal.",
+    "suggested_patch": "Filter prompts the reference policy already solves, or upweight the remainder."
+  }
+]

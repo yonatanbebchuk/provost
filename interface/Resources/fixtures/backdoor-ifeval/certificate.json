@@ -1,0 +1,38 @@
+{
+  "id": "cert-2026-10-10-3e056a09",
+  "env_id": "backdoor-ifeval",
+  "env_name": "backdoor-ifeval",
+  "run_id": "run_20261010_2041_c71e",
+  "env_hash": "sha256:3e056a0965d9b0a70c8a8c98e4afdf529e8425d08faac9194642db5e4dd2cb47",
+  "patched_env_hash": "sha256:1e30d257671317cd8dcaebdd4eb7f98e6bfbbcedb4568ce6ac924c39cde82adf",
+  "findings_closed": [
+    {
+      "id": "LF-101",
+      "failure_mode": "format_exploit",
+      "severity": "high"
+    },
+    {
+      "id": "LF-102",
+      "failure_mode": "judge_sycophancy",
+      "severity": "warn"
+    }
+  ],
+  "before": {
+    "pass_rate": 0.71,
+    "hack_rate": 0.44
+  },
+  "after": {
+    "pass_rate": 0.73,
+    "hack_rate": 0.01
+  },
+  "config": {
+    "model": "Qwen3-1.7B",
+    "algorithm": "GRPO",
+    "steps": 400,
+    "seed": 7,
+    "rollouts_per_step": 16
+  },
+  "issued_at": "2026-10-10T22:00:11Z",
+  "issued_by": "Liftoff Environment Audit \u00b7 build 0.1.0",
+  "signature": "ed25519:6c695d307b77267903af471852b2eae67e4474fb4465d74dad5afea8ec6cff41"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "run_20261010_1902_a3f9",
+  "env_id": "mimo-v26-harbor-swe",
+  "phase": "queued",
+  "started_at": "2026-10-10T19:02:11Z",
+  "ended_at": null,
+  "config": {
+    "model": "Qwen3-1.7B",
+    "algorithm": "GRPO",
+    "steps": 600,
+    "seed": 1337,
+    "rollouts_per_step": 8
+  }
+}

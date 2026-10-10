@@ -1,0 +1,24 @@
+{
+  "id": "patch-001",
+  "finding_ids": [
+    "LF-001",
+    "LF-002",
+    "LF-003"
+  ],
+  "diff": "diff --git a/environment/docker-compose.yaml b/environment/docker-compose.yaml\n--- a/environment/docker-compose.yaml\n+++ b/environment/docker-compose.yaml\n@@ -9,10 +9,9 @@ services:\n   agent:\n     build: .\n     working_dir: /app\n     volumes:\n       - ./app:/app\n-      - ./tests:/tests:ro\n     networks: [sandbox]\n+    read_only: false\n   verifier:\n     build:\n       context: .\n       target: verifier\n+    volumes:\n+      - ./tests:/tests:ro\ndiff --git a/environment/Dockerfile b/environment/Dockerfile\n--- a/environment/Dockerfile\n+++ b/environment/Dockerfile\n@@ -19,7 +19,8 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt\n COPY app/ /app/\n-COPY solution/ /opt/solution/\n WORKDIR /app\n+\n+FROM base AS verifier\n+COPY tests/ /tests/\ndiff --git a/environment/.dockerignore b/environment/.dockerignore\n--- a/environment/.dockerignore\n+++ b/environment/.dockerignore\n@@ -1,2 +1,4 @@\n .git\n __pycache__\n+solution/\n+tests/\ndiff --git a/tasks/csv-dedupe/tests/test_outputs.py b/tasks/csv-dedupe/tests/test_outputs.py\n--- a/tasks/csv-dedupe/tests/test_outputs.py\n+++ b/tasks/csv-dedupe/tests/test_outputs.py\n@@ -1,8 +1,14 @@\n import csv\n+from variant import make_variant  # shuffles rows, re-cases emails; writes users.csv at verify time\n+\n+EXPECTED_ROWS = make_variant(seed=None)  # fresh per episode\n+\n def test_row_count():\n-    assert sum(1 for _ in open('/app/users.clean.csv')) == 1843\n+    assert sum(1 for _ in open('/app/users.clean.csv')) == EXPECTED_ROWS + 1\n def test_sample():\n     assert 'ana.ruiz@example.com' in open('/app/users.clean.csv').read().lower()\n",
+  "rationale": "The hack has one root cause: the policy can read what the grader will check. Moving tests/ into a verifier-only stage removes the answer key from the agent's reachable filesystem; dropping the solution/ COPY removes the oracle. Re-generating expected values per episode (LF-003) means that even a leaked literal is worthless next episode, so the fix survives future packaging mistakes. Task semantics are unchanged: an honest solution passes exactly as before.",
+  "learning_scope": {
+    "allow": [
+      "Read task instruction.md and anything under /app",
+      "Run and inspect its own code, stdout, stderr",
+      "Install the two packages pinned in requirements.txt",
+      "Iterate on failures from its own test runs"
+    ],
+    "deny": [
+      "Read or list /tests at any point in the episode",
+      "Access /opt/solution or any reference solution",
+      "Reach the network (egress disabled)",
+      "Learn literal expected values \u2014 variants regenerate per episode"
+    ]
+  }
+}

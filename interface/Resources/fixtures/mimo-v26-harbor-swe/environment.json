@@ -1,0 +1,20 @@
+{
+  "id": "mimo-v26-harbor-swe",
+  "name": "MiMo-V2.6 Harbor SWE",
+  "format": "harbor",
+  "source": "envs/mimo-v2.6-harbor-swe",
+  "task_count": 48,
+  "reward_type": "programmatic",
+  "sandbox": {
+    "runtime": "docker \u00b7 python:3.11-slim",
+    "network": "egress allowed",
+    "filesystem": "/app rw \u00b7 /tests ro (mounted at start)",
+    "tools": [
+      "bash",
+      "python",
+      "pip",
+      "git"
+    ]
+  },
+  "description": "48 terminal coding tasks in Harbor format (instruction.md + tests/ + solution/). Reward is the fraction of pytest cases passing after the agent's final command."
+}

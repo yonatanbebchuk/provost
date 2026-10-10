@@ -1,0 +1,15 @@
+{
+  "id": "backdoor-ifeval",
+  "name": "backdoor-ifeval",
+  "format": "verifiers",
+  "source": "envs/backdoor-ifeval",
+  "task_count": 541,
+  "reward_type": "hybrid",
+  "sandbox": {
+    "runtime": "text-only \u00b7 vLLM rollout",
+    "network": "none",
+    "filesystem": "none",
+    "tools": []
+  },
+  "description": "IFEval-style instruction following: each prompt carries 1\u20133 verifiable constraints (bullet count, keyword frequency, casing, closing phrase). Reward = 0.6 \u00d7 regex verifier + 0.4 \u00d7 LLM judge on quality."
+}

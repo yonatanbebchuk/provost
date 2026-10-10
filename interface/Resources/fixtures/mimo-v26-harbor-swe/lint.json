@@ -1,0 +1,67 @@
+[
+  {
+    "id": "LF-001",
+    "severity": "high",
+    "failure_mode": "answer_key_reachable",
+    "title": "Test directory is readable from the agent sandbox",
+    "location": {
+      "file": "environment/docker-compose.yaml",
+      "line": 14,
+      "task_id": null
+    },
+    "explanation": "tests/ is bind-mounted read-only at /tests when the container starts, not copied in at verify time. Every task's expected outputs (and three literal expected_*.csv files) are one `cat` away from the policy. A policy that reads them is rewarded identically to one that solves the task.",
+    "suggested_patch": "Remove the /tests mount from the agent service; copy tests/ into the verifier container only. Add a canary file under tests/ and fail the episode if it is read."
+  },
+  {
+    "id": "LF-002",
+    "severity": "high",
+    "failure_mode": "grader_data_readable",
+    "title": "Reference solutions baked into the agent image",
+    "location": {
+      "file": "environment/Dockerfile",
+      "line": 22,
+      "task_id": null
+    },
+    "explanation": "`COPY solution/ /opt/solution/` ships the oracle solve.sh for all 48 tasks into the image layer the agent runs in. The directory is not referenced by any task; it was left over from local debugging.",
+    "suggested_patch": "Drop the COPY line and add solution/ to .dockerignore. Build the verifier image from a separate stage."
+  },
+  {
+    "id": "LF-003",
+    "severity": "warn",
+    "failure_mode": "test_overfit",
+    "title": "7 tasks graded on a single hard-coded expected value",
+    "location": {
+      "file": null,
+      "line": null,
+      "task_id": "csv-dedupe, parse-nginx-logs, cron-parser, +4"
+    },
+    "explanation": "These tasks assert one literal (row count, checksum, first line). A policy that learns the literal passes without implementing the behaviour. Combined with LF-001 this is the cheapest hack available.",
+    "suggested_patch": "Grade on a held-out input variant generated at verify time (shuffle rows, perturb timestamps) so the expected value cannot be memorised."
+  },
+  {
+    "id": "LF-004",
+    "severity": "warn",
+    "failure_mode": "tool_escape",
+    "title": "Unrestricted network egress from the agent container",
+    "location": {
+      "file": "environment/task.toml",
+      "line": 31,
+      "task_id": null
+    },
+    "explanation": "`network = \"bridge\"` with no egress policy. Tasks do not require network access, but `pip install` and `curl` are available. This widens what the policy can learn from well beyond the task.",
+    "suggested_patch": "Set `network = \"none\"` and pre-install the two packages tasks need in the image."
+  },
+  {
+    "id": "LF-005",
+    "severity": "info",
+    "failure_mode": "nondeterministic_grader",
+    "title": "3 tasks compare wall-clock timestamps in output",
+    "location": {
+      "file": "tasks/parse-nginx-logs/tests/test_outputs.py",
+      "line": 41,
+      "task_id": "parse-nginx-logs"
+    },
+    "explanation": "Expected output includes the generation time. Pass/fail flips depending on run duration, adding reward noise that masks real signal during RL.",
+    "suggested_patch": "Freeze time in the verifier (`faketime` or monkeypatch `datetime.now`)."
+  }
+]

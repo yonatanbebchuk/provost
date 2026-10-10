@@ -1,0 +1,43 @@
+{
+  "id": "cert-2026-10-10-7158e54e",
+  "env_id": "mimo-v26-harbor-swe",
+  "env_name": "MiMo-V2.6 Harbor SWE",
+  "run_id": "run_20261010_1902_a3f9",
+  "env_hash": "sha256:7158e54e17ffefcdcf44587cc76bb3250703d74843b8a94c8c09f58798814128",
+  "patched_env_hash": "sha256:896e42d621221dde9afe89696f0a995342f6f464a8a3643abdb51d9720eba2ea",
+  "findings_closed": [
+    {
+      "id": "LF-001",
+      "failure_mode": "answer_key_reachable",
+      "severity": "high"
+    },
+    {
+      "id": "LF-002",
+      "failure_mode": "grader_data_readable",
+      "severity": "high"
+    },
+    {
+      "id": "LF-003",
+      "failure_mode": "test_overfit",
+      "severity": "warn"
+    }
+  ],
+  "before": {
+    "pass_rate": 0.64,
+    "hack_rate": 0.31
+  },
+  "after": {
+    "pass_rate": 0.66,
+    "hack_rate": 0.0
+  },
+  "config": {
+    "model": "Qwen3-1.7B",
+    "algorithm": "GRPO",
+    "steps": 600,
+    "seed": 1337,
+    "rollouts_per_step": 8
+  },
+  "issued_at": "2026-10-10T20:19:11Z",
+  "issued_by": "Liftoff Environment Audit \u00b7 build 0.1.0",
+  "signature": "ed25519:d3ac583bc7107878784b0cdacd44859f00672bd0ce3f1cb4ec0907c3376d4c5a"
+}
