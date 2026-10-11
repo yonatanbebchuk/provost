@@ -3,6 +3,8 @@ import SwiftUI
 /// One slide: eyebrow, title, optional subtitle, optional visual. Title only; the script never shows.
 struct PitchSlideView: View {
     let slide: PitchSlide
+    /// Pieces of a step-revealed visual showing so far (see `PitchSlide.buildCount`).
+    var build: Int = 0
 
     var body: some View {
         GeometryReader { geo in
@@ -14,12 +16,16 @@ struct PitchSlideView: View {
                         .foregroundStyle(.secondary)
                         .padding(.bottom, 22)
                 }
-                Text(slide.title)
-                    .font(.system(size: titleSize, weight: .semibold))
-                    .kerning(-titleSize * 0.025)
-                    .lineSpacing(titleSize * 0.06)
-                    .frame(maxWidth: titleSize * (slide.isWideTitle ? 12.1 : 8.8), alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
+                if slide.logo {
+                    BrandLockup(size: titleSize)
+                } else {
+                    Text(slide.title)
+                        .font(.system(size: titleSize, weight: .semibold))
+                        .kerning(-titleSize * 0.025)
+                        .lineSpacing(titleSize * 0.06)
+                        .frame(maxWidth: titleSize * (slide.isWideTitle ? 12.1 : 8.8), alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if let subtitle = slide.subtitle, !subtitle.isEmpty {
                     Text(subtitle)
                         .font(.system(size: min(20, max(15, geo.size.width * 0.019))))
@@ -43,7 +49,9 @@ struct PitchSlideView: View {
     private var visual: some View {
         switch slide.visual {
         case .names: NamesVisual(names: slide.names ?? [])
-        case .timeline: TimelineVisual(ticks: slide.timeline ?? [], chart: slide.chart)
+        case .faces: FacesVisual(people: slide.people ?? [])
+        case .timeline: TimelineVisual(ticks: slide.timeline ?? [], chart: slide.chart, revealed: slide.revealsByStep ? build : nil)
+        case .chart: ChartVisual(chart: slide.chart, revealed: slide.revealsByStep ? build > 0 : nil)
         case .ring: RingVisual(stat: slide.ring ?? .init(percent: 0, caption: ""))
         case .reachDo: ReachDoVisual()
         case .diagram: DiagramVisual()

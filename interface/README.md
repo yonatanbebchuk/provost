@@ -79,7 +79,10 @@ The pitch deck lives inside the app: a third top-level mode of the main window (
 Pitch; `make pitch` launches straight into it with `--pitch`). The deck is data:
 `Resources/pitch/deck.json` holds the ten slides (eyebrow, title, subtitle, visual, script, budget).
 Edit titles, scripts and budgets there; `make pitch` points the app at the source file so ⌘R in
-pitch mode re-reads it without a rebuild. Every slide is title-only; the script shows only in the
+pitch mode re-reads it without a rebuild. A slide with `"reveal": "step"` builds one piece per `→`
+(each tick of a timeline, the chart) before the next slide; `←` un-reveals. Faces on the opening
+slide come from GitHub: set each person's `github` handle in the deck and run `make faces` to bundle
+the avatars under `Resources/pitch/faces/`; a person without one shows initials. Every slide is title-only; the script shows only in the
 presenter panel (`P`). Visuals replay each time the slide appears; Reduce Motion jumps to the end.
 
 Slide 6 is the demo. `→` on it shows the app as it stands; the presenter drives it by hand (the

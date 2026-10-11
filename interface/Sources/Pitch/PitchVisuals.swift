@@ -68,13 +68,57 @@ struct NamesVisual: View {
     }
 }
 
+// MARK: faces
+
+/// Five people: a bundled GitHub avatar (or initials) over the name.
+struct FacesVisual: View {
+    let people: [PitchSlide.Person]
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shown = false
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 36) {
+            ForEach(Array(people.enumerated()), id: \.offset) { i, person in
+                VStack(spacing: 12) {
+                    face(person)
+                    Text(person.name).font(.system(size: 15, weight: .medium))
+                        .multilineTextAlignment(.center).frame(width: 120)
+                }
+                .opacity(shown ? 1 : 0.25)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.6).delay(0.15 + Double(i) * 0.12), value: shown)
+            }
+        }
+        .onAppear { shown = true }
+    }
+
+    @ViewBuilder
+    private func face(_ person: PitchSlide.Person) -> some View {
+        if let handle = person.github, let url = PitchDeck.faceURL(for: handle), let image = NSImage(contentsOf: url) {
+            Image(nsImage: image).resizable().scaledToFill()
+                .frame(width: 84, height: 84).clipShape(Circle())
+                .overlay(Circle().strokeBorder(Color.primary.opacity(0.12)))
+        } else {
+            ZStack {
+                Circle().fill(Color.primary.opacity(0.08))
+                Text(person.initials).font(.system(size: 26, weight: .medium)).foregroundStyle(.secondary)
+            }
+            .frame(width: 84, height: 84)
+        }
+    }
+}
+
 // MARK: timeline + compute chart
 
+/// A rail with ticks. `revealed` nil: the ticks rise in one by one when the slide appears;
+/// otherwise only the first `revealed` ticks show, each rising in as `→` reveals it.
 struct TimelineVisual: View {
     let ticks: [PitchSlide.TimelineTick]
     let chart: PitchSlide.ComputeShareChart?
+    var revealed: Int? = nil
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shown = false
+
+    private func isShown(_ i: Int) -> Bool { revealed.map { i < $0 } ?? shown }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
@@ -85,23 +129,42 @@ struct TimelineVisual: View {
                     ForEach(Array(ticks.enumerated()), id: \.offset) { i, tick in
                         VStack(alignment: .leading, spacing: 10) {
                             Circle().fill(Color.primary).frame(width: 10, height: 10).padding(.top, 5.5)
-                            VStack(alignment: .leading, spacing: 3) {
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text(tick.name).font(.system(size: 16, weight: .medium))
-                                Text(tick.product).font(.system(size: 12)).foregroundStyle(.secondary)
+                                Text(tick.product).font(.system(size: 13)).foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
+                            .frame(width: slot - 24, alignment: .leading)
                         }
-                        .offset(x: CGFloat(i) * slot, y: shown ? 0 : 8)
-                        .opacity(shown ? 1 : 0)
-                        .animation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(0.4 + Double(i) * 0.55), value: shown)
+                        .offset(x: CGFloat(i) * slot, y: isShown(i) ? 0 : 8)
+                        .opacity(isShown(i) ? 1 : 0)
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(revealed == nil ? 0.4 + Double(i) * 0.55 : 0),
+                                   value: isShown(i))
                     }
                 }
             }
-            .frame(height: 70)
+            .frame(height: 110)
             if let chart {
                 ComputeShareChartView(chart: chart, shown: shown)
             }
         }
         .onAppear { shown = true }
+    }
+}
+
+/// The compute-share chart on its own. `revealed` nil: it rises when the slide appears; false:
+/// hidden until `→`; true: rising.
+struct ChartVisual: View {
+    let chart: PitchSlide.ComputeShareChart?
+    var revealed: Bool? = nil
+    @State private var shown = false
+
+    var body: some View {
+        if let chart {
+            ComputeShareChartView(chart: chart, shown: revealed ?? shown)
+                .opacity((revealed ?? shown) ? 1 : 0)
+                .onAppear { shown = true }
+        }
     }
 }
 

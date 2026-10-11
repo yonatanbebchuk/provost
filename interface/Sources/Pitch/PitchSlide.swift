@@ -13,9 +13,15 @@ public struct PitchSlide: Codable, Identifiable, Hashable, Sendable {
     public var budgetSeconds: Int
     /// True only on the Demo slide: `→` enters the app instead of advancing.
     public var isDemoHandoff: Bool
+    /// The brand lockup stands in for the title.
+    public var logo: Bool
+    /// `"step"`: the visual builds one piece per `→` (ticks of a timeline, the chart); absent: it
+    /// animates by itself when the slide appears.
+    public var reveal: String?
 
     // Data behind the visuals. Each visual reads only its own field; all are optional.
     public var names: [String]?
+    public var people: [Person]?
     public var timeline: [TimelineTick]?
     public var chart: ComputeShareChart?
     public var ring: RingStat?
@@ -23,7 +29,16 @@ public struct PitchSlide: Codable, Identifiable, Hashable, Sendable {
     public var heroes: [HeroNumber]?
     public var team: [TeamLine]?
 
-    public enum Visual: String, Codable, Sendable { case names, timeline, ring, reachDo, diagram, waffle, team }
+    public enum Visual: String, Codable, Sendable { case names, faces, timeline, chart, ring, reachDo, diagram, waffle, team }
+
+    public struct Person: Codable, Hashable, Sendable {
+        public var name: String
+        /// GitHub handle; `scripts/fetch_faces.py` bundles its avatar as `faces/<handle>.png|jpg`.
+        public var github: String?
+        public var initials: String {
+            name.split(separator: " ").prefix(2).compactMap { $0.first.map(String.init) }.joined()
+        }
+    }
 
     public struct TimelineTick: Codable, Hashable, Sendable {
         public var name: String
@@ -70,9 +85,21 @@ public struct PitchSlide: Codable, Identifiable, Hashable, Sendable {
     /// Long titles get a wider column, as the mock's `h1.wide`.
     public var isWideTitle: Bool { title.count > 45 }
 
+    public var revealsByStep: Bool { reveal == "step" }
+
+    /// How many `→` presses the slide takes before the next slide.
+    public var buildCount: Int {
+        guard revealsByStep else { return 0 }
+        switch visual {
+        case .timeline: return timeline?.count ?? 0
+        case .chart: return 1
+        default: return 0
+        }
+    }
+
     enum CodingKeys: String, CodingKey {
-        case id, eyebrow, title, subtitle, visual, script, budgetSeconds, isDemoHandoff
-        case names, timeline, chart, ring, waffle, heroes, team
+        case id, eyebrow, title, subtitle, visual, script, budgetSeconds, isDemoHandoff, logo, reveal
+        case names, people, timeline, chart, ring, waffle, heroes, team
     }
 
     public init(from decoder: Decoder) throws {
@@ -85,7 +112,10 @@ public struct PitchSlide: Codable, Identifiable, Hashable, Sendable {
         script = try c.decodeIfPresent(String.self, forKey: .script) ?? ""
         budgetSeconds = try c.decodeIfPresent(Int.self, forKey: .budgetSeconds) ?? 0
         isDemoHandoff = try c.decodeIfPresent(Bool.self, forKey: .isDemoHandoff) ?? false
+        logo = try c.decodeIfPresent(Bool.self, forKey: .logo) ?? false
+        reveal = try c.decodeIfPresent(String.self, forKey: .reveal)
         names = try c.decodeIfPresent([String].self, forKey: .names)
+        people = try c.decodeIfPresent([Person].self, forKey: .people)
         timeline = try c.decodeIfPresent([TimelineTick].self, forKey: .timeline)
         chart = try c.decodeIfPresent(ComputeShareChart.self, forKey: .chart)
         ring = try c.decodeIfPresent(RingStat.self, forKey: .ring)
@@ -106,6 +136,15 @@ public struct PitchDeck: Codable, Sendable {
             return URL(fileURLWithPath: path)
         }
         return Bundle.main.resourceURL?.appendingPathComponent("pitch/deck.json")
+    }
+
+    /// A bundled face for a GitHub handle, if `fetch_faces.py` saved one.
+    public static func faceURL(for handle: String) -> URL? {
+        let dir = locate()?.deletingLastPathComponent().appendingPathComponent("faces", isDirectory: true)
+        for ext in ["png", "jpg"] {
+            if let url = dir?.appendingPathComponent("\(handle).\(ext)"), FileManager.default.fileExists(atPath: url.path) { return url }
+        }
+        return nil
     }
 
     public static func load(from url: URL) throws -> PitchDeck {

@@ -24,6 +24,8 @@ public final class PitchController {
     public var deckError: String?
     /// Incremented on every slide change so visuals replay from their resting state.
     public private(set) var appearance = 0
+    /// How many pieces of a step-revealed visual are showing on the current slide.
+    public private(set) var buildIndex = 0
 
     // Clocks. Elapsed time is derived from a start date, so no timer runs in the store.
     public private(set) var clockRunning = false
@@ -64,7 +66,7 @@ public final class PitchController {
     // MARK: Navigation
 
     public func enterPitch(at newIndex: Int? = nil) {
-        if let newIndex { index = max(0, min(slides.count - 1, newIndex)) }
+        if let newIndex { index = max(0, min(slides.count - 1, newIndex)); buildIndex = 0 }
         mode = .pitch
         canResume = false
         appearance += 1
@@ -90,21 +92,28 @@ public final class PitchController {
     /// handoff; the caller decides what to do there.
     @discardableResult
     public func advance() -> Bool {
-        guard let current, !current.isDemoHandoff, index + 1 < slides.count else { return false }
+        guard let current else { return false }
+        if buildIndex < current.buildCount { buildIndex += 1; return true }
+        guard !current.isDemoHandoff, index + 1 < slides.count else { return false }
         go(to: index + 1)
         return true
     }
 
+    /// Back un-reveals the last piece first; from the first piece it goes to the previous slide,
+    /// fully built.
     @discardableResult
     public func back() -> Bool {
+        if buildIndex > 0 { buildIndex -= 1; return true }
         guard index > 0 else { return false }
         go(to: index - 1)
+        buildIndex = current?.buildCount ?? 0
         return true
     }
 
     public func go(to newIndex: Int) {
         index = max(0, min(slides.count - 1, newIndex))
         appearance += 1
+        buildIndex = 0
         resetSlideClock()
     }
 
@@ -119,6 +128,7 @@ public final class PitchController {
         mode = .pitch
         index = max(0, min(slides.count - 1, newIndex))
         appearance += 1
+        buildIndex = 0
         resetSlideClock()
     }
 

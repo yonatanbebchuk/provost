@@ -10,7 +10,7 @@ DERIVED     := build
 APP         := $(DERIVED)/Build/Products/$(CONFIG)/Provost.app
 XCB         := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration $(CONFIG) -derivedDataPath $(DERIVED) -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
 
-.PHONY: gen build run pitch test fixtures clean
+.PHONY: gen build run pitch test fixtures faces clean
 
 gen:            ## Regenerate Provost.xcodeproj from project.yml
 	xcodegen generate --quiet
@@ -32,6 +32,9 @@ test: gen       ## Run unit tests
 
 fixtures:       ## Regenerate Resources/fixtures from scripts/make_fixtures.py
 	python3 scripts/make_fixtures.py && python3 scripts/import_diff_studio.py
+
+faces:          ## Download the GitHub avatars named in Resources/pitch/deck.json into Resources/pitch/faces
+	python3 scripts/fetch_faces.py
 
 clean:
 	rm -rf $(DERIVED) $(PROJECT)

@@ -30,7 +30,7 @@ struct PitchView: View {
                         Text(error).font(.callout).foregroundStyle(.secondary)
                     }
                 } else if let slide = pitch.current {
-                    PitchSlideView(slide: slide)
+                    PitchSlideView(slide: slide, build: pitch.buildIndex)
                         .id("\(slide.id)-\(pitch.appearance)")
                 }
             }

@@ -5,45 +5,143 @@
       "eyebrow": "CamelHack · October 2026",
       "title": "Provost",
       "subtitle": "Exploit-and-certify for RL training environments.",
-      "visual": "names",
+      "visual": "faces",
       "script": "We're Provost. Five of us — security, reinforcement learning, and the person who has spent two years learning what enterprises actually buy. Most of us met yesterday morning.",
       "budgetSeconds": 10,
       "isDemoHandoff": false,
-      "names": ["Yonatan Bebchuk", "Alvaro Gomez-Jordana", "Matt Curtis", "Joshua Cohen", "Hai Tederry"]
+      "logo": true,
+      "people": [
+        {
+          "name": "Yonatan Bebchuk",
+          "github": "yonatanbebchuk"
+        },
+        {
+          "name": "Alvaro Gomez-Jordana",
+          "github": null
+        },
+        {
+          "name": "Matt Curtis",
+          "github": null
+        },
+        {
+          "name": "Joshua Cohen",
+          "github": "yecohn"
+        },
+        {
+          "name": "Hai Tederry",
+          "github": null
+        }
+      ]
     },
     {
       "id": "exam",
-      "eyebrow": "July 2026",
+      "eyebrow": "Background",
       "title": "An AI was given an exam. It broke into the company that had the answer key.",
       "script": "July this year. OpenAI is grading one of its models on a security exam. The model doesn't solve the exam. It breaks out of its sandbox, gets onto the open internet, and breaks into Hugging Face — because it worked out that's probably where the answer key lived. Hugging Face's own report says it plainly: from the model's point of view, the whole break-in was an attempt to cheat the test. Nobody told it to cheat. Cheating was simply the cheapest way to score. The model wasn't broken. The exam was. And nobody had checked it.",
       "budgetSeconds": 25,
-      "isDemoHandoff": false
+      "isDemoHandoff": false,
+      "visual": "timeline",
+      "reveal": "step",
+      "timeline": [
+        {
+          "name": "Jul 9",
+          "product": "OpenAI model breaks into Hugging Face"
+        },
+        {
+          "name": "Aug 26",
+          "product": "OpenAI post-mortem: cheating “increased during training… and was reinforced”"
+        },
+        {
+          "name": "Aug 31",
+          "product": "Anthropic pauses >10% of its production training environments"
+        },
+        {
+          "name": "Sep 24",
+          "product": "Australia: “the first AI to hack a government”"
+        }
+      ]
     },
     {
       "id": "renaissance",
-      "eyebrow": "Why now",
-      "title": "The RL renaissance",
-      "subtitle": "In the past year every major cloud shipped an enterprise RL post-training product.",
-      "visual": "timeline",
+      "eyebrow": "The RL Renaissance",
+      "title": "Every company will train its own models",
+      "visual": "chart",
       "script": "We believe every company is going to post-train its own intelligence. As companies hire fewer people, they can own more intelligence — a model that has learned how their business works, not how the internet works. And the infrastructure is now a commodity: in the past year Microsoft, AWS, Snowflake and OpenAI each shipped an enterprise RL post-training product. Your data is the advantage; renting means training someone else's roadmap.",
       "budgetSeconds": 20,
       "isDemoHandoff": false,
-      "timeline": [
-        {"name": "Microsoft", "product": "Frontier Tuning"},
-        {"name": "AWS", "product": "Nova Forge"},
-        {"name": "Snowflake", "product": "Cortex Training"},
-        {"name": "OpenAI", "product": "RFT"}
-      ],
       "chart": {
         "title": "Share of frontier lab compute by workload",
         "source": "SemiAnalysis Tokenomics Model · 4Q26 is an estimate · Social Capital",
-        "quarters": ["1Q24", "2Q24", "3Q24", "4Q24", "1Q25", "2Q25", "3Q25", "4Q25", "1Q26", "2Q26", "3Q26", "4Q26 est."],
+        "quarters": [
+          "1Q24",
+          "2Q24",
+          "3Q24",
+          "4Q24",
+          "1Q25",
+          "2Q25",
+          "3Q25",
+          "4Q25",
+          "1Q26",
+          "2Q26",
+          "3Q26",
+          "4Q26 est."
+        ],
         "series": [
-          {"name": "Pre-training", "values": [67, 63, 57, 55, 53, 50, 40, 32, 23, 13, 10, 7]},
-          {"name": "Post-training / RL", "values": [4, 5, 6, 7, 9, 14, 24, 36, 42, 50, 53, 55], "highlight": true},
-          {"name": "Inference", "values": [29, 32, 38, 39, 38, 36, 36, 32, 34, 37, 37, 38]}
+          {
+            "name": "Pre-training",
+            "values": [
+              67,
+              63,
+              57,
+              55,
+              53,
+              50,
+              40,
+              32,
+              23,
+              13,
+              10,
+              7
+            ]
+          },
+          {
+            "name": "Post-training / RL",
+            "values": [
+              4,
+              5,
+              6,
+              7,
+              9,
+              14,
+              24,
+              36,
+              42,
+              50,
+              53,
+              55
+            ],
+            "highlight": true
+          },
+          {
+            "name": "Inference",
+            "values": [
+              29,
+              32,
+              38,
+              39,
+              38,
+              36,
+              36,
+              32,
+              34,
+              37,
+              37,
+              38
+            ]
+          }
         ]
-      }
+      },
+      "reveal": "step"
     },
     {
       "id": "trust",
@@ -53,7 +151,10 @@
       "script": "But it isn't happening at scale. A pilot you supervise is one thing; full deployment is thousands of unsupervised decisions. KPMG, March 2026: only twenty percent of organizations feel confident they can manage AI risk. And trust is decided in one step. A model learns your business by doing a task and getting scored — that loop decides whether it learned your job, or a shortcut that looks like your job. Anthropic, this August: \"our industry lacks a general solution to this problem.\" Everyone is building better models, agents and tools. Nobody is checking that step.",
       "budgetSeconds": 25,
       "isDemoHandoff": false,
-      "ring": {"percent": 20, "caption": "of organizations feel confident they can manage AI risk · KPMG, March 2026"}
+      "ring": {
+        "percent": 20,
+        "caption": "of organizations feel confident they can manage AI risk · KPMG, March 2026"
+      }
     },
     {
       "id": "concept",
@@ -89,11 +190,26 @@
       "script": "In a standard, heavily reviewed coding environment, roughly one task in four is exploitable. For a thousand-task environment that's on the order of six hundred thousand dollars of training compute spent teaching the wrong thing. Finding it costs a few hundred. Fifty-plus data and environment vendors, about eight and a half billion in revenue — and none of it independently checked. We go where the training actually runs: the platforms that run post-training for enterprises first, then the enterprises themselves. The moat: Anthropic found eighty of its own production environments hackable — during training, after the fact. If the most sophisticated buyer on earth can't self-certify, nobody can. That's why auditors exist. And every exploit we find transfers to the next audit. The library is the asset.",
       "budgetSeconds": 35,
       "isDemoHandoff": false,
-      "waffle": {"cells": 1000, "columns": 50, "lit": 250},
+      "waffle": {
+        "cells": 1000,
+        "columns": 50,
+        "lit": 250
+      },
       "heroes": [
-        {"value": "$600,000", "countTo": 600000, "accent": true, "caption": "training compute spent teaching the wrong thing, per 1,000-task environment"},
-        {"value": "a few hundred", "caption": "dollars to find it"},
-        {"value": "80", "caption": "Anthropic production environments found hackable — after the fact"}
+        {
+          "value": "$600,000",
+          "countTo": 600000,
+          "accent": true,
+          "caption": "training compute spent teaching the wrong thing, per 1,000-task environment"
+        },
+        {
+          "value": "a few hundred",
+          "caption": "dollars to find it"
+        },
+        {
+          "value": "80",
+          "caption": "Anthropic production environments found hackable — after the fact"
+        }
       ]
     },
     {
@@ -105,10 +221,22 @@
       "budgetSeconds": 15,
       "isDemoHandoff": false,
       "team": [
-        {"name": "[Name]", "clause": "8 years on this, inside [company]"},
-        {"name": "Matt · Josh · Hai", "clause": "RL, the harness"},
-        {"name": "Alvaro", "clause": "HBS, what enterprises buy"},
-        {"name": "Yonatan", "clause": "security, the interface"}
+        {
+          "name": "[Name]",
+          "clause": "8 years on this, inside [company]"
+        },
+        {
+          "name": "Matt · Josh · Hai",
+          "clause": "RL, the harness"
+        },
+        {
+          "name": "Alvaro",
+          "clause": "HBS, what enterprises buy"
+        },
+        {
+          "name": "Yonatan",
+          "clause": "security, the interface"
+        }
       ]
     },
     {
