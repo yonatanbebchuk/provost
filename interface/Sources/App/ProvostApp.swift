@@ -6,7 +6,8 @@ struct ProvostApp: App {
     @State private var store: DemoStore
 
     init() {
-        let playback = PlaybackSettings()
+        // Fast-forward from the start: the demo never has to flip it.
+        let playback = PlaybackSettings(fastForward: true)
         // Backend swap: one line. `LocalHTTPBackend()` talks to the FastAPI server on 127.0.0.1:8765.
         let backend: any AuditBackend = FixtureBackend.bundled(playback: playback)
         _store = State(initialValue: DemoStore(backend: backend, playback: playback))

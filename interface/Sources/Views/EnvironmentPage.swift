@@ -24,10 +24,12 @@ struct EnvironmentPage: View {
                         PartCard(part: .actions, environment: environment) { actionSpace(spec) }
                         PartCard(part: .observations, environment: environment, alsoParts: [.initialState]) { observationSpace(spec) }
                     }
+                    .fixedSize(horizontal: false, vertical: true)
                     HStack(alignment: .top, spacing: 16) {
                         compiles
                         certificateCard.frame(width: 320)
                     }
+                    .fixedSize(horizontal: false, vertical: true)
                     provenance(spec.provenance)
                 } else {
                     Card(title: "Specification") {
@@ -111,54 +113,36 @@ struct EnvironmentPage: View {
 
     @ViewBuilder
     private func rewardSummary(_ spec: EnvironmentSpec) -> some View {
-        Text(spec.evaluation.summary).font(.callout).fixedSize(horizontal: false, vertical: true)
-        if !spec.evaluation.components.isEmpty {
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(spec.evaluation.components, id: \.self) { Chip(text: $0, mono: true) }
+        VStack(alignment: .leading, spacing: 10) {
+            Text(spec.evaluation.summary).font(.body).fixedSize(horizontal: false, vertical: true)
+            ForEach(spec.evaluation.components, id: \.self) { component in
+                let parts = component.components(separatedBy: " · ")
+                Tile(title: parts.first ?? component, detail: parts.dropFirst().joined(separator: " · "), mono: true)
             }
-        }
-        if let audit = spec.evaluation.audit {
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Image(systemName: "checkmark.shield").font(.caption).foregroundStyle(.secondary)
-                Text(audit).font(.caption).foregroundStyle(.secondary)
+            HStack(spacing: 4) {
+                Image(systemName: "curlybraces").font(.caption)
+                Text(spec.evaluation.codePath ?? "Reward function")
+                Image(systemName: "chevron.right").font(.caption2.weight(.semibold))
             }
+            .font(.callout.weight(.medium)).foregroundStyle(.secondary)
+            .padding(.top, 2)
         }
-        HStack(spacing: 4) {
-            Image(systemName: "curlybraces").font(.caption2)
-            Text(spec.evaluation.codePath ?? "Reward function")
-            Image(systemName: "chevron.right").font(.caption2.weight(.semibold))
-        }
-        .font(.caption.weight(.medium)).foregroundStyle(.secondary)
-        .padding(.top, 2)
     }
 
     private func actionSpace(_ spec: EnvironmentSpec) -> some View {
-        VStack(alignment: .leading, spacing: 7) {
+        VStack(alignment: .leading, spacing: 10) {
             ForEach(spec.actions) { action in
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(action.id).font(.callout.monospaced()).frame(width: 64, alignment: .leading)
-                    Text(action.description).font(.callout).fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            if environment.sandbox.network != "none" || !environment.sandbox.tools.isEmpty {
-                Text("\(environment.sandbox.runtime) · network \(environment.sandbox.network)")
-                    .font(.caption).foregroundStyle(.secondary).padding(.top, 4)
+                Tile(title: action.id, detail: action.description, mono: true)
             }
         }
     }
 
-    /// What the policy sees, what it starts from, and what stays with the grader.
-    @ViewBuilder
+    /// What the policy sees. The header's eye says it; the rows just name things.
     private func observationSpace(_ spec: EnvironmentSpec) -> some View {
-        bullets(spec.observations.visible, symbol: "eye")
-        if !spec.initialState.items.isEmpty {
-            Divider().padding(.vertical, 2)
-            Text("Starts from").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-            keyValues(spec.initialState.items)
-        }
-        if !spec.observations.hidden.isEmpty {
-            Divider().padding(.vertical, 2)
-            bullets(spec.observations.hidden, symbol: "eye.slash", muted: true)
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(spec.observations.visible, id: \.self) { item in
+                Tile(title: item, detail: "", mono: false)
+            }
         }
     }
 
@@ -166,8 +150,8 @@ struct EnvironmentPage: View {
         let status = store.status(for: environment)
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Image(systemName: "seal").font(.callout).foregroundStyle(.secondary)
-                Text("Certificate").font(.headline)
+                Image(systemName: "seal").font(.body).foregroundStyle(.secondary)
+                Text("Certificate").font(.title3.weight(.semibold))
                 Spacer()
             }
             Divider()
@@ -206,7 +190,7 @@ struct EnvironmentPage: View {
 
     private var compiles: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Compiles").font(.headline).padding(.top, 2)
+            Text("Compiles").font(.title3.weight(.semibold)).padding(.top, 2)
             let sessions = store.sessions(for: environment)
             if sessions.isEmpty {
                 Text("Not compiled yet. ⌘R.").font(.callout).foregroundStyle(.secondary)
@@ -270,6 +254,26 @@ struct EnvironmentPage: View {
     }
 }
 
+/// One item of a part: a name and, under it, what it means. Fills the card's width.
+private struct Tile: View {
+    let title: String
+    let detail: String
+    var mono: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title).font(mono ? .body.weight(.semibold).monospaced() : .body.weight(.medium))
+                .fixedSize(horizontal: false, vertical: true)
+            if !detail.isEmpty {
+                Text(detail).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.horizontal, 12).padding(.vertical, 9)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+}
+
 /// One part of the environment, with its proposed differences underneath, each accept-or-reject.
 /// With an `action`, the content is pressable and the header shows a chevron.
 private struct PartCard<Content: View>: View {
@@ -289,8 +293,8 @@ private struct PartCard<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Image(systemName: part.systemImage).font(.callout).foregroundStyle(.secondary)
-                Text(part.displayName).font(.headline)
+                Image(systemName: part.systemImage).font(.body).foregroundStyle(.secondary)
+                Text(part.displayName).font(.title3.weight(.semibold))
                 if !changes.isEmpty {
                     HStack(spacing: 4) {
                         Circle().fill(Theme.changeAltered).frame(width: 6, height: 6)
@@ -377,8 +381,8 @@ private struct TrainingDataStrip: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Image(systemName: "tray.full").font(.callout).foregroundStyle(.secondary)
-                Text("Training data").font(.headline)
+                Image(systemName: "tray.full").font(.body).foregroundStyle(.secondary)
+                Text("Training data").font(.title3.weight(.semibold))
                 Text("\(samples.count) of \(taskCount)").font(.callout.monospacedDigit()).foregroundStyle(.secondary)
                 Spacer()
             }
