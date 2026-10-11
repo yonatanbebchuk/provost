@@ -43,7 +43,7 @@ struct RootView: View {
                 .id(env.id)
         } else {
             VStack(spacing: 8) {
-                Image(systemName: "shield.lefthalf.filled").font(.system(size: 36)).foregroundStyle(.tertiary)
+                ProvostMark.image(height: 30).foregroundStyle(.tertiary).padding(.bottom, 6)
                 Text("No environments").font(.title3.weight(.medium))
                 Text("File ▸ New Environment… (⌘N) adds one from a folder.").font(.callout).foregroundStyle(.secondary)
             }
@@ -61,8 +61,8 @@ struct EnvironmentSidebar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(AppConfig.productName).font(.title3.weight(.bold))
+                VStack(alignment: .leading, spacing: 3) {
+                    BrandLockup()
                     Text("Environment audit").font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -169,7 +169,7 @@ private struct RunRow: View {
             HStack(spacing: 8) {
                 statusDot
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(session.id).font(.caption.monospaced()).lineLimit(1)
+                    Text("Compile v\(session.version)").font(.caption.weight(.medium)).lineLimit(1)
                     Text(session.statusLine).font(.caption2).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -186,10 +186,10 @@ private struct RunRow: View {
 
     @ViewBuilder
     private var statusDot: some View {
-        if session.liftoff != nil && session.certificate == nil {
-            Circle().fill(Theme.liftoff).frame(width: 7, height: 7)
-        } else if session.certificate != nil {
-            Image(systemName: "checkmark.seal.fill").font(.caption2).foregroundStyle(.primary)
+        if session.certificate != nil {
+            Image(systemName: "checkmark.seal.fill").font(.caption2).foregroundStyle(Theme.statusCertified)
+        } else if session.compileFinished {
+            Circle().fill(session.isStable ? Theme.statusCertified : Theme.statusVulnerable).frame(width: 7, height: 7)
         } else {
             Circle().fill(.secondary).frame(width: 7, height: 7)
         }
@@ -221,7 +221,7 @@ struct TopBar: View {
             }
             if let session = store.selectedSession {
                 Divider().frame(height: 16)
-                Text("\(session.run.config.model) · \(session.run.config.algorithm) · \(session.run.config.steps) steps")
+                Text("compile v\(session.version) · \(session.run.config.model) · \(session.run.config.algorithm)")
                     .font(.callout.monospaced()).foregroundStyle(.secondary)
                 Spacer()
                 if let liftoff = session.liftoff {
@@ -250,7 +250,7 @@ struct TopBar: View {
     }
 }
 
-/// The processes you can run on an environment. One today; this is where the others go.
+/// The processes you can run on an environment. Compile here; Harden acts per hack.
 struct OperationsBar: View {
     @Environment(DemoStore.self) private var store
 
@@ -258,22 +258,22 @@ struct OperationsBar: View {
 
     var body: some View {
         Button {
-            Task { await store.newRun() }
+            Task { await store.compile() }
         } label: {
             HStack(spacing: 8) {
                 if isBusy {
                     ProgressView().controlSize(.mini)
                 } else {
-                    Image(systemName: "play.fill").font(.caption.weight(.bold))
+                    Image(systemName: "hammer.fill").font(.caption.weight(.bold))
                 }
-                Text("Run")
+                Text("Compile")
             }
-            .frame(minWidth: 72)
+            .frame(minWidth: 88)
         }
         .buttonStyle(RoundedProminentButtonStyle())
         .keyboardShortcut("r", modifiers: .command)
         .disabled(isBusy)
-        .help("Run the audit on this environment (⌘R)")
+        .help("Compile this environment: find what a policy can exploit (⌘R)")
     }
 }
 

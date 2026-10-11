@@ -15,6 +15,9 @@ public final class FixtureBackend: AuditBackend {
 
     /// Run ids are minted per audit; we remember which env each one belongs to.
     private let runs = Locked<[String: String]>([:])
+    /// Environments whose patch has been applied (a verify ran). Their next compile replays the clean
+    /// curve from verify.json with the closed findings removed: the hardened environment compiles stable.
+    private let hardened = Locked<Set<String>>([])
 
     /// Fixtures bundled in the app.
     public static func bundled(playback: PlaybackSettings) -> FixtureBackend {
@@ -67,8 +70,16 @@ public final class FixtureBackend: AuditBackend {
             description: "Loaded from disk. No fixture data for this environment — audit will not have replay data.")
     }
 
-    public func startAudit(envId: String) async throws -> AuditRun {
+    public func startAudit(envId: String, spec: EnvironmentSpec?) async throws -> AuditRun {
+        // The fixture has one hardened outcome. Compiling a spec that differs from the one shipped with the
+        // environment (accepted differences applied) replays it; compiling the original replays the hacks.
+        if let spec, let original = try? load(AuditEnvironment.self, from: file("environment.json", env: envId)).spec {
+            hardened.withLock { if spec != original { $0.insert(envId) } else { $0.remove(envId) } }
+        }
         var run = try load(AuditRun.self, from: file("run.json", env: envId))
+        // Every compile is its own run, even when it replays the same fixture.
+        let serial = runs.withLock { $0.count + 1 }
+        run.id = "\(run.id)-\(serial)"
         run.phase = .queued
         run.startedAt = Date()
         run.endedAt = nil
@@ -79,7 +90,10 @@ public final class FixtureBackend: AuditBackend {
     public func lint(runId: String) async throws -> [LintFinding] {
         let env = try envId(for: runId)
         try await pause(seconds: 0.9)
-        return try load([LintFinding].self, from: file("lint.json", env: env))
+        let findings = try load([LintFinding].self, from: file("lint.json", env: env))
+        guard hardened.withLock({ $0.contains(env) }) else { return findings }
+        let closed = Set((try? load(Patch.self, from: file("patch.json", env: env)))?.findingIds ?? [])
+        return findings.filter { !closed.contains($0.id) }
     }
 
     public func train(runId: String) -> AsyncThrowingStream<TrainingEvent, Error> {
@@ -87,17 +101,28 @@ public final class FixtureBackend: AuditBackend {
             let task = Task {
                 do {
                     let env = try envId(for: runId)
-                    let points = try load([TrainingPoint].self, from: file("training.json", env: env))
-                    let trajectories = try load([Trajectory].self, from: file("trajectories.json", env: env))
-                        .sorted { $0.step < $1.step }
-                    let liftoff = try load(LiftoffEvent.self, from: file("liftoff.json", env: env))
+                    let isHardened = hardened.withLock { $0.contains(env) }
+                    let points: [TrainingPoint]
+                    let trajectories: [Trajectory]
+                    let liftoff: LiftoffEvent?
+                    if isHardened {
+                        points = try load(VerifyResult.self, from: file("verify.json", env: env)).training ?? []
+                        trajectories = try load([Trajectory].self, from: file("trajectories.json", env: env))
+                            .filter { !$0.isHack }.sorted { $0.step < $1.step }
+                        liftoff = nil
+                    } else {
+                        points = try load([TrainingPoint].self, from: file("training.json", env: env))
+                        trajectories = try load([Trajectory].self, from: file("trajectories.json", env: env))
+                            .sorted { $0.step < $1.step }
+                        liftoff = try load(LiftoffEvent.self, from: file("liftoff.json", env: env))
+                    }
                     continuation.yield(.phase(.training))
                     try await replay(points, over: trainingSeconds) { point in
                         continuation.yield(.point(point))
                         for t in trajectories where t.step == point.step {
                             continuation.yield(.trajectory(t))
                         }
-                        if point.step == liftoff.step {
+                        if let liftoff, point.step == liftoff.step {
                             continuation.yield(.liftoff(liftoff))
                             continuation.yield(.phase(.detecting))
                         }
@@ -113,10 +138,12 @@ public final class FixtureBackend: AuditBackend {
         }
     }
 
-    public func proposePatch(runId: String) async throws -> Patch {
+    public func proposePatch(runId: String, trajectoryId: String?) async throws -> Patch {
         let env = try envId(for: runId)
         try await pause(seconds: 0.6)
-        return try load(Patch.self, from: file("patch.json", env: env))
+        var patch = try load(Patch.self, from: file("patch.json", env: env))
+        patch.trajectoryId = trajectoryId
+        return patch
     }
 
     public func verify(runId: String, patchId: String) -> AsyncThrowingStream<TrainingEvent, Error> {
@@ -129,6 +156,7 @@ public final class FixtureBackend: AuditBackend {
                     result.training = nil
                     continuation.yield(.phase(.verifying))
                     try await replay(points, over: verifySeconds) { continuation.yield(.point($0)) }
+                    hardened.withLock { _ = $0.insert(env) }
                     continuation.yield(.verifyResult(result))
                     continuation.yield(.phase(.done))
                     continuation.yield(.completed)
@@ -145,6 +173,7 @@ public final class FixtureBackend: AuditBackend {
         let env = try envId(for: runId)
         try await pause(seconds: 0.5)
         var cert = try load(Certificate.self, from: file("certificate.json", env: env))
+        cert.runId = runId
         cert.issuedAt = Date()
         return cert
     }

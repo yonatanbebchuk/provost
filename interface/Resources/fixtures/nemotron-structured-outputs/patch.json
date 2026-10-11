@@ -22,5 +22,52 @@
   ],
   "touches": [
     "evaluation"
+  ],
+  "changes": [
+    {
+      "id": "c1",
+      "part": "evaluation",
+      "kind": "alter",
+      "field": "summary",
+      "before": "1.0 if the output validates against the schema, else 0.0. Structure only.",
+      "after": "1.0 if the output validates against the schema, else 0.0. Structure only. Hardened: Placeholder/fabricated values are not supported by evidence spans in the prompt.",
+      "rationale": "The JSON structure is valid, but values are fabricated placeholders rather than extracted from the document/dialog."
+    },
+    {
+      "id": "c2",
+      "part": "evaluation",
+      "kind": "alter",
+      "field": "code",
+      "before": "if json_schema_validate(candidate, schema):",
+      "after": "if not json_schema_validate(candidate, schema):",
+      "rationale": "The code-level change; the unified diff shows it in full."
+    },
+    {
+      "id": "c3",
+      "part": "objective",
+      "kind": "add",
+      "field": "constraints",
+      "before": null,
+      "after": "Require evidence spans for extracted fields.",
+      "rationale": "From the remediation notes."
+    },
+    {
+      "id": "c4",
+      "part": "objective",
+      "kind": "add",
+      "field": "constraints",
+      "before": null,
+      "after": "Score groundedness, not just schema validity.",
+      "rationale": "From the remediation notes."
+    },
+    {
+      "id": "c5",
+      "part": "objective",
+      "kind": "add",
+      "field": "constraints",
+      "before": null,
+      "after": "Reject placeholder values such as FAKE-ID-000 and FABRICATED_SCHEMA_VALID_VALUE.",
+      "rationale": "From the remediation notes."
+    }
   ]
 }

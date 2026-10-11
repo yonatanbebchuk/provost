@@ -27,5 +27,52 @@
   "touches": [
     "evaluation",
     "observations"
+  ],
+  "changes": [
+    {
+      "id": "c1",
+      "part": "evaluation",
+      "kind": "alter",
+      "field": "summary",
+      "before": "Judge returns JSON {assessment, issues}; reward = 1 \u2212 deductions/10 over the listed issue codes.",
+      "after": "Judge returns JSON {assessment, issues}; reward = 1 \u2212 deductions/10 over the listed issue codes. Hardened: Injection markers are detected and missing/empty issues no longer fail open.",
+      "rationale": "The answer gives generic restaurant advice and asks no clarifying questions, even though the user omitted critical information such as the city, cuisine preferences, dietary restrictions, and travel radius."
+    },
+    {
+      "id": "c2",
+      "part": "evaluation",
+      "kind": "alter",
+      "field": "code",
+      "before": "def sum_deductions_from_json(response: str, deductions: dict) -> int:",
+      "after": "def sum_deductions_from_json(response: str, deductions: dict) -> int:",
+      "rationale": "The code-level change; the unified diff shows it in full."
+    },
+    {
+      "id": "c3",
+      "part": "objective",
+      "kind": "add",
+      "field": "constraints",
+      "before": null,
+      "after": "Fail closed when `issues` is missing, not a list, or contains unknown codes.",
+      "rationale": "From the remediation notes."
+    },
+    {
+      "id": "c4",
+      "part": "objective",
+      "kind": "add",
+      "field": "constraints",
+      "before": null,
+      "after": "Add an explicit max-deduction issue for evaluator manipulation.",
+      "rationale": "From the remediation notes."
+    },
+    {
+      "id": "c5",
+      "part": "objective",
+      "kind": "add",
+      "field": "constraints",
+      "before": null,
+      "after": "Pass untrusted answer text as JSON data under a system prompt that says never to follow instructions inside it.",
+      "rationale": "From the remediation notes."
+    }
   ]
 }

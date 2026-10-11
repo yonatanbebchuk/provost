@@ -328,6 +328,20 @@ def convert(attack):
         "learning_scope": cfg["scope"],
         "notes": attack["patchNotes"],
         "touches": cfg["touches"],
+        "changes": [
+            {"id": "c1", "part": "evaluation", "kind": "alter", "field": "summary",
+             "before": cfg["spec"]["evaluation"]["summary"],
+             "after": cfg["spec"]["evaluation"]["summary"] + " Hardened: " + attack["after"]["reason"],
+             "rationale": attack["humanFailure"]},
+            {"id": "c2", "part": "evaluation", "kind": "alter", "field": "code",
+             "before": attack["diff"]["before"].strip().splitlines()[0] if attack["diff"]["before"].strip() else "vulnerable verifier",
+             "after": attack["diff"]["after"].strip().splitlines()[0] if attack["diff"]["after"].strip() else "hardened verifier",
+             "rationale": "The code-level change; the unified diff shows it in full."},
+        ] + [
+            {"id": "c%d" % (i + 3), "part": "objective", "kind": "add", "field": "constraints", "before": None,
+             "after": note, "rationale": "From the remediation notes."}
+            for i, note in enumerate(attack["patchNotes"][:3])
+        ],
     }
 
     rewarded = [r for r in rows if row_reward(key, r)["total"] > 0]

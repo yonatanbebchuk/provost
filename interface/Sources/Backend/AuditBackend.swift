@@ -14,8 +14,10 @@ public protocol AuditBackend: Sendable {
     /// Register an environment from a folder the user dropped or picked.
     func loadEnvironment(at url: URL) async throws -> AuditEnvironment
 
-    /// Create an audit run for an environment. Returns the run in `.queued`.
-    func startAudit(envId: String) async throws -> AuditRun
+    /// Create a compile run for an environment at its current spec. Returns the run in `.queued`.
+    /// `spec` is the environment as the user has edited it (accepted differences applied); a backend
+    /// compiles that, not the version it first loaded.
+    func startAudit(envId: String, spec: EnvironmentSpec?) async throws -> AuditRun
 
     /// Static lint pass. Resolves when all findings are available.
     func lint(runId: String) async throws -> [LintFinding]
@@ -24,8 +26,8 @@ public protocol AuditBackend: Sendable {
     /// phase changes, and finally `.completed`.
     func train(runId: String) -> AsyncThrowingStream<TrainingEvent, Error>
 
-    /// Proposed patch for the findings confirmed by training.
-    func proposePatch(runId: String) async throws -> Patch
+    /// Harden: proposed differences that close one hack (or all findings when `trajectoryId` is nil).
+    func proposePatch(runId: String, trajectoryId: String?) async throws -> Patch
 
     /// Apply the patch and re-run. Streams points, then `.verifyResult`, then `.completed`.
     func verify(runId: String, patchId: String) -> AsyncThrowingStream<TrainingEvent, Error>

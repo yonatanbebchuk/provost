@@ -422,8 +422,27 @@ public struct LearningScope: Codable, Hashable, Sendable {
     public var deny: [String]
 }
 
+public enum ChangeKind: String, Codable, Sendable {
+    case add, remove, alter
+}
+
+/// One proposed difference to one part of the environment, produced by hardening a hack.
+/// `field` names the list or value inside the part: `constraints`, `visible`, `hidden`, `items`,
+/// `actions`, `components`, `summary`, `termination`, `reset`, or `code` for the reward function.
+public struct SpecChange: Codable, Hashable, Identifiable, Sendable {
+    public var id: String
+    public var part: EnvironmentPart
+    public var kind: ChangeKind
+    public var field: String
+    public var before: String?
+    public var after: String?
+    public var rationale: String
+}
+
 public struct Patch: Codable, Hashable, Identifiable, Sendable {
     public var id: String
+    /// The hack this patch hardens against, when produced per hack.
+    public var trajectoryId: String?
     public var findingIds: [String]
     /// Unified diff against the environment root.
     public var diff: String
@@ -434,6 +453,9 @@ public struct Patch: Codable, Hashable, Identifiable, Sendable {
     /// Which parts of the environment the patch changes. Mirrors Matt's
     /// `contrast.expected_configuration_changes`.
     public var touches: [EnvironmentPart]?
+    /// The differences, one per accept/reject decision. The unified `diff` is the code-level view of
+    /// the `code` change on the Reward part.
+    public var changes: [SpecChange]?
 }
 
 // MARK: Verify

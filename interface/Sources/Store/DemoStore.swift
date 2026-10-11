@@ -1,7 +1,18 @@
 import Foundation
 import Observation
 
-/// Single source of truth for the app: the environments (projects), their runs, and what is selected.
+/// A proposed difference waiting for a decision, attached to an environment.
+public struct PendingChange: Identifiable, Hashable, Sendable {
+    public enum Decision: Sendable { case pending, accepted, rejected }
+    public let id: String
+    public let change: SpecChange
+    public let hackId: String?
+    public let runId: String
+    public var decision: Decision = .pending
+}
+
+/// Single source of truth: environments (the projects), their current editable spec and version,
+/// pending differences, compiles, and selection.
 @MainActor
 @Observable
 public final class DemoStore {
@@ -11,11 +22,15 @@ public final class DemoStore {
     public private(set) var environments: [AuditEnvironment] = []
     public private(set) var sessions: [RunSession] = []
     public private(set) var selectedEnvironmentId: String?
-    /// Nil shows the environment page; otherwise the run view.
+    /// Nil shows the environment page; otherwise the compile result.
     public private(set) var selectedRunId: String?
     public var errorMessage: String?
     public var showLog = true
 
+    /// Current spec per environment, after accepted changes. Absent means unchanged from the fixture.
+    private var specs: [String: EnvironmentSpec] = [:]
+    private var versions: [String: Int] = [:]
+    private var pending: [String: [PendingChange]] = [:]
     private var fastForwardMirror = false
 
     public init(backend: any AuditBackend, playback: PlaybackSettings) {
@@ -30,31 +45,15 @@ public final class DemoStore {
     }
     public var isFastForward: Bool { fastForwardMirror }
 
-    public var selectedEnvironment: AuditEnvironment? {
-        environments.first { $0.id == selectedEnvironmentId }
-    }
-
-    public var selectedSession: RunSession? {
-        sessions.first { $0.id == selectedRunId }
-    }
+    public var selectedEnvironment: AuditEnvironment? { environments.first { $0.id == selectedEnvironmentId } }
+    public var selectedSession: RunSession? { sessions.first { $0.id == selectedRunId } }
 
     public func sessions(for environment: AuditEnvironment) -> [RunSession] {
         sessions.filter { $0.environment.id == environment.id }
     }
 
-    public enum PatchMark: Equatable { case pending, applied }
-
-    /// Parts of the environment a patch touches: `.applied` once a run verified it, else `.pending`.
-    public func patchMarks(for environment: AuditEnvironment) -> [EnvironmentPart: PatchMark] {
-        var marks: [EnvironmentPart: PatchMark] = [:]
-        for session in sessions(for: environment).reversed() {
-            for part in session.patch?.touches ?? [] {
-                let mark: PatchMark = session.verifyFinished ? .applied : .pending
-                if marks[part] != .applied { marks[part] = mark }
-            }
-        }
-        return marks
-    }
+    public func version(of environment: AuditEnvironment) -> Int { versions[environment.id] ?? 1 }
+    public func spec(for environment: AuditEnvironment) -> EnvironmentSpec? { specs[environment.id] ?? environment.spec }
 
     // MARK: Environments
 
@@ -86,27 +85,26 @@ public final class DemoStore {
     public func addEnvironment(at url: URL) async {
         do {
             let env = try await backend.loadEnvironment(at: url)
-            if !environments.contains(where: { $0.id == env.id }) {
-                environments.insert(env, at: 0)
-            }
+            if !environments.contains(where: { $0.id == env.id }) { environments.insert(env, at: 0) }
             select(environment: env)
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
-    // MARK: Runs
+    // MARK: Compile
 
-    /// Create a run for the selected environment and start it (static scan + adversarial training).
+    /// Compile the selected environment at its current version and show the result.
     @discardableResult
-    public func newRun() async -> RunSession? {
-        guard let env = selectedEnvironment else { return nil }
+    public func compile() async -> RunSession? {
+        guard var env = selectedEnvironment else { return nil }
+        if let spec = specs[env.id] { env.spec = spec }
         do {
-            let run = try await backend.startAudit(envId: env.id)
-            let session = RunSession(run: run, environment: env, backend: backend)
+            let run = try await backend.startAudit(envId: env.id, spec: env.spec)
+            let session = RunSession(run: run, environment: env, version: version(of: env), backend: backend)
             sessions.insert(session, at: 0)
             selectedRunId = session.id
-            Task { await session.start() }
+            Task { await session.compile() }
             return session
         } catch {
             errorMessage = error.localizedDescription
@@ -114,6 +112,151 @@ public final class DemoStore {
         }
     }
 
-    public func advance() { selectedSession?.advance() }
-    public func retreat() { selectedSession?.retreat() }
+    // MARK: Harden
+
+    /// Ask the backend for the differences that close one hack and attach them to the environment.
+    public func harden(_ hack: Trajectory, in session: RunSession) async {
+        guard let patch = await session.harden(hack) else { return }
+        let envId = session.environment.id
+        var list = pending[envId] ?? []
+        for change in patch.changes ?? [] {
+            let id = "\(patch.id)/\(change.id)"
+            if let index = list.firstIndex(where: { $0.id == id }) {
+                // Hardening the same hack again re-opens differences the user rejected; accepted ones stay applied.
+                if list[index].decision == .rejected { list[index].decision = .pending }
+            } else {
+                list.append(PendingChange(id: id, change: change, hackId: hack.id, runId: session.id))
+            }
+        }
+        pending[envId] = list
+    }
+
+    public func pendingChanges(for environment: AuditEnvironment, part: EnvironmentPart? = nil) -> [PendingChange] {
+        (pending[environment.id] ?? []).filter { $0.decision == .pending && (part == nil || $0.change.part == part) }
+    }
+
+    public func accept(_ change: PendingChange, in environment: AuditEnvironment) {
+        decide(change, in: environment, .accepted)
+    }
+
+    public func reject(_ change: PendingChange, in environment: AuditEnvironment) {
+        decide(change, in: environment, .rejected)
+    }
+
+    public func acceptAll(in environment: AuditEnvironment) {
+        for change in pendingChanges(for: environment) { accept(change, in: environment) }
+    }
+
+    public func rejectAll(in environment: AuditEnvironment) {
+        for change in pendingChanges(for: environment) { reject(change, in: environment) }
+    }
+
+    private func decide(_ change: PendingChange, in environment: AuditEnvironment, _ decision: PendingChange.Decision) {
+        guard var list = pending[environment.id], let index = list.firstIndex(where: { $0.id == change.id }) else { return }
+        list[index].decision = decision
+        pending[environment.id] = list
+        if decision == .accepted, var spec = spec(for: environment) {
+            SpecEditor.apply(change.change, to: &spec)
+            specs[environment.id] = spec
+            versions[environment.id] = version(of: environment) + 1
+        }
+    }
+
+    /// Accepted changes since the given environment version.
+    public func acceptedChanges(for environment: AuditEnvironment) -> [PendingChange] {
+        (pending[environment.id] ?? []).filter { $0.decision == .accepted }
+    }
+
+    // MARK: Status
+
+    public func latestCertificate(for environment: AuditEnvironment) -> Certificate? {
+        let fromRuns = sessions(for: environment).compactMap(\.certificate)
+        return (fromRuns + [environment.lastCertificate].compactMap { $0 }).max { $0.issuedAt < $1.issuedAt }
+    }
+
+    public func status(for environment: AuditEnvironment) -> EnvironmentStatus {
+        let current = version(of: environment)
+        let latest = sessions(for: environment).first
+        if let latest {
+            if latest.isBusy && !latest.compileFinished { return .compiling }
+            if latest.version < current {
+                let since = acceptedChanges(for: environment).count
+                return .edited(changes: max(since, 1))
+            }
+            if latest.compileFinished {
+                if latest.isStable { return .stable(certified: latest.certificate?.issuedAt) }
+                return .unstable(hacks: latest.hackCount)
+            }
+        }
+        if let certificate = latestCertificate(for: environment) {
+            if let version = certificate.auditorVersion, version != AppConfig.auditorVersion {
+                return .stale(certificate.issuedAt, reason: "auditor \(version) → \(AppConfig.auditorVersion)")
+            }
+            if certificate.auditorVersion == nil { return .stale(certificate.issuedAt, reason: "auditor version unknown") }
+            return .stable(certified: certificate.issuedAt)
+        }
+        return .unassessed
+    }
+}
+
+/// Applies a `SpecChange` to an `EnvironmentSpec`. Fields are addressed by name (see `SpecChange`).
+public enum SpecEditor {
+    public static func apply(_ change: SpecChange, to spec: inout EnvironmentSpec) {
+        func edit(_ list: inout [String]) {
+            switch change.kind {
+            case .add: if let after = change.after, !list.contains(after) { list.append(after) }
+            case .remove: list.removeAll { $0 == change.before }
+            case .alter:
+                if let before = change.before, let after = change.after, let i = list.firstIndex(of: before) { list[i] = after }
+                else if let after = change.after { list.append(after) }
+            }
+        }
+        switch (change.part, change.field) {
+        case (.objective, "constraints"): edit(&spec.objective.constraints)
+        case (.objective, "summary"): if let after = change.after { spec.objective.summary = after }
+        case (.observations, "visible"): edit(&spec.observations.visible)
+        case (.observations, "hidden"): edit(&spec.observations.hidden)
+        case (.evaluation, "components"): edit(&spec.evaluation.components)
+        case (.evaluation, "summary"): if let after = change.after { spec.evaluation.summary = after }
+        case (.evaluation, "audit"): spec.evaluation.audit = change.after
+        case (.initialState, "summary"): if let after = change.after { spec.initialState.summary = after }
+        case (.initialState, "items"):
+            // "Key: value" strings address items by key.
+            func split(_ s: String) -> (String, String) {
+                guard let r = s.range(of: ": ") else { return (s, "") }
+                return (String(s[..<r.lowerBound]), String(s[r.upperBound...]))
+            }
+            switch change.kind {
+            case .add: if let after = change.after { let (k, v) = split(after); spec.initialState.items.append(KeyValue(key: k, value: v)) }
+            case .remove: if let before = change.before { let (k, _) = split(before); spec.initialState.items.removeAll { $0.key == k } }
+            case .alter:
+                if let after = change.after {
+                    let (k, v) = split(after)
+                    if let i = spec.initialState.items.firstIndex(where: { $0.key == k }) { spec.initialState.items[i].value = v }
+                    else { spec.initialState.items.append(KeyValue(key: k, value: v)) }
+                }
+            }
+        case (.actions, "actions"):
+            func split(_ s: String) -> (String, String) {
+                guard let r = s.range(of: ": ") else { return (s, "") }
+                return (String(s[..<r.lowerBound]), String(s[r.upperBound...]))
+            }
+            switch change.kind {
+            case .add: if let after = change.after { let (k, v) = split(after); spec.actions.append(ActionContract(id: k, description: v, arguments: nil)) }
+            case .remove: if let before = change.before { let (k, _) = split(before); spec.actions.removeAll { $0.id == k } }
+            case .alter:
+                if let after = change.after {
+                    let (k, v) = split(after)
+                    if let i = spec.actions.firstIndex(where: { $0.id == k }) { spec.actions[i].description = v }
+                }
+            }
+        case (.episode, "termination"): if let after = change.after { spec.episode.termination = after }
+        case (.episode, "reset"): if let after = change.after { spec.episode.reset = after }
+        case (.episode, "max_steps"): spec.episode.maxSteps = change.after.flatMap(Int.init)
+        default:
+            // `code` on the reward function and unknown fields have no spec text to rewrite; the
+            // decision is recorded and the unified diff documents the change.
+            break
+        }
+    }
 }

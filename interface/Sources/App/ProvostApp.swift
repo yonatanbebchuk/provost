@@ -26,15 +26,13 @@ struct ProvostApp: App {
                 Button("New Environment…") { ProvostApp.chooseEnvironmentFolder(store: store) }
                     .keyboardShortcut("n", modifiers: .command)
             }
-            CommandMenu("Run") {
-                Button("New Run") { Task { await store.newRun() } }
+            CommandMenu("Environment") {
+                Button("Compile") { Task { await store.compile() } }
                     .keyboardShortcut("r", modifiers: .command)
                     .disabled(store.selectedEnvironment == nil)
-                Divider()
-                Button("Next stage") { store.advance() }
-                    .keyboardShortcut(.rightArrow, modifiers: .command)
-                Button("Previous stage") { store.retreat() }
-                    .keyboardShortcut(.leftArrow, modifiers: .command)
+                Button("Show Environment") { store.showEnvironmentPage() }
+                    .keyboardShortcut("e", modifiers: .command)
+                    .disabled(store.selectedEnvironment == nil)
                 Divider()
                 Toggle("Fast-forward", isOn: Binding(get: { store.isFastForward }, set: { store.fastForward = $0 }))
                     .keyboardShortcut("f", modifiers: [.command, .shift])

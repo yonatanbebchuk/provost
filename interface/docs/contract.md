@@ -144,9 +144,26 @@ The gap between `proxy_reward` and `true_score` is the whole story.
     "deny":  ["Read or list /tests at any point in the episode", "..."]
   },
   "notes": ["Fail closed when `issues` is missing ...", "..."],  // optional bullet points
-  "touches": ["observations", "evaluation"]                      // optional: which spec parts change
+  "touches": ["observations", "evaluation"],                     // optional: which spec parts change
+  "trajectory_id": "traj-0412-03",                               // optional: the hack this hardens against
+  "changes": [                                                   // optional: one accept/reject decision each
+    { "id": "c1", "part": "observations", "kind": "remove", "field": "visible",
+      "before": "Anything readable from the container filesystem", "after": null,
+      "rationale": "The policy could read /tests and /opt/solution." },
+    { "id": "c6", "part": "evaluation", "kind": "add", "field": "components",
+      "before": null, "after": "variant_regen · fresh expected values per episode", "rationale": "..." },
+    { "id": "c7", "part": "evaluation", "kind": "alter", "field": "code",
+      "before": "asserts a fixed literal", "after": "asserts a per-episode variant", "rationale": "..." }
+  ]
 }
 ```
+
+`kind` is `add | remove | alter`. `field` names the list or value inside the part: `constraints`,
+`summary` (objective); `visible`, `hidden` (observations); `items` as `"Key: value"` (initial_state);
+`actions` as `"id: description"`; `components`, `summary`, `audit`, `code` (evaluation); `termination`,
+`reset`, `max_steps` (episode). `code` has no spec text to rewrite; the unified `diff` documents it.
+
+`POST /runs/{run_id}/patch` takes an optional body `{"trajectory_id": "..."}` to harden against one hack.
 
 `touches` values: `objective | initial_state | observations | actions | evaluation | episode`.
 
@@ -200,10 +217,10 @@ auditor → certified; certificate by an older auditor → stale.
 |--------|---------------------------------------|-----------------------|----------------------|
 | GET    | `/environments`                       |                       | `Environment[]`      |
 | POST   | `/environments`                       | `{"path": "..."}`     | `Environment`        |
-| POST   | `/runs`                               | `{"env_id": "..."}`   | `AuditRun` (queued)  |
+| POST   | `/runs`                               | `{"env_id": "...", "spec": EnvironmentSpec?}` | `AuditRun` (queued)  |
 | POST   | `/runs/{run_id}/lint`                 |                       | `LintFinding[]`      |
 | GET    | `/runs/{run_id}/train`                | SSE                   | event stream         |
-| POST   | `/runs/{run_id}/patch`                |                       | `Patch`              |
+| POST   | `/runs/{run_id}/patch`                | `{"trajectory_id": "..."}` optional | `Patch` (harden) |
 | GET    | `/runs/{run_id}/verify?patch_id=...`  | SSE                   | event stream         |
 | POST   | `/runs/{run_id}/certificate`          |                       | `Certificate`        |
 

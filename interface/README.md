@@ -22,33 +22,35 @@ Or open `Provost.xcodeproj` after `make gen` and hit Run.
 
 ## Model
 
-Environments are projects. The left sidebar lists them; selecting one opens its page. A run is created
-from an environment (like a build) and walks through the audit stages.
+Environments are the objects. The sidebar lists them; selecting one opens its page. Two procedures act
+on an environment:
 
-- **Environment page** — the environment in its six mandatory parts (objective, initial state, agent
-  sees, actions, evaluation, episode), provenance, its last certificate, and its runs. The status
-  badge is derived: Unassessed, Vulnerable (liftoff found, not yet re-signed), Certified, or Stale
-  (signed by an older auditor than `AppConfig.auditorVersion`; re-run to re-sign). The parts come from the
-  structural comparison in `auto_RL_builder/environment_comparison.md`. A part a proposed patch
-  would change is marked "patch pending".
-- **Run** — created with **New Run** (⌘R). It scans the environment, trains the adversarial policy, and
-  proposes a patch, all as one run; the run log at the bottom reads like a build log.
-  1. **Train** — live chart, proxy reward vs true score; liftoff marker; trajectories and static findings.
-  2. **Patch** — unified diff, rationale, which environment parts change, Learning Scope. **Apply & re-verify**.
-  3. **Verify** — same chart on the patched environment, before/after strip. **Issue certificate**.
-  4. **Certificate** — printable audit record. **Export PDF…**
-- **New Environment…** (⌘N, File menu) registers a folder; dropping a folder on the sidebar does the same.
+- **Compile** (⌘R, the pill in the top bar). Scans the environment, trains a policy against it, and
+  reports **Stable** or **Unstable** with the hacks it found, each with its full trace, plus the static
+  findings. The compile log at the bottom reads like a build log.
+- **Harden** (per hack, on the compile result). Produces differences to the environment that close that
+  hack. They appear in place on the environment page, under the part they change: additions in green,
+  removals in red, alterations in yellow, each with accept and reject. Accepting edits the environment
+  and bumps its version; the status reads **Edited** until you compile again.
+- **Recheck** (per hardened hack) replays that hack and the legitimate trajectory on the hardened
+  environment: closed, or still rewarded.
+- A compile that comes back Stable can **issue a certificate**, shown as a printable page with PDF
+  export. The environment carries its last certificate; one signed by an older auditor reads **Stale**.
+
+The environment page shows sample inputs first (what the policy is trained on), then Reward, Action
+space, Observation space, Objective, Initial state, Episode, provenance, the last certificate, and the
+compiles. The parts follow the six mandatory responsibilities in
+`auto_RL_builder/environment_comparison.md`.
 
 ### Keyboard shortcuts
 
 | Keys  | Action |
 |-------|--------|
 | `⌘N`  | New Environment… |
-| `⌘R`  | New Run on the selected environment |
-| `⌘→`  | Next stage (fires the current stage's primary action if the next stage is still locked) |
-| `⌘←`  | Previous stage |
-| `⌘⇧F` | Toggle fast-forward (training replays in ~2 s instead of ~30 s) |
-| `⌘⇧L` | Show / hide the run log |
+| `⌘R`  | Compile the selected environment |
+| `⌘E`  | Show the environment page |
+| `⌘⇧F` | Toggle fast-forward (the compile replays in ~2 s instead of ~30 s) |
+| `⌘⇧L` | Show / hide the compile log |
 
 ## Switching backends
 
@@ -91,10 +93,10 @@ single-shot probes; the environment card says so.
 
 ```
 Sources/App        ProvostApp, AppConfig (product name, port, replay timing)
-Sources/Domain     Contract.swift (wire types), Stage.swift (stage enum + state machine)
+Sources/Domain     Contract.swift (wire types)
 Sources/Backend    AuditBackend protocol, FixtureBackend, LocalHTTPBackend, PlaybackSettings
-Sources/Store      DemoStore (environments, runs, selection), RunSession (one run's data + stages)
-Sources/Views      RootView (sidebar, top bar), EnvironmentPage, RunView (stepper, log), Stages/*, Components/*
+Sources/Store      DemoStore (environments, versions, pending differences, compiles), RunSession (one compile)
+Sources/Views      RootView (sidebar, top bar), EnvironmentPage (parts + differences), RunView (compile result), Components/*
 Resources/fixtures <env-id>/*.json
 Tests              XCTest
 docs/contract.md   wire format with example JSON

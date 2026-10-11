@@ -1,20 +1,25 @@
 import SwiftUI
 
-/// One run: a stepper across its stages, the stage content, and the run log.
+/// The result of one compile: Stable or Unstable, the hacks with their traces, the static findings,
+/// and the run log. Harden and Recheck act per hack; the certificate is issued from a stable compile.
 struct RunView: View {
     @Environment(DemoStore.self) private var store
     @Environment(RunSession.self) private var session
+    @State private var showCertificate = false
+
+    private var totalSteps: Int { session.run.config.steps }
+    private var currentStep: Int { session.trainingPoints.last?.step ?? 0 }
 
     var body: some View {
         VStack(spacing: 0) {
-            RunStepper()
-            Divider()
-            stageContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if showCertificate, session.certificate != nil {
+                CertificateView()
+            } else {
+                result
+            }
             if store.showLog {
                 Divider()
-                RunLogView()
-                    .frame(height: 120)
+                RunLogView().frame(height: 120)
             }
         }
         .sheet(item: Binding(get: { session.selectedTrajectory }, set: { session.selectedTrajectory = $0 })) { t in
@@ -22,65 +27,105 @@ struct RunView: View {
         }
     }
 
-    @ViewBuilder
-    private var stageContent: some View {
-        switch session.stage {
-        case .train: TrainView()
-        case .patch: PatchView()
-        case .verify: VerifyView()
-        case .certificate: CertificateView()
-        }
-    }
-}
-
-struct RunStepper: View {
-    @Environment(RunSession.self) private var session
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(Stage.allCases) { stage in
-                let unlocked = session.isUnlocked(stage)
-                let completed = session.isCompleted(stage)
-                let selected = session.stage == stage
-                Button { session.select(stage) } label: {
-                    HStack(spacing: 8) {
-                        ZStack {
-                            Circle()
-                                .strokeBorder(unlocked ? Color.primary.opacity(0.5) : Color.primary.opacity(0.15), lineWidth: 1)
-                                .background(Circle().fill(completed ? Color.primary : .clear))
-                                .frame(width: 20, height: 20)
-                            if completed {
-                                Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.windowBackground)
-                            } else {
-                                Text("\(stage.rawValue + 1)").font(.system(size: 10, weight: .semibold, design: .rounded))
-                                    .foregroundStyle(unlocked ? .primary : .tertiary)
-                            }
-                        }
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text(stage.title).font(.callout.weight(selected ? .semibold : .regular))
-                                .foregroundStyle(unlocked ? .primary : .tertiary)
-                            Text(stage.subtitle).font(.caption2).foregroundStyle(unlocked ? .secondary : .quaternary).lineLimit(1)
-                        }
-                        if stage == .train, session.liftoff != nil {
-                            Circle().fill(Theme.liftoff).frame(width: 6, height: 6)
+    private var result: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                header
+                TrainingChart(points: session.trainingPoints, totalSteps: totalSteps, liftoff: session.liftoff)
+                    .frame(height: 230)
+                HStack {
+                    ChartLegend(showLiftoff: session.liftoff != nil)
+                    Spacer()
+                    if let last = session.trainingPoints.last {
+                        HStack(spacing: 14) {
+                            metric("proxy", last.proxyReward)
+                            metric("true", last.trueScore)
+                            metric("gap", last.gap, emphasize: session.liftoff != nil)
+                            metric("kl", last.kl, digits: 3)
                         }
                     }
-                    .padding(.horizontal, 12).padding(.vertical, 6)
-                    .background(selected ? Color.primary.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
-                .disabled(!unlocked)
-                if stage != Stage.allCases.last {
-                    Rectangle().fill(Color.primary.opacity(0.15)).frame(width: 28, height: 1).padding(.horizontal, 4)
+                if let liftoff = session.liftoff { LiftoffBanner(liftoff: liftoff) }
+                if let check = session.checks.values.first, let replay = check.replay, session.checks.count == 1 {
+                    ReplayChecks(replay: replay)
+                }
+                HStack(alignment: .top, spacing: 16) {
+                    HacksTable()
+                    FindingsPanel(findings: session.findings).frame(width: 360)
+                }
+                .frame(height: 360)
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
+            footer
+        }
+    }
+
+    private var header: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 10) {
+                    Text(session.resultTitle).font(.title2.weight(.semibold))
+                        .foregroundStyle(session.compileFinished ? (session.isStable ? Theme.statusCertified : Theme.statusVulnerable) : .primary)
+                    if session.compileFinished {
+                        Text(session.isStable ? "No hack found in \(session.trajectories.count) trajectories · \(session.findings.count) static findings"
+                                              : "\(session.hackCount) hack\(session.hackCount == 1 ? "" : "s") in \(session.trajectories.count) trajectories · \(session.findings.count) static findings")
+                            .font(.callout).foregroundStyle(.secondary)
+                    }
+                }
+                let run = session.run
+                Text("v\(session.version) · \(run.config.model) · \(run.config.algorithm) · seed \(run.config.seed)" + (run.config.rolloutsPerStep.map { " · \($0) rollouts/step" } ?? ""))
+                    .font(.callout.monospaced()).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if session.certificate != nil {
+                Picker("", selection: $showCertificate) {
+                    Text("Result").tag(false)
+                    Text("Certificate").tag(true)
+                }
+                .pickerStyle(.segmented).labelsHidden().frame(width: 200)
+            }
+            Text("step \(currentStep) / \(totalSteps)").font(.title3.monospacedDigit().weight(.medium)).foregroundStyle(.secondary)
+        }
+    }
+
+    private var footer: some View {
+        HStack(spacing: 12) {
+            if session.compileFinished {
+                let pending = store.pendingChanges(for: session.environment).count
+                if pending > 0 {
+                    Button("\(pending) difference\(pending == 1 ? "" : "s") pending on the environment") { store.showEnvironmentPage() }
+                        .buttonStyle(MonoSecondaryButtonStyle())
                 }
             }
             Spacer()
-            Text(session.id).font(.caption.monospaced()).foregroundStyle(.secondary)
+            if session.isBusy {
+                ProgressView().controlSize(.small)
+                Text(session.compileFinished ? "Rechecking…" : (session.phase == .linting ? "Scanning environment…" : "Compiling · step \(currentStep) / \(totalSteps)"))
+                    .foregroundStyle(.secondary)
+            } else if session.isStable && session.certificate == nil {
+                Button("Issue certificate") { Task { await session.issueCertificate(); showCertificate = true } }
+                    .buttonStyle(MonoProminentButtonStyle())
+                    .keyboardShortcut(.defaultAction)
+            } else if session.compileFinished && !session.isStable {
+                Text(session.patches.isEmpty ? "Harden a hack to get differences." : "Accept differences on the environment page, then compile again.")
+                    .font(.callout).foregroundStyle(.secondary)
+            }
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 8)
-        .background(Theme.windowBackground)
+        .padding(.horizontal, 24).padding(.vertical, 12)
+        .background(.bar)
+        .overlay(alignment: .top) { Divider() }
+    }
+
+    private func metric(_ label: String, _ value: Double, digits: Int = 2, emphasize: Bool = false) -> some View {
+        HStack(spacing: 4) {
+            Text(label).foregroundStyle(.secondary)
+            Text(String(format: "%+.\(digits)f", value).replacingOccurrences(of: "+", with: label == "gap" ? "+" : ""))
+                .foregroundStyle(emphasize ? Theme.liftoff : .primary).fontWeight(emphasize ? .semibold : .regular)
+        }
+        .font(.callout.monospacedDigit())
     }
 }
 
@@ -91,7 +136,7 @@ struct RunLogView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("Run log").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                Text("Compile log").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                 Text("\(session.log.count)").font(.caption.monospacedDigit()).foregroundStyle(.tertiary)
                 Spacer()
             }
@@ -101,12 +146,10 @@ struct RunLogView: View {
                     LazyVStack(alignment: .leading, spacing: 2) {
                         ForEach(session.log) { entry in
                             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                                Text(entry.at, format: .dateTime.hour().minute().second())
-                                    .foregroundStyle(.tertiary)
+                                Text(entry.at, format: .dateTime.hour().minute().second()).foregroundStyle(.tertiary)
                                 Text(prefix(entry.kind)).foregroundStyle(color(entry.kind)).frame(width: 52, alignment: .leading)
                                 Text(entry.message).foregroundStyle(entry.kind == .liftoff ? Theme.liftoff : .primary)
-                                    .fontWeight(entry.kind == .liftoff ? .semibold : .regular)
-                                    .textSelection(.enabled)
+                                    .fontWeight(entry.kind == .liftoff ? .semibold : .regular).textSelection(.enabled)
                             }
                             .font(.system(size: 11.5, design: .monospaced))
                             .id(entry.id)
@@ -128,7 +171,7 @@ struct RunLogView: View {
         case .phase: "phase"
         case .finding: "find"
         case .liftoff: "LIFTOFF"
-        case .patch: "patch"
+        case .patch: "harden"
         case .error: "error"
         }
     }
@@ -136,7 +179,7 @@ struct RunLogView: View {
     private func color(_ kind: RunLogEntry.Kind) -> Color {
         switch kind {
         case .liftoff: Theme.liftoff
-        case .error: .red
+        case .error: Theme.statusVulnerable
         default: .secondary
         }
     }

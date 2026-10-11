@@ -27,11 +27,27 @@ enum Theme {
             : NSColor(srgbRed: 0.12, green: 0.55, blue: 0.30, alpha: 1)
     })
 
+    /// Alterations in proposed differences. Additions use `statusCertified`, removals `statusVulnerable`.
+    static let changeAltered = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 0.95, green: 0.78, blue: 0.30, alpha: 1)
+            : NSColor(srgbRed: 0.72, green: 0.52, blue: 0.05, alpha: 1)
+    })
+
+    static func color(for kind: ChangeKind) -> Color {
+        switch kind {
+        case .add: statusCertified
+        case .remove: statusVulnerable
+        case .alter: changeAltered
+        }
+    }
+
     static func color(for status: EnvironmentStatus) -> Color {
         switch status {
-        case .unassessed: .secondary
-        case .vulnerable: statusVulnerable
-        case .certified: statusCertified
+        case .unassessed, .compiling: .secondary
+        case .unstable: statusVulnerable
+        case .edited: changeAltered
+        case .stable: statusCertified
         case .stale: .secondary
         }
     }
@@ -179,39 +195,6 @@ struct MonoSecondaryButtonStyle: ButtonStyle {
             .padding(.vertical, 8)
             .background(Color.primary.opacity(configuration.isPressed ? 0.14 : 0.07),
                         in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-    }
-}
-
-/// Fixed-height bar at the bottom of a stage holding the stage's one primary action.
-struct StageFooter<Leading: View>: View {
-    @Environment(RunSession.self) private var session
-    var busyLabel: String? = nil
-    @ViewBuilder var leading: Leading
-
-    var body: some View {
-        HStack(spacing: 12) {
-            leading
-            Spacer()
-            if session.isBusy, let busyLabel {
-                ProgressView().controlSize(.small)
-                Text(busyLabel).foregroundStyle(.secondary)
-            }
-            if let action = session.primaryAction {
-                Button(action.title) { session.performPrimaryAction() }
-                    .buttonStyle(MonoProminentButtonStyle())
-                    .keyboardShortcut(.defaultAction)
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 12)
-        .background(.bar)
-        .overlay(alignment: .top) { Divider() }
-    }
-}
-
-extension StageFooter where Leading == EmptyView {
-    init(busyLabel: String? = nil) {
-        self.init(busyLabel: busyLabel) { EmptyView() }
     }
 }
 

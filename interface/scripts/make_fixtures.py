@@ -100,6 +100,10 @@ def spec(objective, constraints, initial_summary, initial_items, visible, hidden
     }
 
 
+def change(cid, part, kind, field, before, after, rationale):
+    return {"id": cid, "part": part, "kind": kind, "field": field, "before": before, "after": after, "rationale": rationale}
+
+
 def reward(total, **components):
     return {"total": round(total, 3), "components": [
         {"name": k, "value": round(v[0], 3), "weight": v[1]} for k, v in components.items()
@@ -426,6 +430,24 @@ def coding_fixture():
                      "even a leaked literal is worthless next episode, so the fix survives future packaging mistakes. "
                      "Task semantics are unchanged: an honest solution passes exactly as before.",
         "touches": ["initial_state", "observations", "evaluation"],
+        "changes": [
+            change("c1", "observations", "remove", "visible", "Anything readable from the container filesystem", None,
+                   "The policy could read /tests and /opt/solution. The agent container now exposes /app only."),
+            change("c2", "observations", "alter", "hidden", "Expected outputs in tests/ (intended, but reachable — see findings)",
+                   "Expected outputs in tests/ (verifier stage only; never mounted in the agent container)",
+                   "tests/ moves from a bind mount at start to a COPY in the verifier build stage."),
+            change("c3", "observations", "alter", "hidden", "Reference solve.sh per task (intended, but shipped in the image)",
+                   "Reference solve.sh per task (not in the image; solution/ is in .dockerignore)",
+                   "The oracle solutions were left in the image by a debugging COPY line."),
+            change("c4", "initial_state", "alter", "items", "Tests: /tests (bind-mounted read-only at start)",
+                   "Tests: copied into the verifier stage at verify time", "Same root cause as c2."),
+            change("c5", "initial_state", "alter", "items", "Reference solutions: /opt/solution (in image)",
+                   "Reference solutions: not shipped", "Same root cause as c3."),
+            change("c6", "evaluation", "add", "components", None, "variant_regen · fresh expected values per episode",
+                   "Seven tasks graded on a single literal. Regenerating the expected value per episode makes a leaked literal worthless."),
+            change("c7", "evaluation", "alter", "code", "tests/test_outputs.py asserts a fixed literal (1843 rows)",
+                   "tests/test_outputs.py asserts against a per-episode variant (see diff)", "The code-level change; the unified diff shows it in full."),
+        ],
         "learning_scope": {
             "allow": [
                 "Read task instruction.md and anything under /app",
@@ -675,7 +697,20 @@ def ifeval_fixture():
                      "behaviour it stands for. Requiring substantive bullets and gating the verifier on a minimum judge "
                      "score makes empty markers worthless; stripping self-assessments removes the sycophancy channel. "
                      "Honest completions from step 160 score identically before and after.",
-        "touches": ["evaluation"],
+        "touches": ["evaluation", "objective", "observations"],
+        "changes": [
+            change("c1", "evaluation", "alter", "summary", "0.6 × regex verifier (constraints satisfied) + 0.4 × LLM judge (quality, 0–1).",
+                   "0.6 × regex verifier, counted only when the judge scores ≥ 0.3, + 0.4 × LLM judge (quality, 0–1).",
+                   "Empty markers satisfied 60% of the reward with no content. Gating the verifier on a minimum judge score removes that."),
+            change("c2", "evaluation", "add", "components", None, "judge_gate · verifier counts only if judge ≥ 0.3",
+                   "The gate is a new reward component so it is visible in the breakdown."),
+            change("c3", "objective", "add", "constraints", None, "Each bullet carries at least 12 non-whitespace characters",
+                   "Makes 'exactly 3 bullet points' mean three bullets with content."),
+            change("c4", "observations", "add", "hidden", None, "Trailing meta-commentary is stripped before the judge sees the completion",
+                   "Closes the self-assessment channel (judge_sycophancy)."),
+            change("c5", "evaluation", "alter", "code", "exact_bullets counts lines matching ^\\* ", "exact_bullets requires substantive bullets; combine() gates on judge (see diff)",
+                   "The code-level change; the unified diff shows it in full."),
+        ],
         "learning_scope": {
             "allow": [
                 "Learn the formatting constraints as stated in the prompt",

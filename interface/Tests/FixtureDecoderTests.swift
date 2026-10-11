@@ -62,6 +62,8 @@ final class FixtureDecoderTests: XCTestCase {
 
         let patch = try decode(Patch.self, env, "patch.json")
         XCTAssertTrue(patch.diff.contains("--- a/"))
+        XCTAssertEqual(patch.changes?.count, 7)
+        for c in patch.changes ?? [] { XCTAssertTrue(c.kind != .alter || (c.before != nil && c.after != nil), c.id) }
         XCTAssertFalse(patch.learningScope.allow.isEmpty)
         XCTAssertFalse(patch.learningScope.deny.isEmpty)
         for id in patch.findingIds { XCTAssertTrue(findings.contains { $0.id == id }) }
@@ -120,6 +122,7 @@ final class FixtureDecoderTests: XCTestCase {
             let patch = try decode(Patch.self, env, "patch.json")
             XCTAssertFalse(patch.notes?.isEmpty ?? true)
             XCTAssertFalse(patch.touches?.isEmpty ?? true)
+            XCTAssertFalse(patch.changes?.isEmpty ?? true)
             XCTAssertTrue(patch.diff.hasPrefix("diff --git"))
             let verify = try decode(VerifyResult.self, env, "verify.json")
             XCTAssertEqual(verify.after.hackRate, 0)
@@ -154,7 +157,7 @@ final class FixtureDecoderTests: XCTestCase {
         let backend = FixtureBackend(root: Self.fixturesRoot, playback: playback, trainingSeconds: 0.1, verifySeconds: 0.1)
         let envs = try await backend.listEnvironments()
         XCTAssertEqual(envs.count, 5)
-        let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe")
+        let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe", spec: nil)
         let findings = try await backend.lint(runId: run.id)
         XCTAssertEqual(findings.count, 5)
         var points = 0, trajectories = 0, liftoffs = 0, completed = 0
@@ -171,7 +174,8 @@ final class FixtureDecoderTests: XCTestCase {
         XCTAssertEqual(trajectories, 15)
         XCTAssertEqual(liftoffs, 1)
         XCTAssertEqual(completed, 1)
-        let patch = try await backend.proposePatch(runId: run.id)
+        let patch = try await backend.proposePatch(runId: run.id, trajectoryId: "traj-0412-03")
+        XCTAssertEqual(patch.trajectoryId, "traj-0412-03")
         var result: VerifyResult?
         for try await event in backend.verify(runId: run.id, patchId: patch.id) {
             if case .verifyResult(let r) = event { result = r }

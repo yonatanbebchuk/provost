@@ -31,8 +31,9 @@ public final class LocalHTTPBackend: AuditBackend {
         try await post("environments", body: ["path": url.path])
     }
 
-    public func startAudit(envId: String) async throws -> AuditRun {
-        try await post("runs", body: ["env_id": envId])
+    public func startAudit(envId: String, spec: EnvironmentSpec?) async throws -> AuditRun {
+        struct Body: Encodable { let envId: String; let spec: EnvironmentSpec? }
+        return try await post("runs", encoding: Body(envId: envId, spec: spec))
     }
 
     public func lint(runId: String) async throws -> [LintFinding] {
@@ -43,8 +44,8 @@ public final class LocalHTTPBackend: AuditBackend {
         stream(path: "runs/\(runId)/train")
     }
 
-    public func proposePatch(runId: String) async throws -> Patch {
-        try await post("runs/\(runId)/patch", body: [:])
+    public func proposePatch(runId: String, trajectoryId: String?) async throws -> Patch {
+        try await post("runs/\(runId)/patch", body: trajectoryId.map { ["trajectory_id": $0] } ?? [:])
     }
 
     public func verify(runId: String, patchId: String) -> AsyncThrowingStream<TrainingEvent, Error> {
@@ -60,6 +61,14 @@ public final class LocalHTTPBackend: AuditBackend {
     private func get<T: Decodable>(_ path: String) async throws -> T {
         var req = URLRequest(url: base.appendingPathComponent(path))
         req.httpMethod = "GET"
+        return try await send(req)
+    }
+
+    private func post<T: Decodable, B: Encodable>(_ path: String, encoding body: B) async throws -> T {
+        var req = URLRequest(url: base.appendingPathComponent(path))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try ContractJSON.encoder.encode(body)
         return try await send(req)
     }
 

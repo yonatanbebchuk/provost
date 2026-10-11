@@ -12,6 +12,71 @@
     "observations",
     "evaluation"
   ],
+  "changes": [
+    {
+      "id": "c1",
+      "part": "observations",
+      "kind": "remove",
+      "field": "visible",
+      "before": "Anything readable from the container filesystem",
+      "after": null,
+      "rationale": "The policy could read /tests and /opt/solution. The agent container now exposes /app only."
+    },
+    {
+      "id": "c2",
+      "part": "observations",
+      "kind": "alter",
+      "field": "hidden",
+      "before": "Expected outputs in tests/ (intended, but reachable \u2014 see findings)",
+      "after": "Expected outputs in tests/ (verifier stage only; never mounted in the agent container)",
+      "rationale": "tests/ moves from a bind mount at start to a COPY in the verifier build stage."
+    },
+    {
+      "id": "c3",
+      "part": "observations",
+      "kind": "alter",
+      "field": "hidden",
+      "before": "Reference solve.sh per task (intended, but shipped in the image)",
+      "after": "Reference solve.sh per task (not in the image; solution/ is in .dockerignore)",
+      "rationale": "The oracle solutions were left in the image by a debugging COPY line."
+    },
+    {
+      "id": "c4",
+      "part": "initial_state",
+      "kind": "alter",
+      "field": "items",
+      "before": "Tests: /tests (bind-mounted read-only at start)",
+      "after": "Tests: copied into the verifier stage at verify time",
+      "rationale": "Same root cause as c2."
+    },
+    {
+      "id": "c5",
+      "part": "initial_state",
+      "kind": "alter",
+      "field": "items",
+      "before": "Reference solutions: /opt/solution (in image)",
+      "after": "Reference solutions: not shipped",
+      "rationale": "Same root cause as c3."
+    },
+    {
+      "id": "c6",
+      "part": "evaluation",
+      "kind": "add",
+      "field": "components",
+      "before": null,
+      "after": "variant_regen \u00b7 fresh expected values per episode",
+      "rationale": "Seven tasks graded on a single literal. Regenerating the expected value per episode makes a leaked literal worthless."
+    },
+    {
+      "id": "c7",
+      "part": "evaluation",
+      "kind": "alter",
+      "field": "code",
+      "before": "tests/test_outputs.py asserts a fixed literal (1843 rows)",
+      "after": "tests/test_outputs.py asserts against a per-episode variant (see diff)",
+      "rationale": "The code-level change; the unified diff shows it in full."
+    }
+  ],
   "learning_scope": {
     "allow": [
       "Read task instruction.md and anything under /app",

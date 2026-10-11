@@ -73,8 +73,13 @@ struct CertificatePaper: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(AppConfig.productName.uppercased())
-                        .font(.system(size: 12, weight: .bold)).kerning(2.2).foregroundStyle(muted)
+                    HStack(alignment: .lastTextBaseline, spacing: 7) {
+                        ProvostMark.image(height: 10)
+                            .alignmentGuide(.lastTextBaseline) { d in d[.bottom] }
+                        Text(AppConfig.productName.uppercased())
+                            .font(.system(size: 12, weight: .bold)).kerning(2.2)
+                    }
+                    .foregroundStyle(muted)
                     Text("Environment Audit Certificate")
                         .font(.system(size: 26, weight: .semibold, design: .serif)).foregroundStyle(ink)
                 }
