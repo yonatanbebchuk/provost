@@ -157,7 +157,7 @@ final class FixtureDecoderTests: XCTestCase {
         let backend = FixtureBackend(root: Self.fixturesRoot, playback: playback, trainingSeconds: 0.1, verifySeconds: 0.1)
         let envs = try await backend.listEnvironments()
         XCTAssertEqual(envs.count, 5)
-        let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe", spec: nil)
+        let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe", spec: nil, model: nil)
         let findings = try await backend.lint(runId: run.id)
         XCTAssertEqual(findings.count, 5)
         var points = 0, trajectories = 0, liftoffs = 0, completed = 0

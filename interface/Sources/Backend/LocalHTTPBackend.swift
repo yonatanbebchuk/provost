@@ -31,9 +31,9 @@ public final class LocalHTTPBackend: AuditBackend {
         try await post("environments", body: ["path": url.path])
     }
 
-    public func startAudit(envId: String, spec: EnvironmentSpec?) async throws -> AuditRun {
-        struct Body: Encodable { let envId: String; let spec: EnvironmentSpec? }
-        return try await post("runs", encoding: Body(envId: envId, spec: spec))
+    public func startAudit(envId: String, spec: EnvironmentSpec?, model: String?) async throws -> AuditRun {
+        struct Body: Encodable { let envId: String; let spec: EnvironmentSpec?; let model: String? }
+        return try await post("runs", encoding: Body(envId: envId, spec: spec, model: model))
     }
 
     public func lint(runId: String) async throws -> [LintFinding] {

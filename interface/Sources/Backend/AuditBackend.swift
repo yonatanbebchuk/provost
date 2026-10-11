@@ -17,7 +17,8 @@ public protocol AuditBackend: Sendable {
     /// Create a compile run for an environment at its current spec. Returns the run in `.queued`.
     /// `spec` is the environment as the user has edited it (accepted differences applied); a backend
     /// compiles that, not the version it first loaded.
-    func startAudit(envId: String, spec: EnvironmentSpec?) async throws -> AuditRun
+    /// `model` names the policy to train; nil keeps the backend's default.
+    func startAudit(envId: String, spec: EnvironmentSpec?, model: String?) async throws -> AuditRun
 
     /// Static lint pass. Resolves when all findings are available.
     func lint(runId: String) async throws -> [LintFinding]

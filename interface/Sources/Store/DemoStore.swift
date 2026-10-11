@@ -34,6 +34,8 @@ public final class DemoStore {
     private var specs: [String: EnvironmentSpec] = [:]
     private var versions: [String: Int] = [:]
     private var pending: [String: [PendingChange]] = [:]
+    /// Policy chosen per environment; absent means the default.
+    private var models: [String: String] = [:]
     private var fastForwardMirror = false
 
     public init(backend: any AuditBackend, playback: PlaybackSettings) {
@@ -56,6 +58,15 @@ public final class DemoStore {
     }
 
     public func version(of environment: AuditEnvironment) -> Int { versions[environment.id] ?? 1 }
+
+    /// The policy the next compile trains against this environment.
+    public func policyModel(for environment: AuditEnvironment) -> PolicyModel {
+        AppConfig.policyModels.first { $0.id == models[environment.id] } ?? AppConfig.defaultPolicyModel
+    }
+
+    public func setPolicyModel(_ model: PolicyModel, for environment: AuditEnvironment) {
+        models[environment.id] = model.id
+    }
     public func spec(for environment: AuditEnvironment) -> EnvironmentSpec? { specs[environment.id] ?? environment.spec }
 
     // MARK: Environments
@@ -103,7 +114,7 @@ public final class DemoStore {
         guard var env = selectedEnvironment else { return nil }
         if let spec = specs[env.id] { env.spec = spec }
         do {
-            let run = try await backend.startAudit(envId: env.id, spec: env.spec)
+            let run = try await backend.startAudit(envId: env.id, spec: env.spec, model: policyModel(for: env).name)
             let session = RunSession(run: run, environment: env, version: version(of: env), backend: backend)
             sessions.insert(session, at: 0)
             selectedRunId = session.id

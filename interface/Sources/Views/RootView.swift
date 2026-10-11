@@ -166,7 +166,7 @@ private struct RunRow: View {
                 statusDot
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Compile v\(session.version)").font(.caption.weight(.medium)).lineLimit(1)
-                    Text(session.statusLine).font(.caption2).foregroundStyle(.secondary)
+                    Text("\(session.statusLine) · \(session.run.config.model)").font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                 }
                 Spacer()
                 if session.isBusy { ProgressView().controlSize(.mini) }
@@ -208,7 +208,7 @@ struct TopBar: View {
                     }
                 }
                 .buttonStyle(.plain)
-                Text("Compile v\(session.version)").font(.callout).foregroundStyle(.secondary)
+                Text("Compile v\(session.version) · \(session.run.config.model)").font(.callout).foregroundStyle(.secondary)
                 Spacer()
                 PhasePill(phase: session.phase, busy: session.isBusy)
                 ElapsedLabel(start: session.startedAt, end: session.endedAt)

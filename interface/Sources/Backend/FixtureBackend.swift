@@ -70,7 +70,7 @@ public final class FixtureBackend: AuditBackend {
             description: "Loaded from disk. No fixture data for this environment — audit will not have replay data.")
     }
 
-    public func startAudit(envId: String, spec: EnvironmentSpec?) async throws -> AuditRun {
+    public func startAudit(envId: String, spec: EnvironmentSpec?, model: String? = nil) async throws -> AuditRun {
         // The fixture has one hardened outcome. Compiling a spec that differs from the one shipped with the
         // environment (accepted differences applied) replays it; compiling the original replays the hacks.
         if let spec, let original = try? load(AuditEnvironment.self, from: file("environment.json", env: envId)).spec {
@@ -80,6 +80,7 @@ public final class FixtureBackend: AuditBackend {
         // Every compile is its own run, even when it replays the same fixture.
         let serial = runs.withLock { $0.count + 1 }
         run.id = "\(run.id)-\(serial)"
+        if let model { run.config.model = model }
         run.phase = .queued
         run.startedAt = Date()
         run.endedAt = nil

@@ -229,7 +229,7 @@ auditor → certified; certificate by an older auditor → stale.
 |--------|---------------------------------------|-----------------------|----------------------|
 | GET    | `/environments`                       |                       | `Environment[]`      |
 | POST   | `/environments`                       | `{"path": "..."}`     | `Environment`        |
-| POST   | `/runs`                               | `{"env_id": "...", "spec": EnvironmentSpec?}` | `AuditRun` (queued)  |
+| POST   | `/runs`                               | `{"env_id": "...", "spec": EnvironmentSpec?, "model": "Qwen3-1.7B"?}` | `AuditRun` (queued)  |
 | POST   | `/runs/{run_id}/lint`                 |                       | `LintFinding[]`      |
 | GET    | `/runs/{run_id}/train`                | SSE                   | event stream         |
 | POST   | `/runs/{run_id}/patch`                | `{"trajectory_id": "..."}` optional | `Patch` (harden) |

@@ -19,4 +19,24 @@ public enum AppConfig {
     public static let verifyReplaySeconds: Double = 16
 
     public static let recentEnvironmentKey = "liftoff.recentEnvironmentPath"
+
+    /// Policies a compile can train against the environment. Open weights run locally; the custom
+    /// tier is a hosted checkpoint behind an API. The fixture replays the same evidence either way.
+    public static let policyModels: [PolicyModel] = [
+        PolicyModel(id: "qwen3-1.7b", name: "Qwen3-1.7B", provider: "open weights · local vLLM", tier: .open),
+        PolicyModel(id: "qwen3-8b", name: "Qwen3-8B", provider: "open weights · local vLLM", tier: .open),
+        PolicyModel(id: "llama-3.1-8b", name: "Llama-3.1-8B", provider: "open weights · local vLLM", tier: .open),
+        PolicyModel(id: "policy-ckpt-2026-10", name: "policy-ckpt-2026-10", provider: "custom checkpoint · hosted API", tier: .custom),
+        PolicyModel(id: "frontier-rl-preview", name: "frontier-rl-preview", provider: "custom · partner endpoint", tier: .custom),
+    ]
+    public static var defaultPolicyModel: PolicyModel { policyModels[0] }
+}
+
+/// A policy the compile trains against the environment.
+public struct PolicyModel: Identifiable, Hashable, Sendable {
+    public enum Tier: String, Sendable { case open = "Open", custom = "Custom" }
+    public let id: String
+    public let name: String
+    public let provider: String
+    public let tier: Tier
 }

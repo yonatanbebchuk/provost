@@ -211,7 +211,7 @@ final class CompileLoopTests: XCTestCase {
     func testFastForwardCompileFitsFiveSeconds() async throws {
         let playback = PlaybackSettings(fastForward: true)
         let backend = FixtureBackend(root: FixtureDecoderTests.fixturesRoot, playback: playback)
-        let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe", spec: nil)
+        let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe", spec: nil, model: nil)
         let start = ContinuousClock.now
         _ = try await backend.lint(runId: run.id)
         var trajectories = 0
@@ -222,6 +222,21 @@ final class CompileLoopTests: XCTestCase {
         XCTAssertEqual(trajectories, 15)
         XCTAssertLessThan(elapsed, .seconds(5), "fast-forward compile took \(elapsed)")
         XCTAssertGreaterThan(elapsed, .seconds(2.5), "fast-forward should still look like work, took \(elapsed)")
+    }
+
+    /// The chosen policy rides on the compile: a run carries the model it trained.
+    @MainActor
+    func testChosenPolicyModelRidesOnTheCompile() async throws {
+        let store = await makeStore()
+        let env = store.selectedEnvironment!
+        XCTAssertEqual(store.policyModel(for: env).id, AppConfig.defaultPolicyModel.id)
+        let custom = try XCTUnwrap(AppConfig.policyModels.first { $0.tier == .custom })
+        store.setPolicyModel(custom, for: env)
+        let started = await store.compile()
+        let session = try XCTUnwrap(started)
+        XCTAssertEqual(session.run.config.model, custom.name)
+        try await settle(session)
+        XCTAssertFalse(session.isStable, "the fixture replays the same evidence whichever policy is chosen")
     }
 
     func testSpecEditorAppliesEachKind() {
