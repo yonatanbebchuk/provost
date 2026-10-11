@@ -42,10 +42,10 @@ on an environment:
   printable page with PDF export. The environment carries its last certificate; one signed by an
   older auditor reads **Stale**.
 - **Test** sits greyed out next to Compile. It lights up with the Monitor process.
-- The environment page header has a **policy menu**: which model the next compile trains, open
-  weights (local) or a custom hosted checkpoint. The catalog lives in `AppConfig.policyModels`; the
-  compile carries the choice in its config and the sidebar, top bar and compiles list show it. The
-  fixture replays the same evidence whichever policy is chosen.
+- The environment page header has a **policy menu**: which model the next compile trains. Open:
+  Qwen, Llama. Custom: Provost Secure. The catalog lives in `AppConfig.policyModels`; the compile
+  carries the choice in its config and the sidebar, top bar and compiles list show it. The fixture
+  replays the same evidence whichever policy is chosen.
 
 The environment page reads like a README: the objective first, then sample inputs (what the policy is
 trained on), then Reward, Action space and Observation space side by side, then Initial state,

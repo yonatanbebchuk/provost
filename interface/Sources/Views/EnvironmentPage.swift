@@ -344,9 +344,9 @@ private struct PolicyModelMenu: View {
                             store.setPolicyModel(model, for: environment)
                         } label: {
                             if model.id == current.id {
-                                Label("\(model.name) · \(model.provider)", systemImage: "checkmark")
+                                Label(model.name, systemImage: "checkmark")
                             } else {
-                                Text("\(model.name) · \(model.provider)")
+                                Text(model.name)
                             }
                         }
                     }
@@ -354,9 +354,8 @@ private struct PolicyModelMenu: View {
             }
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: "cpu").font(.caption)
+                Image(systemName: current.tier == .custom ? "checkmark.shield.fill" : "cpu").font(.caption)
                 Text(current.name).font(.callout.weight(.medium))
-                Text(current.tier.rawValue).font(.caption).foregroundStyle(.secondary)
                 Image(systemName: "chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
             }
             .padding(.horizontal, 10).padding(.vertical, 5)
