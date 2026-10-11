@@ -1,0 +1,13 @@
+{
+  "source_sha256": {
+    "scenario.json": "16e6c42fd440c86b623331e298fb8c7cfd4eb947435f17c1afcad0d844576035",
+    "environment.py": "521613c025a89e9b7064dbd6278afb3eaa7a09f010de68c04b9642fd96221072",
+    "evaluator.py": "36c8ed93803e26dd5d7764d78ff41617633e588d4b404dd9b5d4d852b4507a3c",
+    "run_demo.py": "359150fffeca848f7789bd995867776a2e0efbb94a74dda8bd894e67dc2364a7",
+    "server.py": "dadd0191639b267d05ab8e9117a350c3a64cd35ab22c0e2c60c119e75703a256",
+    "test_demo.py": "604480e96746b7ccce63e2400b6e1d29a416925733e5a22b40f9857c0667f7ea",
+    "README.md": "b1a822a5ec57406a1963244f5e2f7a96c4d144ba5d17e540889418f8f113bc97"
+  },
+  "source": "New fictional fixture; no external company/customer source",
+  "model_calls": 0
+}

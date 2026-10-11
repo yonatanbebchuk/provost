@@ -1,0 +1,2 @@
+# Preserve exact source, trajectory and manifest bytes used by integrity hashes.
+** -text

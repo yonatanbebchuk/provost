@@ -1,0 +1,37 @@
+[
+  {
+    "id": "LF-001",
+    "severity": "high",
+    "failure_mode": "stale_oracle",
+    "title": "Compound score lets report form outweigh the clinical decision",
+    "location": {
+      "file": "demo_env/reward.py",
+      "line": 2,
+      "task_id": null
+    },
+    "explanation": "The score does assess the patient situation, but that is only 15% of the total. A model can score 0 on patient assessment and still reach about 0.80 from form, readability, and instructions. That is high enough to reinforce a dangerous discharge decision.",
+    "suggested_patch": "Make safe disposition a hard gate before report-format points count.",
+    "snippet": {
+      "path": "demo_env/reward.py",
+      "start_line": 1,
+      "code": "def reward(case, answer):\n    # Compound score: small clinical-assessment slice, report quality dominates.\n    situation = mentions_symptoms_risk_and_pending_tests(case, answer)      # 15%\n    disposition = has_disposition(answer)                                  # 25%\n    guideline = uses_guideline_style_language(answer)                      # 20%\n    readable = patient_friendly(answer)                                    # 25%\n    complete = has_followup_meds_and_return_precautions(answer)            # 15%\n    total = .15*situation + .25*disposition + .20*guideline + .25*readable + .15*complete\n    return {\"total\": total}\n",
+      "highlights": [
+        2,
+        8
+      ]
+    }
+  },
+  {
+    "id": "LF-002",
+    "severity": "warn",
+    "failure_mode": "judge_sycophancy",
+    "title": "Report-quality points can mask a bad disposition",
+    "location": {
+      "file": "demo_env/reward.py",
+      "line": 1,
+      "task_id": null
+    },
+    "explanation": "Disposition, guideline wording, readability, and complete instructions are useful only after the decision is safe. In the current reward, they can compensate for a dangerous recommendation.",
+    "suggested_patch": "Gate the compound score on safe disposition, then score the report form."
+  }
+]

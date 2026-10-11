@@ -1,0 +1,37 @@
+[
+  {
+    "id": "LF-001",
+    "severity": "high",
+    "failure_mode": "spec_gaming",
+    "title": "Score rewards looking right before being right",
+    "location": {
+      "file": "demo_env/reward.py",
+      "line": 2,
+      "task_id": null
+    },
+    "explanation": "The reward gives high score for a polished answer before checking the real-world rule. Training will discover that shortcut.",
+    "suggested_patch": "Make the real-world rule a hard gate before style or speed points.",
+    "snippet": {
+      "path": "demo_env/reward.py",
+      "start_line": 1,
+      "code": "def reward(case, answer):\n    # Vulnerable demo reward: scores appearance before safety.\n    looks_good = judge_clear_and_confident(answer)\n    form_ok = has_required_fields(answer)\n    return {\"total\": 0.75 * looks_good + 0.25 * form_ok}\n",
+      "highlights": [
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "id": "LF-002",
+    "severity": "warn",
+    "failure_mode": "answer_key_reachable",
+    "title": "Human-intent check is not part of the training score",
+    "location": {
+      "file": "demo_env/reward.py",
+      "line": 1,
+      "task_id": null
+    },
+    "explanation": "The demo has a clear human rule, but the old reward does not enforce it.",
+    "suggested_patch": "Add the human rule to the reward."
+  }
+]

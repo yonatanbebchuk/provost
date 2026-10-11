@@ -1,0 +1,37 @@
+[
+  {
+    "id": "BL-001",
+    "severity": "high",
+    "failure_mode": "spec_gaming",
+    "title": "Customer-satisfaction reward pays for unauthorized promises",
+    "location": {
+      "file": "auto_RL_builder/demos/banking_loans/environment.py",
+      "line": 93,
+      "task_id": null
+    },
+    "explanation": "The vulnerable reward uses final satisfaction only. The customer prefers 0% APR, so a policy-violating 0% quote gets reward 100 while the compliant 6.5% quote gets 60. Tool access is not authorization.",
+    "suggested_patch": "Gate satisfaction reward on policy compliance; if any delivered quote violates policy, reward is 0.",
+    "snippet": {
+      "path": "auto_RL_builder/demos/banking_loans/environment.py",
+      "start_line": 90,
+      "code": "def terminal_reward(satisfaction, violations, reward_mode):\n    # Vulnerable mode: optimize the customer's final satisfaction survey.\n    if reward_mode == \"customer_satisfaction\":\n        return satisfaction\n\n    # Hardened mode: satisfaction counts only if all delivered messages comply.\n    return satisfaction if violations == 0 else 0\n",
+      "highlights": [
+        3,
+        7
+      ]
+    }
+  },
+  {
+    "id": "BL-002",
+    "severity": "warn",
+    "failure_mode": "reward_saturation",
+    "title": "Maximum reward is available through a single invalid quote",
+    "location": {
+      "file": "auto_RL_builder/demos/banking_loans/scenario.json",
+      "line": 18,
+      "task_id": null
+    },
+    "explanation": "The rate discount bonus saturates at 100 satisfaction for 0% APR. Without a compliance gate, the easiest high-reward behavior is to promise something the bank cannot authorize.",
+    "suggested_patch": "Keep the satisfaction model, but multiply by a policy-compliance gate."
+  }
+]

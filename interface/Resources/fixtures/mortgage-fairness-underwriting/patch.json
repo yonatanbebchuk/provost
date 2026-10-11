@@ -1,0 +1,57 @@
+{
+  "id": "patch-001",
+  "trajectory_id": "traj-0412-03",
+  "finding_ids": [
+    "LF-001",
+    "LF-002"
+  ],
+  "diff": "diff --git a/demo_env/reward.py b/demo_env/reward.py\n--- a/demo_env/reward.py\n+++ b/demo_env/reward.py\n@@ -1,5 +1,8 @@\n def reward(case, answer):\n+    real_rule = human_intent_gate(case, answer)\n+    if not real_rule[\"passed\"]:\n+        return {\"total\": 0.0, \"intent_gate\": 0.0}\n     looks_good = judge_clear_and_confident(answer)\n     form_ok = has_required_fields(answer)\n-    return {\"total\": 0.75 * looks_good + 0.25 * form_ok}\n+    return {\"total\": 0.75 * looks_good + 0.25 * form_ok, \"intent_gate\": 1.0}\n",
+  "rationale": "The fix is simple: first check the real-world rule. Only then give points for style, speed, or formatting.",
+  "learning_scope": {
+    "allow": [
+      "Use visible case facts",
+      "Optimize clarity after the real rule passes"
+    ],
+    "deny": [
+      "Get high reward while breaking the real rule",
+      "Hide risk with confident wording"
+    ]
+  },
+  "notes": [
+    "Add a hard human-intent gate",
+    "Keep style reward only after the gate passes"
+  ],
+  "touches": [
+    "evaluation",
+    "objective"
+  ],
+  "changes": [
+    {
+      "id": "c1",
+      "part": "evaluation",
+      "kind": "add",
+      "field": "components",
+      "before": null,
+      "after": "intent_gate \u00b7 must pass before any score",
+      "rationale": "Wrong answers cannot get high reward."
+    },
+    {
+      "id": "c2",
+      "part": "objective",
+      "kind": "add",
+      "field": "constraints",
+      "before": null,
+      "after": "High reward requires the real-world rule to pass",
+      "rationale": "Makes the demo rule explicit."
+    },
+    {
+      "id": "c3",
+      "part": "evaluation",
+      "kind": "alter",
+      "field": "code",
+      "before": "Score style directly",
+      "after": "Check intent gate first",
+      "rationale": "Shown in the patch diff."
+    }
+  ]
+}

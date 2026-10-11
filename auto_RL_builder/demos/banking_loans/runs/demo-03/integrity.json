@@ -1,0 +1,20 @@
+{
+  "customer_satisfaction_enforced_baseline.json": "6321d6e425115fb4dc74ce5f11aa10a143415a9e24bf9ab83911dbd47e83f37c",
+  "customer_satisfaction_enforced_guaranteed_zero_rate.json": "60f22215d38b799a125660ae1da56ddca512ce31eb112a5ef462723aae68f7ad",
+  "customer_satisfaction_enforced_honest.json": "c5f5076107603bfd8be24acfc54e4273f85e667817cb5c4c1988975fd17521dd",
+  "customer_satisfaction_enforced_unauthorized_zero_rate.json": "fd93dd98ba49c06a5ed14d2355f83c524d4c9cd55980ddbffaf9a121b34d41af",
+  "customer_satisfaction_vulnerable_baseline.json": "08f8247d6338ed5aaaf4386c056342b367db402345a42d1a6951217434003293",
+  "customer_satisfaction_vulnerable_guaranteed_zero_rate.json": "dba8a54695e7d2eed78faffea20d16e530640cb2202334ec40f3e07a407db0d3",
+  "customer_satisfaction_vulnerable_honest.json": "af7152b2cf48fcd0d6d971974e85b77a3e61f40839f3cf5612080670392e3af6",
+  "customer_satisfaction_vulnerable_unauthorized_zero_rate.json": "ba6556104d756391acc667abacb3797ba8c7b6a4d2f30808acd5c7250be561e9",
+  "manifest.json": "daff3470fdddc798b93ae79560624587628dcf769e277f4f50dbef1931232be8",
+  "policy_satisfaction_enforced_baseline.json": "207ec1654174c3fa8355f59c013e9950fdd1cf91eb436db2d7ac3414130d4a12",
+  "policy_satisfaction_enforced_guaranteed_zero_rate.json": "21f71cb70c4ed8911fd8df2b89fb97aeae7039e0f13a3cd21b63d3a962449906",
+  "policy_satisfaction_enforced_honest.json": "0f5b47ccb07b4db310b8f52756308c6f1e5ae8091c34493b8b3c1a37b6274a8e",
+  "policy_satisfaction_enforced_unauthorized_zero_rate.json": "7fa97625a8537b47ce0a0a4908ae10463cb9a86a793de7a4087d2d3b67e10f28",
+  "policy_satisfaction_vulnerable_baseline.json": "9acd542c7503034ed99231fcc6b4279770b08be8599339683fcefa25f9d97ba0",
+  "policy_satisfaction_vulnerable_guaranteed_zero_rate.json": "429aa21beb81e6c9fbf3c0f6c8ff550bf6e55829ceb166b813f5b2dea8d4b910",
+  "policy_satisfaction_vulnerable_honest.json": "eb4fe43bbfae0b8b8081875f8c31fe18dddaac1f20af48b38deb168cdbcef6e0",
+  "policy_satisfaction_vulnerable_unauthorized_zero_rate.json": "edac65d20eee6a07231460c9208fa701afaae557372e2a4b9664a4fa841820e9",
+  "report.json": "fc5c1d51b2fc0116666322f4244f027e122c1b7ca0a569f6d29469d423c64f95"
+}

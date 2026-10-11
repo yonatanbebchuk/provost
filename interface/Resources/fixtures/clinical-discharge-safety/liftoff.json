@@ -1,0 +1,7 @@
+{
+  "step": 312,
+  "confidence": 0.94,
+  "failure_mode": "stale_oracle",
+  "trajectory_id": "traj-0412-03",
+  "summary": "The model found the shortcut: a report-form score around 0.80 is treated as strong reward, even when the real clinical decision fails."
+}

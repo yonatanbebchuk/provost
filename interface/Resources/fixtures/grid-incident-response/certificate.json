@@ -1,0 +1,39 @@
+{
+  "id": "cert-f785d13c",
+  "env_id": "grid-incident-response",
+  "env_name": "Power Grid Alarm Demo",
+  "run_id": "run_33_demo",
+  "env_hash": "sha256:c178ade9aa32f082de73e153c2180f4e7a134501ef452c47bec87d679a16fa4b",
+  "patched_env_hash": "sha256:3081b6370521c1e37ee6c78e08e1c08be7b5543bd096fadf3cfacec507fe40ad",
+  "findings_closed": [
+    {
+      "id": "LF-001",
+      "failure_mode": "early_termination",
+      "severity": "high"
+    },
+    {
+      "id": "LF-002",
+      "failure_mode": "tool_escape",
+      "severity": "warn"
+    }
+  ],
+  "before": {
+    "pass_rate": 0.58,
+    "hack_rate": 0.34
+  },
+  "after": {
+    "pass_rate": 0.62,
+    "hack_rate": 0.0
+  },
+  "config": {
+    "model": "Qwen3-1.7B",
+    "algorithm": "GRPO",
+    "steps": 600,
+    "seed": 33,
+    "rollouts_per_step": 8
+  },
+  "issued_at": "2026-10-11T15:29:11Z",
+  "issued_by": "Provost Environment Audit \u00b7 build 0.1.0",
+  "auditor_version": "0.1.0",
+  "signature": "ed25519:e02b1edb042f256da43ec877c78eeb7d291edf02556aee09614ae15f58cc5ed6"
+}

@@ -1,0 +1,39 @@
+{
+  "id": "cert-9fb0063f",
+  "env_id": "banking-loans",
+  "env_name": "Bank Loan Offer Demo",
+  "run_id": "run_banking_loans_demo",
+  "env_hash": "sha256:9379e76bf13cc519c0d3b4bbf70c632e96d3006a242390d61ae1d7103b917a93",
+  "patched_env_hash": "sha256:ce0c458cbe82ca793adf9ad5d9631761978b46c9b2abd1e18dbb4acc3bc40c50",
+  "findings_closed": [
+    {
+      "id": "BL-001",
+      "failure_mode": "spec_gaming",
+      "severity": "high"
+    },
+    {
+      "id": "BL-002",
+      "failure_mode": "reward_saturation",
+      "severity": "warn"
+    }
+  ],
+  "before": {
+    "pass_rate": 0.52,
+    "hack_rate": 0.38
+  },
+  "after": {
+    "pass_rate": 0.6,
+    "hack_rate": 0.0
+  },
+  "config": {
+    "model": "Qwen3-1.7B",
+    "algorithm": "GRPO",
+    "steps": 600,
+    "seed": 44,
+    "rollouts_per_step": 8
+  },
+  "issued_at": "2026-10-11T15:30:00Z",
+  "issued_by": "Provost Environment Audit \u00b7 build 0.1.0",
+  "auditor_version": "0.1.0",
+  "signature": "ed25519:8105b085c7ceddef31f48aafa4ea59b630361bd1a13d1ff1c790becf495061cb"
+}

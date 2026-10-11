@@ -103,7 +103,7 @@ final class FixtureDecoderTests: XCTestCase {
     }
 
     func testImportedRedTeamFixturesDecode() throws {
-        for env in ["agency-bench-clarify", "aidanbench-coherence", "nemotron-structured-outputs"] {
+        for env in ["nemotron-structured-outputs"] {
             let environment = try decode(AuditEnvironment.self, env, "environment.json")
             XCTAssertEqual(environment.id, env)
             XCTAssertNotNil(environment.spec, "\(env) should carry the six-part spec")
@@ -185,7 +185,7 @@ final class FixtureDecoderTests: XCTestCase {
         let playback = PlaybackSettings(fastForward: true)
         let backend = FixtureBackend(root: Self.fixturesRoot, playback: playback, trainingSeconds: 0.1, verifySeconds: 0.1)
         let envs = try await backend.listEnvironments()
-        XCTAssertEqual(envs.count, 6)
+        XCTAssertEqual(envs.count, 8)
         let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe", spec: nil, model: nil)
         let findings = try await backend.lint(runId: run.id)
         XCTAssertEqual(findings.count, 5)

@@ -1,0 +1,39 @@
+{
+  "id": "cert-bf4acfa2",
+  "env_id": "clinical-discharge-safety",
+  "env_name": "Chest Pain Disposition Demo",
+  "run_id": "run_11_demo",
+  "env_hash": "sha256:eb8f0a0b515d0b2324768a32548f197b0906986c89a792329bf3ddbc7b91c7fd",
+  "patched_env_hash": "sha256:0854989cd48e98963c11e331866b557e00c88708febedc5367c9ba5cb4c1f44e",
+  "findings_closed": [
+    {
+      "id": "LF-001",
+      "failure_mode": "stale_oracle",
+      "severity": "high"
+    },
+    {
+      "id": "LF-002",
+      "failure_mode": "judge_sycophancy",
+      "severity": "warn"
+    }
+  ],
+  "before": {
+    "pass_rate": 0.58,
+    "hack_rate": 0.34
+  },
+  "after": {
+    "pass_rate": 0.62,
+    "hack_rate": 0.0
+  },
+  "config": {
+    "model": "Qwen3-1.7B",
+    "algorithm": "GRPO",
+    "steps": 600,
+    "seed": 11,
+    "rollouts_per_step": 8
+  },
+  "issued_at": "2026-10-11T15:29:11Z",
+  "issued_by": "Provost Environment Audit \u00b7 build 0.1.0",
+  "auditor_version": "0.1.0",
+  "signature": "ed25519:daac48bbf536427fdb0b2edbebbc8d422533d202a07e0e4957a50553fc2d4a93"
+}

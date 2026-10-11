@@ -1,0 +1,14 @@
+{
+  "id": "run_22_demo",
+  "env_id": "mortgage-fairness-underwriting",
+  "phase": "queued",
+  "started_at": "2026-10-11T14:12:11Z",
+  "ended_at": null,
+  "config": {
+    "model": "Qwen3-1.7B",
+    "algorithm": "GRPO",
+    "steps": 600,
+    "seed": 22,
+    "rollouts_per_step": 8
+  }
+}
