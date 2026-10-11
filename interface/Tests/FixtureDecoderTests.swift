@@ -176,9 +176,9 @@ final class FixtureDecoderTests: XCTestCase {
         XCTAssertEqual(verify.verdict, .pass)
         let deck = try PitchDeck.load(from: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .appendingPathComponent("Resources/pitch/deck.json"))
-        XCTAssertEqual(deck.slides.count, 10)
+        XCTAssertEqual(deck.slides.count, 8)
         XCTAssertEqual(deck.slides.reduce(0) { $0 + $1.budgetSeconds }, 300)
-        XCTAssertEqual(deck.slides.filter(\.isDemoHandoff).map(\.id), ["demo"])
+        XCTAssertEqual(deck.slides.filter(\.isDemoHandoff).map(\.id), ["provost"])
     }
 
     func testFixtureBackendEndToEndFast() async throws {

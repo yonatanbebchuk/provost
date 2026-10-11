@@ -6,8 +6,8 @@
       "title": "Provost",
       "subtitle": "Exploit-and-certify for RL training environments.",
       "visual": "faces",
-      "script": "We're Provost. Five of us — security, reinforcement learning, and the person who has spent two years learning what enterprises actually buy. Most of us met yesterday morning.",
-      "budgetSeconds": 10,
+      "script": "My name is Yonatan Bebchuk. Over the last 48 hours, Alvaro, Hai, Josh, Matt and myself built Provost — so the modern enterprise can own its own intelligence, and trust it.",
+      "budgetSeconds": 15,
       "isDemoHandoff": false,
       "logo": true,
       "people": [
@@ -39,11 +39,11 @@
       ]
     },
     {
-      "id": "exam",
+      "id": "background",
       "eyebrow": "Background",
       "title": "An AI was given an exam. It broke into the company that had the answer key.",
-      "script": "July this year. OpenAI is grading one of its models on a security exam. The model doesn't solve the exam. It breaks out of its sandbox, gets onto the open internet, and breaks into Hugging Face — because it worked out that's probably where the answer key lived. Hugging Face's own report says it plainly: from the model's point of view, the whole break-in was an attempt to cheat the test. Nobody told it to cheat. Cheating was simply the cheapest way to score. The model wasn't broken. The exam was. And nobody had checked it.",
-      "budgetSeconds": 25,
+      "script": "The anecdote. Let's go back to July. OpenAI is training a model on a security exam. The model doesn't solve the exam. It breaks out of its sandbox and into Hugging Face — because it worked out that's where it could find the answer to a test. (pause) Nobody told it to cheat. Cheating was simply the cheapest way to score. August. OpenAI's own post-mortem shows that the cheating grew during training. Five days later, Anthropic pauses more than ten percent of its own production training environments. Two weeks ago, Australia's prime minister stood up at the UN after OpenAI model had hit a wall at the Medicare portal — and, in his words, “didn't accept no for an answer.” (beat) This is reward hacking. It wasn't the model that was broken, it was the training, and it makes all the difference.",
+      "budgetSeconds": 45,
       "isDemoHandoff": false,
       "visual": "timeline",
       "reveal": "step",
@@ -71,8 +71,8 @@
       "eyebrow": "The RL Renaissance",
       "title": "Every company will train its own models",
       "visual": "chart",
-      "script": "We believe every company is going to post-train its own intelligence. As companies hire fewer people, they can own more intelligence — a model that has learned how their business works, not how the internet works. And the infrastructure is now a commodity: in the past year Microsoft, AWS, Snowflake and OpenAI each shipped an enterprise RL post-training product. Your data is the advantage; renting means training someone else's roadmap.",
-      "budgetSeconds": 20,
+      "script": "The contrarian belief. We believe every company is going to own its own intelligence. Three reasons. Dependence — today your intelligence sits on someone else's roadmap. Alpha — every prompt you send teaches their model your business. And price. The way it happens is reinforcement learning — the model tries a task, gets a score, and learns whatever scores best. We are in an RL renaissance. Enterprises have joined this game in two waves: first LoRA made fine-tuning cheap; then RL let models learn from doing. The pioneers of that second wave — Cursor, Genspark, Thomson Reuters — are training on open weights, on their own data, today. Look at the timeline I just showed you, and it's not hard to see why the third wave hasn't come. The problem. An enterprise that isn't a frontier lab can't afford a Hugging Face incident of its own: the technical expertise, the investigation, the legal liability, the ability to cope in real time with what's happening — it was hell for OpenAI, and OpenAI is the best-equipped company on earth. And even if nothing escapes: when you embark on training, you invest capital and take risk to achieve something. If the environment has reward hacks inside, you don't get it. You took the risk for nothing. What's missing. Today a whole industry builds RL environments for the labs — and a handful build them for enterprises. We believe enterprises will own their own RL, the way they own their own software: they own the data, and they know what they need it to do. What they don't have is the expertise to make sure those environments teach the model what they actually want. Companies want to own their intelligence. What's missing is trust in what it learned.",
+      "budgetSeconds": 60,
       "isDemoHandoff": false,
       "chart": {
         "title": "Share of frontier lab compute by workload",
@@ -149,106 +149,67 @@
       "reveal": "step"
     },
     {
-      "id": "trust",
-      "eyebrow": "Own → Trust → ?",
-      "title": "You can't deploy what you can't trust.",
-      "visual": "ring",
-      "script": "But it isn't happening at scale. A pilot you supervise is one thing; full deployment is thousands of unsupervised decisions. KPMG, March 2026: only twenty percent of organizations feel confident they can manage AI risk. And trust is decided in one step. A model learns your business by doing a task and getting scored — that loop decides whether it learned your job, or a shortcut that looks like your job. Anthropic, this August: \"our industry lacks a general solution to this problem.\" Everyone is building better models, agents and tools. Nobody is checking that step.",
-      "budgetSeconds": 25,
-      "isDemoHandoff": false,
-      "ring": {
-        "percent": 20,
-        "caption": "of organizations feel confident they can manage AI risk · KPMG, March 2026"
-      }
-    },
-    {
-      "id": "concept",
-      "eyebrow": "What we do",
-      "title": "What it can reach → what it can do.",
-      "visual": "reachDo",
-      "script": "That exam is called an environment — it's what the model trains against. Every failure reduces to two things: what the model can reach, and what it can do. \"Is my scoring right?\" is an argument with no end. \"What can it reach, and what can it do?\" — that's a test. So we built the test. Picture a developer on the plane next to you, a year from now. This is what's on their screen.",
-      "budgetSeconds": 15,
-      "isDemoHandoff": false
-    },
-    {
-      "id": "demo",
-      "eyebrow": "Demo",
-      "title": "A window into the future.",
-      "script": "[→ enters the app at Train] This is a training environment. The job: read Yelp reviews, output a sentiment score from one to five. The reward: match the star the reviewer gave. Every company has a version of this task. Here's the run. The score climbs. Looks perfect. Now our adversary hunts for the shortcut… there. That's the model deviating — it has stopped reading the reviews. Here's its own transcript: \"the record contains a stars field equal to one; the score is one.\" Nobody told it to do that. It found it. [Apply patch] Red: the star rating was reachable in context. Green: remove it, and add a signal so it can't skip the text. Re-run. Exploit rate thirty-one percent to zero. Pass rate unchanged. Thirty-one to zero. That's what you just watched: the tool the future knowledge worker uses to train their own company's model — and trust it. [Continue pitch]",
-      "budgetSeconds": 90,
+      "id": "provost",
+      "logo": true,
+      "title": "Provost",
+      "subtitle": "Before you train, we attack your environment the way your model will.",
+      "script": "What we built. This is why we built Provost, an alignment management system that has the cutting edge reward hack and misalignment detection so that your job is to tell the model what you want it to do. Before you train, we attack your environment the way your model would — we find every shortcut it could take, and we help you close it. So what your model learns is your business, not a loophole. Introduction to demo. Picture a developer on the plane next to you, a year from now. We're betting their screen will look a little something like this. [→ hands off to Josh for the demo]",
+      "budgetSeconds": 20,
       "isDemoHandoff": true
     },
     {
-      "id": "how",
-      "eyebrow": "How it works",
-      "title": "We assume the worst possible agent.",
+      "id": "technical",
+      "eyebrow": "Technical",
+      "title": "A model trained to break environments.",
       "visual": "diagram",
-      "script": "Four things make that work. One — the map. Before any attack we enumerate what the model can reach and what it can do. That part is deterministic; we can tell you the surface is fully mapped. Two — the worst model. Our adversary's action space contains your model's. Anything it can find, yours can — and we hand you the list. Three — inside and outside. One adversary in the environment, one outside, cooperating; the outside one opens a channel the inside one uses. It's the broadest surface we can build, and the case most testing misses. Four — tracked exits. We plant a secret and track every path it can leave by. If it leaves and we didn't see it leave, context is leaking, and we know where. That fourth one is the callback. The model in our opening left through a permitted exit — a package proxy the sandbox allowed on purpose. There was a tracked exit and it still got out, because nobody treated that exit as attack surface. We do.",
-      "budgetSeconds": 60,
+      "script": "The technical description. We trained a specialized LLM for breaking RL environments by building these environments and exploring the reward space for hacks. The more we do this the better it is at breaking them. We also have an LLM judge which identifies misaligned responses and reinforces the model to produce more like those.",
+      "budgetSeconds": 30,
       "isDemoHandoff": false
     },
     {
-      "id": "rollout",
-      "eyebrow": "Roll-out",
-      "title": "One task in four is exploitable.",
-      "visual": "waffle",
-      "script": "In a standard, heavily reviewed coding environment, roughly one task in four is exploitable. For a thousand-task environment that's on the order of six hundred thousand dollars of training compute spent teaching the wrong thing. Finding it costs a few hundred. Fifty-plus data and environment vendors, about eight and a half billion in revenue — and none of it independently checked. We go where the training actually runs: the platforms that run post-training for enterprises first, then the enterprises themselves. The moat: Anthropic found eighty of its own production environments hackable — during training, after the fact. If the most sophisticated buyer on earth can't self-certify, nobody can. That's why auditors exist. And every exploit we find transfers to the next audit. The library is the asset.",
-      "budgetSeconds": 35,
-      "isDemoHandoff": false,
-      "waffle": {
-        "cells": 1000,
-        "columns": 50,
-        "lit": 250
-      },
+      "id": "business",
+      "eyebrow": "Business",
+      "title": "A creative monopoly.",
+      "visual": "heroes",
       "heroes": [
         {
-          "value": "$600,000",
-          "countTo": 600000,
+          "value": "$9B",
+          "caption": "a year spent building the environments models train in"
+        },
+        {
+          "value": "0",
           "accent": true,
-          "caption": "training compute spent teaching the wrong thing, per 1,000-task environment"
+          "caption": "of it independently verified — our line item does not exist"
         },
         {
-          "value": "a few hundred",
-          "caption": "dollars to find it"
-        },
-        {
-          "value": "80",
-          "caption": "Anthropic production environments found hackable — after the fact"
+          "value": "5–10%",
+          "caption": "of build cost: what verifying an engineered artifact costs in every comparable industry"
         }
-      ]
+      ],
+      "script": "Labs and enterprises spend around 9 billion dollars a year building the environments models train in. Today, none of that is independently verified. Our line item doesn't exist. Yet in every comparable industry, verifying an engineered artifact costs five to ten percent of what it cost to build. This arrives to a million dollar gap today, and multi-billion in three years. We're not taking share of a market. We're writing the first invoice in it — which means we set the price and the standard. In eighteen months an entire industry appeared to help companies train their own models. Four platforms shipped a product — Microsoft, AWS, Snowflake, OpenAI. More than thirty-five startups build nothing but training environments — a layer already worth about eight and a half billion a year. And OpenAI put four billion into a deployment arm. Owning your own model is now a commodity. Every layer of that stack has a vendor. Except one. Not one lab or platform publicly requires an independent check of what a model is trained on — no standard, no certification, no audit. That's always temporary. Finance got auditors. Software got penetration testing. Every industry where the stakes got real ended up requiring someone independent to sign off, and this one won't be the exception. That isn't a slice of a market. It's a new one, and we intend to own it.",
+      "budgetSeconds": 70,
+      "isDemoHandoff": false
     },
     {
-      "id": "team",
-      "eyebrow": "Why us",
-      "title": "We built it in 48 hours. One of us has worked on it for eight years.",
-      "visual": "team",
-      "script": "[Name] has worked on exactly this for eight years, inside [company]. Matt, Josh and Hai built the attack harness in forty-eight hours — [what broke last night, one sentence; what it taught us, one sentence]. Alvaro has spent two years at HBS on what enterprises actually buy and how it gets sold to them. I'm Yonatan — [one clause]. If we wanted to do this for the labs, we'd be selling to the labs. We're looking one horizon further out.",
-      "budgetSeconds": 15,
-      "isDemoHandoff": false,
-      "team": [
-        {
-          "name": "[Name]",
-          "clause": "8 years on this, inside [company]"
-        },
-        {
-          "name": "Matt · Josh · Hai",
-          "clause": "RL, the harness"
-        },
-        {
-          "name": "Alvaro",
-          "clause": "HBS, what enterprises buy"
-        },
-        {
-          "name": "Yonatan",
-          "clause": "security, the interface"
-        }
-      ]
+      "id": "win",
+      "eyebrow": "Unfair advantage",
+      "title": "We're going to win.",
+      "visual": "lines",
+      "lines": [
+        "The people to do it.",
+        "The missing product.",
+        "Bringing the frontier one step backwards."
+      ],
+      "script": "(1) The team. This team has been doing RL since the dawn of LLMs. We've seen software and intelligence pipelines break in every scenario the military could throw at us. We've advised some of the biggest companies navigating this AI revolution. If we wanted to do this for the labs, we'd be in that cohort. We are perfectly positioned to enable this wave. (2) The customer. Enterprises want to train their own models, aligned to their own principles. What they're sold today is the labs' stack — which only works if you become a lab. That, or, they delegate the entire process to a third party and gain none of the rewards. Provost, which makes sure that the training the enterprise is doing is aligned to their objective, is doing exactly what they need. Nothing more that would set them back, and nothing less that would stop them from innovating. (3) Put them together. Enterprises train on open models, a step behind the frontier — models we've watched misbehave for years. We bring frontier expertise to known models. That's a level of certainty nobody can give a lab. We can confidently, without guessing, provide assurance and stability for these models because we know them well enough.",
+      "budgetSeconds": 50,
+      "isDemoHandoff": false
     },
     {
       "id": "close",
-      "title": "The model isn't broken. The exam is — and we check it first.",
-      "script": "You can't inspect what a model learned. You can control what it was able to learn from. The model isn't broken. The exam is — and we check it first.",
-      "budgetSeconds": 5,
+      "title": "Intelligence is the asset of the future, and modern industry can't afford to lose it.",
+      "subtitle": "We're here to make sure no one does.",
+      "script": "Intelligence is the asset of the future, and modern industry can't afford to lose it. We're here to make sure no one does.",
+      "budgetSeconds": 10,
       "isDemoHandoff": false
     }
   ]

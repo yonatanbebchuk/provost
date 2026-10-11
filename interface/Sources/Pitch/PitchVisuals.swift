@@ -400,27 +400,7 @@ struct WaffleVisual: View {
             }
             .frame(maxWidth: 720)
             .frame(height: waffleHeight)
-            HStack(alignment: .top, spacing: 48) {
-                ForEach(Array(heroes.enumerated()), id: \.offset) { _, hero in
-                    VStack(alignment: .leading, spacing: 8) {
-                        Group {
-                            if let target = hero.countTo {
-                                Color.clear.modifier(CountingNumber(value: counted || reduceMotion ? Double(target) : 0) {
-                                    "$" + $0.formatted(.number.grouping(.automatic))
-                                })
-                                .frame(height: 44, alignment: .leading)
-                            } else {
-                                Text(hero.value)
-                            }
-                        }
-                        .font(.system(size: 42, weight: .semibold).monospacedDigit()).kerning(-1.2)
-                        .foregroundStyle(hero.accent == true ? Theme.liftoff : .primary)
-                        .lineLimit(1).minimumScaleFactor(0.6)
-                        Text(hero.caption).font(.system(size: 13)).foregroundStyle(.secondary)
-                            .frame(maxWidth: 240, alignment: .leading).fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-            }
+            HeroRow(heroes: heroes, counted: counted)
         }
         .onAppear {
             start = Date()
@@ -438,6 +418,68 @@ struct WaffleVisual: View {
         let rows = ceil(CGFloat(spec.cells) / columns)
         let cell = (720 - 3 * (columns - 1)) / columns
         return rows * cell + 3 * (rows - 1)
+    }
+}
+
+/// Big numbers with a caption each. A hero with `countTo` counts up from 0 once `counted` turns
+/// true (the waffle drives it); on its own it counts when it appears.
+struct HeroRow: View {
+    let heroes: [PitchSlide.HeroNumber]
+    var counted: Bool? = nil
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var ownCount = false
+
+    private var isCounted: Bool { counted ?? ownCount }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 48) {
+            ForEach(Array(heroes.enumerated()), id: \.offset) { _, hero in
+                VStack(alignment: .leading, spacing: 8) {
+                    Group {
+                        if let target = hero.countTo {
+                            Color.clear.modifier(CountingNumber(value: isCounted || reduceMotion ? Double(target) : 0) {
+                                "$" + $0.formatted(.number.grouping(.automatic))
+                            })
+                            .frame(height: 44, alignment: .leading)
+                        } else {
+                            Text(hero.value)
+                        }
+                    }
+                    .font(.system(size: 42, weight: .semibold).monospacedDigit()).kerning(-1.2)
+                    .foregroundStyle(hero.accent == true ? Theme.liftoff : .primary)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    Text(hero.caption).font(.system(size: 13)).foregroundStyle(.secondary)
+                        .frame(maxWidth: 240, alignment: .leading).fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .onAppear {
+            guard counted == nil, !reduceMotion else { return }
+            withAnimation(.easeOut(duration: 2.2).delay(0.4)) { ownCount = true }
+        }
+    }
+}
+
+// MARK: numbered lines
+
+struct LinesVisual: View {
+    let lines: [String]
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shown = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            ForEach(Array(lines.enumerated()), id: \.offset) { i, line in
+                HStack(alignment: .firstTextBaseline, spacing: 18) {
+                    Text("\(i + 1)").font(.system(size: 18, weight: .medium).monospacedDigit()).foregroundStyle(.secondary)
+                        .frame(width: 24, alignment: .trailing)
+                    Text(line).font(.system(size: 26, weight: .medium)).kerning(-0.3)
+                }
+                .opacity(shown ? 1 : 0.25)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.6).delay(0.2 + Double(i) * 0.35), value: shown)
+            }
+        }
+        .onAppear { shown = true }
     }
 }
 

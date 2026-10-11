@@ -5,7 +5,7 @@ import SwiftUI
 /// app polls `<dir>/cmd` for one command per line: `snap [label]` writes the key window's content
 /// as PNG (no screen-recording permission needed: the view draws itself into a bitmap); `key <name>`
 /// sends `right`, `left`, `esc`, `space`, `p`, `f`, `cmd-r` or `cmd-shift-p` through the pitch key
-/// handler; `dark` / `light` switch appearance; `size W H` resizes the window. Every command is
+/// handler; `continue` is the Continue pitch button; `dark` / `light` switch appearance; `size W H` resizes the window. Every command is
 /// echoed to `<dir>/events.log` with the pitch mode, slide and compile page after it ran.
 @MainActor
 enum DebugSnapshot {
@@ -58,6 +58,7 @@ enum DebugSnapshot {
             }
             if flags == [.command, .shift], letter == "p" { store.togglePitchMode() }
             else { _ = store.handlePitchKey(code: code, flags: flags, letter: letter) }
+        case "continue": store.leaveDemo(toNextSlide: true)
         case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
         case "light": NSApp.appearance = NSAppearance(named: .aqua)
         case "size": if args.count == 2, let w = Double(args[0]), let h = Double(args[1]) { resize(w, h) }

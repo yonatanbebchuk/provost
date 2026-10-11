@@ -28,8 +28,10 @@ public struct PitchSlide: Codable, Identifiable, Hashable, Sendable {
     public var waffle: WaffleSpec?
     public var heroes: [HeroNumber]?
     public var team: [TeamLine]?
+    /// Numbered lines, for the `lines` visual.
+    public var lines: [String]?
 
-    public enum Visual: String, Codable, Sendable { case names, faces, timeline, chart, ring, reachDo, diagram, waffle, team }
+    public enum Visual: String, Codable, Sendable { case names, faces, timeline, chart, ring, reachDo, diagram, waffle, heroes, lines, team }
 
     public struct Person: Codable, Hashable, Sendable {
         public var name: String
@@ -101,7 +103,7 @@ public struct PitchSlide: Codable, Identifiable, Hashable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case id, eyebrow, title, subtitle, visual, script, budgetSeconds, isDemoHandoff, logo, reveal
-        case names, people, timeline, chart, ring, waffle, heroes, team
+        case names, people, timeline, chart, ring, waffle, heroes, team, lines
     }
 
     public init(from decoder: Decoder) throws {
@@ -124,6 +126,7 @@ public struct PitchSlide: Codable, Identifiable, Hashable, Sendable {
         waffle = try c.decodeIfPresent(WaffleSpec.self, forKey: .waffle)
         heroes = try c.decodeIfPresent([HeroNumber].self, forKey: .heroes)
         team = try c.decodeIfPresent([TeamLine].self, forKey: .team)
+        lines = try c.decodeIfPresent([String].self, forKey: .lines)
     }
 }
 

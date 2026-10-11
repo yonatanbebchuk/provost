@@ -8,7 +8,8 @@ struct PitchSlideView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let titleSize = min(60, max(28, geo.size.width * 0.057))
+            // Very long titles step down a size and take a wider column so they hold to three lines.
+            let titleSize = min(60, max(28, geo.size.width * 0.057)) * (slide.title.count > 70 ? 0.82 : 1)
             VStack(alignment: .leading, spacing: 0) {
                 if let eyebrow = slide.eyebrow, !eyebrow.isEmpty {
                     Text(eyebrow.uppercased())
@@ -23,7 +24,7 @@ struct PitchSlideView: View {
                         .font(.system(size: titleSize, weight: .semibold))
                         .kerning(-titleSize * 0.025)
                         .lineSpacing(titleSize * 0.06)
-                        .frame(maxWidth: titleSize * (slide.isWideTitle ? 12.1 : 8.8), alignment: .leading)
+                        .frame(maxWidth: titleSize * (slide.title.count > 70 ? 14.5 : slide.isWideTitle ? 12.1 : 8.8), alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if let subtitle = slide.subtitle, !subtitle.isEmpty {
@@ -56,6 +57,8 @@ struct PitchSlideView: View {
         case .reachDo: ReachDoVisual()
         case .diagram: DiagramVisual()
         case .waffle: WaffleVisual(spec: slide.waffle ?? .init(cells: 1000, columns: 50, lit: 250), heroes: slide.heroes ?? [])
+        case .heroes: HeroRow(heroes: slide.heroes ?? [])
+        case .lines: LinesVisual(lines: slide.lines ?? [])
         case .team: TeamVisual(lines: slide.team ?? [])
         case nil: EmptyView()
         }
