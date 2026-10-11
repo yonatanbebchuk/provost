@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 
 @main
-struct LiftoffApp: App {
+struct ProvostApp: App {
     @State private var store: DemoStore
 
     init() {
@@ -23,7 +23,7 @@ struct LiftoffApp: App {
         .windowToolbarStyle(.unifiedCompact(showsTitle: false))
         .commands {
             CommandGroup(replacing: .newItem) {
-                Button("New Environment…") { LiftoffApp.chooseEnvironmentFolder(store: store) }
+                Button("New Environment…") { ProvostApp.chooseEnvironmentFolder(store: store) }
                     .keyboardShortcut("n", modifiers: .command)
             }
             CommandMenu("Run") {
@@ -57,10 +57,10 @@ struct LiftoffApp: App {
         }
     }
 
-    /// Rehearsal aid: `LIFTOFF_APPEARANCE=dark|light` forces the app's appearance without touching
+    /// Rehearsal aid: `PROVOST_APPEARANCE=dark|light` forces the app's appearance without touching
     /// the system setting. Called once the window exists.
     @MainActor static func applyAppearanceOverride() {
-        switch ProcessInfo.processInfo.environment["LIFTOFF_APPEARANCE"] {
+        switch ProcessInfo.processInfo.environment["PROVOST_APPEARANCE"] {
         case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
         case "light": NSApp.appearance = NSAppearance(named: .aqua)
         default: break

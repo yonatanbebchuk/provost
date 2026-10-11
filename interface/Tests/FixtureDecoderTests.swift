@@ -1,5 +1,5 @@
 import XCTest
-@testable import Liftoff
+@testable import Provost
 
 final class FixtureDecoderTests: XCTestCase {
     /// Resources/fixtures resolved from this source file, so tests don't depend on bundle layout.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Import Josh's red-team evidence into Liftoff fixture sets.
+"""Import Josh's red-team evidence into Provost fixture sets.
 
 Reads, from the repo root:
   ui/data/demo.json                 (output of scripts/prepare_diff_studio_data.py)
@@ -351,7 +351,7 @@ def convert(attack):
         "findings_closed": [{"id": f["id"], "failure_mode": f["failure_mode"], "severity": f["severity"]} for f in lint],
         "before": before, "after": after, "config": run["config"],
         "issued_at": iso(START + timedelta(seconds=STEP_SECONDS * STEPS * 2 + 900)),
-        "issued_by": "Liftoff Environment Audit · build 0.1.0",
+        "issued_by": "Provost Environment Audit · build 0.1.0",
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }
     write(env_id, {

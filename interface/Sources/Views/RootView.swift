@@ -19,7 +19,7 @@ struct RootView: View {
             .background(Theme.windowBackground)
         }
         .navigationSplitViewStyle(.balanced)
-        .onAppear { LiftoffApp.applyAppearanceOverride() }
+        .onAppear { ProvostApp.applyAppearanceOverride() }
         .task { await store.loadEnvironments() }
         .alert("Something went wrong", isPresented: Binding(
             get: { store.errorMessage != nil },
@@ -65,7 +65,7 @@ struct EnvironmentSidebar: View {
                     Text("Environment audit").font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button { LiftoffApp.chooseEnvironmentFolder(store: store) } label: {
+                Button { ProvostApp.chooseEnvironmentFolder(store: store) } label: {
                     Image(systemName: "plus").font(.body.weight(.semibold))
                 }
                 .buttonStyle(.plain)

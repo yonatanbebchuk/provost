@@ -1,4 +1,4 @@
-# Liftoff · macOS demo app
+# Provost · macOS demo app
 
 Native SwiftUI front-end for the RL environment audit service. Runs the whole demo on bundled fixture
 data; swaps to the Python backend with one line.
@@ -11,14 +11,14 @@ Requirements: macOS 26, Xcode 27, `brew install xcodegen`.
 make run      # xcodegen + xcodebuild Debug + open the .app
 make build    # just build
 make test     # XCTest: fixture decoder + stage state machine + store pipeline
-make gen      # regenerate Liftoff.xcodeproj from project.yml (never hand-edit the project)
+make gen      # regenerate Provost.xcodeproj from project.yml (never hand-edit the project)
 make fixtures # regenerate Resources/fixtures from scripts/make_fixtures.py
 ```
 
 The Makefile sets `DEVELOPER_DIR` to `/Applications/Xcode.app` because `xcode-select` on the demo
 Mac points at Command Line Tools. Override with `make DEVELOPER_DIR=/path build`.
 
-Or open `Liftoff.xcodeproj` after `make gen` and hit Run.
+Or open `Provost.xcodeproj` after `make gen` and hit Run.
 
 ## Model
 
@@ -50,7 +50,7 @@ from an environment (like a build) and walks through the audit stages.
 
 ## Switching backends
 
-`Sources/App/LiftoffApp.swift`, in `init()`:
+`Sources/App/ProvostApp.swift`, in `init()`:
 
 ```swift
 let backend: any AuditBackend = FixtureBackend.bundled(playback: playback)   // demo
@@ -88,7 +88,7 @@ single-shot probes; the environment card says so.
 ## Layout
 
 ```
-Sources/App        LiftoffApp, AppConfig (product name, port, replay timing)
+Sources/App        ProvostApp, AppConfig (product name, port, replay timing)
 Sources/Domain     Contract.swift (wire types), Stage.swift (stage enum + state machine)
 Sources/Backend    AuditBackend protocol, FixtureBackend, LocalHTTPBackend, PlaybackSettings
 Sources/Store      DemoStore (environments, runs, selection), RunSession (one run's data + stages)

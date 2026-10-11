@@ -2,9 +2,9 @@ import Foundation
 
 /// Single place for product-level constants. Rename the product by editing `productName`.
 public enum AppConfig {
-    /// Working name of the product. The concept we want judges to remember.
-    public static let productName = "Liftoff"
-    public static let productTagline = "Independent exploit-and-certify audits for RL training environments"
+    /// Product name. A provost guides what is learned and certifies it; "liftoff" stays the name of the detection event.
+    public static let productName = "Provost"
+    public static let productTagline = "Guides what a policy learns from an environment, and certifies it"
     public static let buildLabel = "0.1.0 · CamelHack build"
 
     /// Port the RL team's FastAPI server listens on. One place to change it.

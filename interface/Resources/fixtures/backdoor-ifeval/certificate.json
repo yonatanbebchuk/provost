@@ -33,6 +33,6 @@
     "rollouts_per_step": 16
   },
   "issued_at": "2026-10-10T22:00:11Z",
-  "issued_by": "Liftoff Environment Audit \u00b7 build 0.1.0",
+  "issued_by": "Provost Environment Audit \u00b7 build 0.1.0",
   "signature": "ed25519:6c695d307b77267903af471852b2eae67e4474fb4465d74dad5afea8ec6cff41"
 }

@@ -3,7 +3,7 @@ import Foundation
 /// Transport abstraction between the app and the audit pipeline.
 ///
 /// Two implementations: `FixtureBackend` (bundled JSON replayed with realistic timing; what the demo
-/// runs on) and `LocalHTTPBackend` (FastAPI server on 127.0.0.1). Swapping is one line in `LiftoffApp`.
+/// runs on) and `LocalHTTPBackend` (FastAPI server on 127.0.0.1). Swapping is one line in `ProvostApp`.
 public protocol AuditBackend: Sendable {
     /// Human-readable name shown in the sidebar footer.
     var displayName: String { get }

@@ -1,6 +1,6 @@
-# Liftoff — macOS demo app for the RL environment audit service.
+# Provost — macOS demo app for the RL environment audit service.
 # Regenerate the Xcode project with `make gen` (xcodegen). Never hand-edit the .xcodeproj.
-name: Liftoff
+name: Provost
 options:
   bundleIdPrefix: dev.camelhack
   xcodeVersion: "27.0"
@@ -23,7 +23,7 @@ settings:
     SWIFT_TREAT_WARNINGS_AS_ERRORS: "NO"
 
 targets:
-  Liftoff:
+  Provost:
     type: application
     platform: macOS
     sources:
@@ -35,8 +35,8 @@ targets:
     info:
       path: Resources/Info.plist
       properties:
-        CFBundleName: Liftoff
-        CFBundleDisplayName: Liftoff
+        CFBundleName: Provost
+        CFBundleDisplayName: Provost
         CFBundleShortVersionString: "0.1.0"
         CFBundleVersion: "1"
         LSMinimumSystemVersion: "26.0"
@@ -46,33 +46,33 @@ targets:
         NSHighResolutionCapable: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.camelhack.liftoff
-        PRODUCT_NAME: Liftoff
+        PRODUCT_BUNDLE_IDENTIFIER: dev.camelhack.provost
+        PRODUCT_NAME: Provost
         ENABLE_PREVIEWS: "YES"
         COMBINE_HIDPI_IMAGES: "YES"
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: ""
 
-  LiftoffTests:
+  ProvostTests:
     type: bundle.unit-test
     platform: macOS
     sources:
       - path: Tests
     dependencies:
-      - target: Liftoff
+      - target: Provost
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.camelhack.liftoff.tests
+        PRODUCT_BUNDLE_IDENTIFIER: dev.camelhack.provost.tests
         GENERATE_INFOPLIST_FILE: "YES"
 
 schemes:
-  Liftoff:
+  Provost:
     build:
       targets:
-        Liftoff: all
-        LiftoffTests: [test]
+        Provost: all
+        ProvostTests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
-        - LiftoffTests
+        - ProvostTests

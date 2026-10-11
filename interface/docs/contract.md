@@ -1,4 +1,4 @@
-# Liftoff ↔ backend contract
+# Provost ↔ backend contract
 
 Wire format between the macOS app (`interface/`) and the audit pipeline (Python). The Swift source of
 truth is `Sources/Domain/Contract.swift`; keep this file in sync with it.
@@ -176,7 +176,7 @@ The gap between `proxy_reward` and `true_score` is the whole story.
   "after":  { "pass_rate": 0.66, "hack_rate": 0.0 },
   "config": { "model": "Qwen3-1.7B", "algorithm": "GRPO", "steps": 600, "seed": 1337, "rollouts_per_step": 8 },
   "issued_at": "2026-10-10T20:19:11Z",
-  "issued_by": "Liftoff Environment Audit · build 0.1.0",
+  "issued_by": "Provost Environment Audit · build 0.1.0",
   "signature": "ed25519:..."
 }
 ```

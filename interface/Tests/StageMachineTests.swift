@@ -1,5 +1,5 @@
 import XCTest
-@testable import Liftoff
+@testable import Provost
 
 final class StageMachineTests: XCTestCase {
     func testInitialState() {

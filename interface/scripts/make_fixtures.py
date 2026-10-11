@@ -460,7 +460,7 @@ def coding_fixture():
         "after": verify["after"],
         "config": run["config"],
         "issued_at": iso(START + timedelta(seconds=STEP_SECONDS * n * 2 + 900)),
-        "issued_by": "Liftoff Environment Audit · build 0.1.0",
+        "issued_by": "Provost Environment Audit · build 0.1.0",
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }
 
@@ -688,7 +688,7 @@ def ifeval_fixture():
         ],
         "before": verify["before"], "after": verify["after"], "config": run["config"],
         "issued_at": iso(START + timedelta(hours=2, minutes=58)),
-        "issued_by": "Liftoff Environment Audit · build 0.1.0",
+        "issued_by": "Provost Environment Audit · build 0.1.0",
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }
     write(env_id, {
