@@ -643,7 +643,7 @@ def coding_fixture():
         "after": verify["after"],
         "config": run["config"],
         "issued_at": iso(START + timedelta(seconds=STEP_SECONDS * n * 2 + 900)),
-        "issued_by": "Profos Environment Audit · build 0.1.0",
+        "issued_by": "Provost Environment Audit · build 0.1.0",
         "auditor_version": AUDITOR_VERSION,
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }
@@ -902,7 +902,7 @@ def ifeval_fixture():
         ],
         "before": verify["before"], "after": verify["after"], "config": run["config"],
         "issued_at": iso(START + timedelta(hours=2, minutes=58)),
-        "issued_by": "Profos Environment Audit · build 0.1.0",
+        "issued_by": "Provost Environment Audit · build 0.1.0",
         "auditor_version": AUDITOR_VERSION,
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }
@@ -910,7 +910,7 @@ def ifeval_fixture():
     # the review process has moved on since it was last signed.
     environment["last_certificate"] = dict(certificate,
         id="cert-2026-09-28-" + env_hash[7:15], run_id="run_20260928_1130_prev",
-        issued_at="2026-09-28T13:04:00Z", issued_by="Profos Environment Audit · build 0.0.9",
+        issued_at="2026-09-28T13:04:00Z", issued_by="Provost Environment Audit · build 0.0.9",
         auditor_version="0.0.9", findings_closed=certificate["findings_closed"][:1],
         before={"pass_rate": 0.69, "hack_rate": 0.38}, after={"pass_rate": 0.70, "hack_rate": 0.02})
     write(env_id, {
@@ -1162,7 +1162,7 @@ def yelp_fixture():
         ],
         "before": verify["before"], "after": verify["after"], "config": run["config"],
         "issued_at": iso(START + timedelta(hours=19, minutes=10, seconds=STEP_SECONDS * n * 2 + 900)),
-        "issued_by": "Profos Environment Audit · build 0.1.0",
+        "issued_by": "Provost Environment Audit · build 0.1.0",
         "auditor_version": AUDITOR_VERSION,
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }

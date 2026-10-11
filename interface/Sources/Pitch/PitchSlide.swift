@@ -99,10 +99,10 @@ public struct PitchSlide: Codable, Identifiable, Hashable, Sendable {
 public struct PitchDeck: Codable, Sendable {
     public var slides: [PitchSlide]
 
-    /// `PROFOS_DECK=/path/to/deck.json` (set by `make pitch`) wins over the bundled copy, so edits to
+    /// `PROVOST_DECK=/path/to/deck.json` (set by `make pitch`) wins over the bundled copy, so edits to
     /// the source file land on ⌘R without a rebuild.
     public static func locate() -> URL? {
-        if let path = ProcessInfo.processInfo.environment["PROFOS_DECK"], FileManager.default.fileExists(atPath: path) {
+        if let path = ProcessInfo.processInfo.environment["PROVOST_DECK"], FileManager.default.fileExists(atPath: path) {
             return URL(fileURLWithPath: path)
         }
         return Bundle.main.resourceURL?.appendingPathComponent("pitch/deck.json")

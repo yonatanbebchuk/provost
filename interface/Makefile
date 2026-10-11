@@ -25,7 +25,7 @@ run: build      ## Build and open the app
 	open $(APP)
 
 pitch: build    ## Build and open the app in Pitch Mode on slide 1; ⌘R re-reads the source deck.json
-	open --env PROFOS_DECK=$(CURDIR)/Resources/pitch/deck.json $(APP) --args --pitch
+	open --env PROVOST_DECK=$(CURDIR)/Resources/pitch/deck.json $(APP) --args --pitch
 
 test: gen       ## Run unit tests
 	$(XCB) test | grep -E "Test Suite|Test Case|error:|passed|failed" | tail -n 40

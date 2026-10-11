@@ -246,6 +246,7 @@ struct TopBar: View {
             } else {
                 Text("No environment").font(.headline).foregroundStyle(.secondary)
                 Spacer()
+                pitchButton
             }
         }
         .padding(.horizontal, 24)
@@ -253,7 +254,8 @@ struct TopBar: View {
         .background(.bar)
     }
 
-    /// During the demo: on to the next slide. After Exit to app: back to the slide that was left.
+    /// The way into the pitch. During the demo: on to the next slide. After Exit to app: back to
+    /// the slide that was left. Otherwise: the deck from slide 1.
     @ViewBuilder
     private var pitchButton: some View {
         if store.pitch.isDemo {
@@ -264,6 +266,14 @@ struct TopBar: View {
             Button("Resume pitch →") { store.pitch.resume() }
                 .buttonStyle(RoundedProminentButtonStyle())
                 .help("Back to the slide you left (⌘⇧P)")
+        } else {
+            Button {
+                store.pitch.enterPitch(at: 0)
+            } label: {
+                Label("Present", systemImage: "play.rectangle.fill")
+            }
+            .buttonStyle(RoundedSecondaryButtonStyle())
+            .help("Start the pitch from slide 1 (⌘⇧P resumes where it was left)")
         }
     }
 

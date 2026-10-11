@@ -3,10 +3,10 @@
     {
       "id": "home",
       "eyebrow": "CamelHack · October 2026",
-      "title": "Profos",
+      "title": "Provost",
       "subtitle": "Exploit-and-certify for RL training environments.",
       "visual": "names",
-      "script": "We're Profos. Five of us — security, reinforcement learning, and the person who has spent two years learning what enterprises actually buy. Most of us met yesterday morning.",
+      "script": "We're Provost. Five of us — security, reinforcement learning, and the person who has spent two years learning what enterprises actually buy. Most of us met yesterday morning.",
       "budgetSeconds": 10,
       "isDemoHandoff": false,
       "names": ["Yonatan Bebchuk", "Alvaro Gomez-Jordana", "Matt Curtis", "Joshua Cohen", "Hai Tederry"]

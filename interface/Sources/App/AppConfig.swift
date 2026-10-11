@@ -3,7 +3,7 @@ import Foundation
 /// Single place for product-level constants. Rename the product by editing `productName`.
 public enum AppConfig {
     /// Product name. A provost guides what is learned and certifies it; "liftoff" stays the name of the detection event.
-    public static let productName = "Profos"
+    public static let productName = "Provost"
     public static let productTagline = "Guides what a policy learns from an environment, and certifies it"
     public static let buildLabel = "0.1.0 · CamelHack build"
     /// Version of the auditor (detector + review process). A certificate issued by an older
@@ -32,7 +32,7 @@ public enum AppConfig {
     public static let policyModels: [PolicyModel] = [
         PolicyModel(id: "qwen", name: "Qwen", tier: .open),
         PolicyModel(id: "llama", name: "Llama", tier: .open),
-        PolicyModel(id: "profos-secure", name: "\(productName) Secure", tier: .custom),
+        PolicyModel(id: "provost-secure", name: "\(productName) Secure", tier: .custom),
     ]
     public static var defaultPolicyModel: PolicyModel { policyModels[0] }
 }

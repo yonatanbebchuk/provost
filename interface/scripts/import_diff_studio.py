@@ -379,7 +379,7 @@ def convert(attack):
         "findings_closed": [{"id": f["id"], "failure_mode": f["failure_mode"], "severity": f["severity"]} for f in lint],
         "before": before, "after": after, "config": run["config"],
         "issued_at": iso(START + timedelta(seconds=STEP_SECONDS * STEPS * 2 + 900)),
-        "issued_by": "Profos Environment Audit · build 0.1.0",
+        "issued_by": "Provost Environment Audit · build 0.1.0",
         "auditor_version": "0.1.0",
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }

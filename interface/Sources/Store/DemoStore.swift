@@ -307,7 +307,6 @@ extension DemoStore {
         select(environment: env)
         playback.trainingSeconds = AppConfig.demoTrainingReplaySeconds
         playback.verifySeconds = AppConfig.demoVerifyReplaySeconds
-        fastForward = false
         guard let session = await compile() else { return }
         session.opensLiftoffDetail = true
         demoSessionId = session.id
