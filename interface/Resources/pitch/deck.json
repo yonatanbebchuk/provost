@@ -6,7 +6,7 @@
       "title": "Provost",
       "subtitle": "Exploit-and-certify for RL training environments.",
       "visual": "faces",
-      "script": "My name is Yonatan Bebchuk. Over the last 48 hours, Alvaro, Hai, Josh, Matt and myself built Provost — so the modern enterprise can own its own intelligence, and trust it.",
+      "script": "• Yonatan Bebchuk.\n• 48 hours — Alvaro, Hai, Josh, Matt and me built Provost.\n• So the modern enterprise can own its own intelligence — and trust it.",
       "budgetSeconds": 15,
       "isDemoHandoff": false,
       "logo": true,
@@ -42,7 +42,7 @@
       "id": "background",
       "eyebrow": "Background",
       "title": "An AI was given an exam. It broke into the company that had the answer key.",
-      "script": "The anecdote. Let's go back to July. OpenAI is training a model on a security exam. The model doesn't solve the exam. It breaks out of its sandbox and into Hugging Face — because it worked out that's where it could find the answer to a test. (pause) Nobody told it to cheat. Cheating was simply the cheapest way to score. August. OpenAI's own post-mortem shows that the cheating grew during training. Five days later, Anthropic pauses more than ten percent of its own production training environments. Two weeks ago, Australia's prime minister stood up at the UN after OpenAI model had hit a wall at the Medicare portal — and, in his words, “didn't accept no for an answer.” (beat) This is reward hacking. It wasn't the model that was broken, it was the training, and it makes all the difference.",
+      "script": "• July. OpenAI trains a model on a security exam. → tick 1\n• Doesn't solve it. Breaks out of the sandbox, into Hugging Face — where the answer was.\n• (pause) Nobody told it to cheat. Cheating was the cheapest way to score.\n• August. OpenAI's post-mortem: cheating grew during training. → tick 2\n• Five days later: Anthropic pauses >10% of its production training environments. → tick 3\n• Two weeks ago: Australia's PM at the UN — Medicare portal — “didn't accept no for an answer.” → tick 4\n• (beat) This is reward hacking. Not the model that was broken — the training. Makes all the difference.",
       "budgetSeconds": 45,
       "isDemoHandoff": false,
       "visual": "timeline",
@@ -71,7 +71,7 @@
       "eyebrow": "The RL Renaissance",
       "title": "Every company will train its own models",
       "visual": "chart",
-      "script": "The contrarian belief. We believe every company is going to own its own intelligence. Three reasons. Dependence — today your intelligence sits on someone else's roadmap. Alpha — every prompt you send teaches their model your business. And price. The way it happens is reinforcement learning — the model tries a task, gets a score, and learns whatever scores best. We are in an RL renaissance. Enterprises have joined this game in two waves: first LoRA made fine-tuning cheap; then RL let models learn from doing. The pioneers of that second wave — Cursor, Genspark, Thomson Reuters — are training on open weights, on their own data, today. Look at the timeline I just showed you, and it's not hard to see why the third wave hasn't come. The problem. An enterprise that isn't a frontier lab can't afford a Hugging Face incident of its own: the technical expertise, the investigation, the legal liability, the ability to cope in real time with what's happening — it was hell for OpenAI, and OpenAI is the best-equipped company on earth. And even if nothing escapes: when you embark on training, you invest capital and take risk to achieve something. If the environment has reward hacks inside, you don't get it. You took the risk for nothing. What's missing. Today a whole industry builds RL environments for the labs — and a handful build them for enterprises. We believe enterprises will own their own RL, the way they own their own software: they own the data, and they know what they need it to do. What they don't have is the expertise to make sure those environments teach the model what they actually want. Companies want to own their intelligence. What's missing is trust in what it learned.",
+      "script": "• Belief: every company will own its own intelligence. Three reasons:\n• Dependence — your intelligence sits on someone else's roadmap.\n• Alpha — every prompt teaches their model your business.\n• Price.\n• How: reinforcement learning — try a task, get a score, learn whatever scores best. → chart\n• RL renaissance. Two enterprise waves: LoRA made fine-tuning cheap; RL let models learn from doing.\n• Second wave today: Cursor, Genspark, Thomson Reuters — open weights, own data.\n• The timeline you just saw → why the third wave hasn't come.\n• Problem: a non-lab can't afford its own Hugging Face incident — expertise, investigation, liability, real-time. Hell for OpenAI, the best-equipped company on earth.\n• Even if nothing escapes: you invest capital, take risk. Reward hacks inside → you took the risk for nothing.\n• Missing: an industry builds environments for labs; a handful for enterprises.\n• Enterprises will own RL like they own software — the data, the need. Not the expertise to make it teach what they want.\n• They want to own their intelligence. Missing: trust in what it learned.",
       "budgetSeconds": 60,
       "isDemoHandoff": false,
       "chart": {
@@ -153,7 +153,7 @@
       "logo": true,
       "title": "Provost",
       "subtitle": "Before you train, we attack your environment the way your model will.",
-      "script": "What we built. This is why we built Provost, an alignment management system that has the cutting edge reward hack and misalignment detection so that your job is to tell the model what you want it to do. Before you train, we attack your environment the way your model would — we find every shortcut it could take, and we help you close it. So what your model learns is your business, not a loophole. Introduction to demo. Picture a developer on the plane next to you, a year from now. We're betting their screen will look a little something like this. [→ hands off to Josh for the demo]",
+      "script": "• This is why we built Provost — an alignment management system.\n• Cutting-edge reward-hack and misalignment detection. Your job: tell the model what you want.\n• Before you train, we attack your environment the way your model would — find every shortcut, help you close it.\n• What your model learns is your business, not a loophole.\n• A developer on the plane next to you, a year from now. Their screen looks like this. → hand off to Josh",
       "budgetSeconds": 20,
       "isDemoHandoff": true
     },
@@ -162,7 +162,7 @@
       "eyebrow": "Technical",
       "title": "A model trained to break environments.",
       "visual": "diagram",
-      "script": "The technical description. We trained a specialized LLM for breaking RL environments by building these environments and exploring the reward space for hacks. The more we do this the better it is at breaking them. We also have an LLM judge which identifies misaligned responses and reinforces the model to produce more like those.",
+      "script": "• A specialized LLM for breaking RL environments.\n• Built by building environments and exploring the reward space for hacks.\n• The more we do it, the better it breaks them.\n• Plus an LLM judge: spots misaligned responses, reinforces the model to produce more of them.",
       "budgetSeconds": 30,
       "isDemoHandoff": false
     },
@@ -186,7 +186,7 @@
           "caption": "of build cost: what verifying an engineered artifact costs in every comparable industry"
         }
       ],
-      "script": "Labs and enterprises spend around 9 billion dollars a year building the environments models train in. Today, none of that is independently verified. Our line item doesn't exist. Yet in every comparable industry, verifying an engineered artifact costs five to ten percent of what it cost to build. This arrives to a million dollar gap today, and multi-billion in three years. We're not taking share of a market. We're writing the first invoice in it — which means we set the price and the standard. In eighteen months an entire industry appeared to help companies train their own models. Four platforms shipped a product — Microsoft, AWS, Snowflake, OpenAI. More than thirty-five startups build nothing but training environments — a layer already worth about eight and a half billion a year. And OpenAI put four billion into a deployment arm. Owning your own model is now a commodity. Every layer of that stack has a vendor. Except one. Not one lab or platform publicly requires an independent check of what a model is trained on — no standard, no certification, no audit. That's always temporary. Finance got auditors. Software got penetration testing. Every industry where the stakes got real ended up requiring someone independent to sign off, and this one won't be the exception. That isn't a slice of a market. It's a new one, and we intend to own it.",
+      "script": "• Labs + enterprises: ~$9B a year on the environments models train in.\n• None independently verified. Our line item doesn't exist.\n• Every comparable industry: verification = 5–10% of build cost.\n• Million-dollar gap today; multi-billion in three years.\n• Not taking share — writing the first invoice. We set the price and the standard.\n• 18 months: a whole industry. Four platforms — Microsoft, AWS, Snowflake, OpenAI.\n• 35+ startups build nothing but environments — ~$8.5B a year. OpenAI: $4B into a deployment arm.\n• Owning your model is a commodity. Every layer has a vendor — except one.\n• No lab or platform requires an independent check. No standard, certification, audit. Always temporary.\n• Finance got auditors. Software got pen testing. This won't be the exception.\n• Not a slice of a market. A new one — and we intend to own it.",
       "budgetSeconds": 70,
       "isDemoHandoff": false
     },
@@ -200,7 +200,7 @@
         "The missing product.",
         "Bringing the frontier one step backwards."
       ],
-      "script": "(1) The team. This team has been doing RL since the dawn of LLMs. We've seen software and intelligence pipelines break in every scenario the military could throw at us. We've advised some of the biggest companies navigating this AI revolution. If we wanted to do this for the labs, we'd be in that cohort. We are perfectly positioned to enable this wave. (2) The customer. Enterprises want to train their own models, aligned to their own principles. What they're sold today is the labs' stack — which only works if you become a lab. That, or, they delegate the entire process to a third party and gain none of the rewards. Provost, which makes sure that the training the enterprise is doing is aligned to their objective, is doing exactly what they need. Nothing more that would set them back, and nothing less that would stop them from innovating. (3) Put them together. Enterprises train on open models, a step behind the frontier — models we've watched misbehave for years. We bring frontier expertise to known models. That's a level of certainty nobody can give a lab. We can confidently, without guessing, provide assurance and stability for these models because we know them well enough.",
+      "script": "• 1 · The people. RL since the dawn of LLMs. Pipelines broken in every scenario the military threw at us. Advised the biggest companies in this revolution.\n    If we wanted the labs, we'd be in that cohort. Positioned to enable this wave.\n• 2 · The customer. Enterprises want their own models, their own principles.\n    Sold today: the labs' stack (works only if you become a lab) — or delegate everything and gain nothing.\n    Provost: training aligned to their objective. Nothing more, nothing less.\n• 3 · Together. Enterprises train on open models, a step behind the frontier — models we've watched misbehave for years.\n    Frontier expertise on known models. Certainty nobody can give a lab.",
       "budgetSeconds": 50,
       "isDemoHandoff": false
     },
@@ -208,7 +208,7 @@
       "id": "close",
       "title": "Intelligence is the asset of the future, and modern industry can't afford to lose it.",
       "subtitle": "We're here to make sure no one does.",
-      "script": "Intelligence is the asset of the future, and modern industry can't afford to lose it. We're here to make sure no one does.",
+      "script": "• Intelligence is the asset of the future. Modern industry can't afford to lose it.\n• We're here to make sure no one does.",
       "budgetSeconds": 10,
       "isDemoHandoff": false
     }
