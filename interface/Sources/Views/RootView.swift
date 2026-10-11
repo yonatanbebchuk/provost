@@ -212,10 +212,11 @@ struct TopBar: View {
                 Spacer()
                 PhasePill(phase: session.phase, busy: session.isBusy)
                 ElapsedLabel(start: session.startedAt, end: session.endedAt)
-            } else if store.selectedEnvironment == nil {
-                Text("No environment").font(.headline).foregroundStyle(.secondary)
+            } else if let env = store.selectedEnvironment {
+                Text(env.name).font(.headline)
                 Spacer()
             } else {
+                Text("No environment").font(.headline).foregroundStyle(.secondary)
                 Spacer()
             }
             if store.selectedEnvironment != nil {

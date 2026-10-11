@@ -9,7 +9,7 @@ struct EnvironmentPage: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 16) {
                 header
                 if let spec = store.spec(for: environment) {
                     ObjectiveBlock(environment: environment, objective: spec.objective)
@@ -66,27 +66,14 @@ struct EnvironmentPage: View {
 
     // MARK: Header and objective
 
+    /// The name lives in the top bar. Here: the policy to train and where the environment stands.
     private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(environment.name).font(.largeTitle.weight(.semibold))
-                Text(metaLine).font(.callout).foregroundStyle(.secondary)
-            }
+        HStack(spacing: 12) {
             Spacer()
+            Text("v\(store.version(of: environment))").font(.callout.monospaced()).foregroundStyle(.secondary)
             PolicyModelMenu(environment: environment)
             StatusBadge(status: store.status(for: environment))
         }
-    }
-
-    /// Format, size, reward kind, the episode in a few words, version.
-    private var metaLine: String {
-        var parts = ["\(environment.format.displayName)", "\(environment.taskCount) tasks", "\(environment.rewardType.displayName) reward"]
-        if let episode = store.spec(for: environment)?.episode {
-            if let max = episode.maxSteps { parts.append(max == 1 ? "single turn" : "\(max) steps per episode") }
-            parts.append(episode.reset.lowercased())
-        }
-        parts.append("v\(store.version(of: environment))")
-        return parts.joined(separator: " · ")
     }
 
     private var pendingBanner: some View {
@@ -250,6 +237,16 @@ struct EnvironmentPage: View {
                     Text(item.value).font(.callout).fixedSize(horizontal: false, vertical: true)
                 }
             }
+        }
+    }
+}
+
+/// Icon and text on one centre line, the icon a touch smaller.
+private struct ConstraintLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(alignment: .center, spacing: 5) {
+            configuration.icon.imageScale(.small)
+            configuration.title
         }
     }
 }
@@ -495,12 +492,10 @@ private struct ObjectiveBlock: View {
                 if !objective.constraints.isEmpty {
                     HStack(spacing: 8) {
                         ForEach(objective.constraints, id: \.self) { c in
-                            HStack(spacing: 5) {
-                                Image(systemName: "lock").font(.caption2)
-                                Text(c).font(.caption)
-                            }
-                            .padding(.horizontal, 8).padding(.vertical, 4)
-                            .background(Color.primary.opacity(0.06), in: Capsule())
+                            Label(c, systemImage: "lock").font(.caption)
+                                .labelStyle(ConstraintLabelStyle())
+                                .padding(.horizontal, 9).padding(.vertical, 4)
+                                .background(Color.primary.opacity(0.06), in: Capsule())
                         }
                     }
                 }
