@@ -76,12 +76,13 @@
     },
     {
       "id": "provost",
-      "logo": true,
-      "title": "Provost",
+      "logo": false,
+      "title": "A window into the future.",
       "subtitle": "Before you train, we attack your environment the way your model will.",
       "script": "• This is why we built Provost — an alignment management system.\n• Cutting-edge reward-hack and misalignment detection. Your job: tell the model what you want.\n• Before you train, we attack your environment the way your model would — find every shortcut, help you close it.\n• What your model learns is your business, not a loophole.\n• A developer on the plane next to you, a year from now. Their screen looks like this. → hand off to Josh",
       "budgetSeconds": 20,
-      "isDemoHandoff": true
+      "isDemoHandoff": true,
+      "eyebrow": "Provost"
     },
     {
       "id": "technical",
