@@ -6,11 +6,12 @@ import SwiftUI
 struct RolloutList: View {
     @Environment(DemoStore.self) private var store
     @Environment(RunSession.self) private var session
-    var hacksOnly: Bool
     @State private var expanded: Set<String> = []
 
-    private var rows: [Trajectory] { hacksOnly ? session.hacks : session.trajectories }
+    private var rows: [Trajectory] { session.trajectories }
     private var sampling: Bool { session.isBusy && !session.compileFinished }
+    /// Hacks that can still be ticked: not hardened yet.
+    private var selectable: [String] { session.hacks.filter { session.patches[$0.id] == nil }.map(\.id) }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -18,8 +19,7 @@ struct RolloutList: View {
                 LazyVStack(spacing: 0) {
                     header
                     ForEach(Array(rows.enumerated()), id: \.element.id) { index, t in
-                        RolloutRow(trajectory: t, number: (session.trajectories.firstIndex { $0.id == t.id } ?? index) + 1,
-                                   zebra: !index.isMultiple(of: 2), isExpanded: expanded.contains(t.id)) {
+                        RolloutRow(trajectory: t, zebra: !index.isMultiple(of: 2), isExpanded: expanded.contains(t.id)) {
                             if expanded.contains(t.id) { expanded.remove(t.id) } else { expanded.insert(t.id) }
                         }
                         .id(t.id)
@@ -46,7 +46,7 @@ struct RolloutList: View {
             }
             .overlay {
                 if rows.isEmpty && !sampling {
-                    Text(hacksOnly ? "No hacks." : "No rollouts.").font(.callout).foregroundStyle(.tertiary)
+                    Text("No rollouts.").font(.callout).foregroundStyle(.tertiary)
                 }
             }
         }
@@ -54,8 +54,19 @@ struct RolloutList: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            Text("").frame(width: 14)
-            Text("#").frame(width: 32, alignment: .leading)
+            // Ticks every hack that can be hardened, or clears the selection.
+            if session.compileFinished && !selectable.isEmpty {
+                let all = Set(selectable)
+                let selected = session.selectedHacks.intersection(all)
+                Toggle("", isOn: Binding(
+                    get: { !selected.isEmpty && selected == all },
+                    set: { on in session.selectedHacks = on ? all : [] }
+                ))
+                .toggleStyle(.checkbox).labelsHidden().frame(width: 14)
+                .help(selected == all ? "Deselect all hacks" : "Select all hacks")
+            } else {
+                Text("").frame(width: 14)
+            }
             Text("Rollout").frame(width: 190, alignment: .leading)
             Text("What it did").frame(maxWidth: .infinity, alignment: .leading)
             Text("Reward").frame(width: 56, alignment: .trailing)
@@ -73,8 +84,6 @@ struct RolloutRow: View {
     @Environment(DemoStore.self) private var store
     @Environment(RunSession.self) private var session
     let trajectory: Trajectory
-    /// Position in the compile, 1-based. The training step the rollout was sampled at is on the deep dive.
-    var number: Int
     var zebra: Bool
     var isExpanded: Bool
     var toggle: () -> Void
@@ -97,8 +106,6 @@ struct RolloutRow: View {
                 // The row is a tap target, not a button, so the name inside stays its own button.
                 HStack(spacing: 12) {
                     Group {
-                        Text("\(number)").monospacedDigit().foregroundStyle(.secondary).frame(width: 32, alignment: .leading)
-                            .help("Rollout \(number) · sampled at training step \(trajectory.step)")
                         Button { session.selectedTrajectory = trajectory } label: {
                             HStack(spacing: 6) {
                                 Text(trajectory.taskId).font(.callout.weight(.semibold).monospaced()).lineLimit(1).truncationMode(.middle)
@@ -106,7 +113,7 @@ struct RolloutRow: View {
                             }
                         }
                         .buttonStyle(.plain)
-                        .help("Open the deep dive")
+                        .help("Open the deep dive · sampled at training step \(trajectory.step)")
                         .frame(width: 190, alignment: .leading)
                         HStack(spacing: 6) {
                             if trajectory.isHack {
@@ -137,7 +144,7 @@ struct RolloutRow: View {
             .background(isExpanded ? Color.primary.opacity(0.05) : (zebra ? Color.primary.opacity(0.025) : .clear))
             if isExpanded {
                 TraceTimeline(trajectory: trajectory)
-                    .padding(.leading, 14 + 14 + 12 + 32 + 12).padding(.trailing, 24).padding(.vertical, 10)
+                    .padding(.leading, 14 + 14 + 12).padding(.trailing, 24).padding(.vertical, 10)
                     .background(Color.primary.opacity(0.025))
                     .overlay(alignment: .top) { Divider() }
             }

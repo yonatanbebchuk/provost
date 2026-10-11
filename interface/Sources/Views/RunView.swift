@@ -5,7 +5,6 @@ import SwiftUI
 struct RunView: View {
     @Environment(DemoStore.self) private var store
     @Environment(RunSession.self) private var session
-    @State private var hacksOnly = false
     @State private var showFindings = false
 
     private var totalSteps: Int { session.run.config.steps }
@@ -30,7 +29,6 @@ struct RunView: View {
             TrajectoryDetailSheet(trajectory: t)
         }
         .onChange(of: session.compileFinished) { _, finished in
-            if finished { hacksOnly = session.hackCount > 0 }
             if finished && session.certificate != nil { session.page = .certificate }
         }
         .onChange(of: session.certificate) { _, cert in
@@ -77,12 +75,6 @@ struct RunView: View {
     @ViewBuilder
     private var actions: some View {
         if session.hackCount > 0 {
-            MonoSegment(selection: $hacksOnly, options: [("Hacks", true), ("All", false)])
-            let unhardened = session.hacks.filter { session.patches[$0.id] == nil }
-            if session.selectedHacks.count < unhardened.count {
-                Button("Select all") { session.selectedHacks = Set(unhardened.map(\.id)) }
-                    .buttonStyle(.plain).font(.callout).foregroundStyle(.secondary)
-            }
             let n = session.selectedHacks.count
             Button(session.hardening.isEmpty ? (n == 0 ? "Harden" : "Harden \(n)") : "Hardening…") {
                 Task { await store.hardenSelected(in: session) }
@@ -97,7 +89,7 @@ struct RunView: View {
 
     private var result: some View {
         VStack(spacing: 0) {
-            RolloutList(hacksOnly: hacksOnly && session.compileFinished)
+            RolloutList()
                 .frame(maxHeight: .infinity)
                 .padding(.vertical, 8)
             Divider()
