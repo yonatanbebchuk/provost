@@ -198,44 +198,26 @@ private struct RunRow: View {
 
 // MARK: - Top bar
 
+/// On the environment page: just the operations. On a compile: the way back, the compile, its phase.
 struct TopBar: View {
     @Environment(DemoStore.self) private var store
 
     var body: some View {
         HStack(spacing: 14) {
-            if let env = store.selectedEnvironment {
-                if store.selectedSession != nil {
-                    Button { store.showEnvironmentPage() } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "chevron.left").font(.caption.weight(.bold))
-                            Text(env.name).font(.headline)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    Text(env.name).font(.headline)
-                }
-                Chip(text: env.format.displayName)
-            } else {
-                Text("No environment").font(.headline).foregroundStyle(.secondary)
-            }
-            if let session = store.selectedSession {
-                Divider().frame(height: 16)
-                Text("compile v\(session.version) · \(session.run.config.model) · \(session.run.config.algorithm)")
-                    .font(.callout.monospaced()).foregroundStyle(.secondary)
-                Spacer()
-                if let liftoff = session.liftoff {
+            if let env = store.selectedEnvironment, let session = store.selectedSession {
+                Button { store.showEnvironmentPage() } label: {
                     HStack(spacing: 6) {
-                        Image(systemName: "arrow.up.right").font(.caption.weight(.bold))
-                        Text("Liftoff · step \(liftoff.step)")
+                        Image(systemName: "chevron.left").font(.caption.weight(.bold))
+                        Text(env.name).font(.headline)
                     }
-                    .font(.callout.weight(.semibold)).foregroundStyle(Theme.liftoff)
                 }
+                .buttonStyle(.plain)
+                Text("Compile v\(session.version)").font(.callout).foregroundStyle(.secondary)
+                Spacer()
                 PhasePill(phase: session.phase, busy: session.isBusy)
                 ElapsedLabel(start: session.startedAt, end: session.endedAt)
-            } else if let env = store.selectedEnvironment {
-                Divider().frame(height: 16)
-                Text(env.source).font(.callout.monospaced()).foregroundStyle(.secondary).lineLimit(1)
+            } else if store.selectedEnvironment == nil {
+                Text("No environment").font(.headline).foregroundStyle(.secondary)
                 Spacer()
             } else {
                 Spacer()
@@ -250,30 +232,43 @@ struct TopBar: View {
     }
 }
 
-/// The processes you can run on an environment. Compile here; Harden acts per hack.
+/// The processes you can run on an environment. Compile now; Test lights up with Monitor.
 struct OperationsBar: View {
     @Environment(DemoStore.self) private var store
 
     private var isBusy: Bool { store.sessions(for: store.selectedEnvironment!).contains { $0.isBusy } }
 
     var body: some View {
-        Button {
-            Task { await store.compile() }
-        } label: {
-            HStack(spacing: 8) {
-                if isBusy {
-                    ProgressView().controlSize(.mini)
-                } else {
-                    Image(systemName: "hammer.fill").font(.caption.weight(.bold))
+        HStack(spacing: 8) {
+            Button {
+                Task { await store.compile() }
+            } label: {
+                HStack(spacing: 8) {
+                    if isBusy {
+                        ProgressView().controlSize(.mini)
+                    } else {
+                        Image(systemName: "hammer.fill").font(.caption.weight(.bold))
+                    }
+                    Text("Compile")
                 }
-                Text("Compile")
+                .frame(minWidth: 88)
             }
-            .frame(minWidth: 88)
+            .buttonStyle(RoundedProminentButtonStyle())
+            .keyboardShortcut("r", modifiers: .command)
+            .disabled(isBusy)
+            .help("Compile this environment: find what a policy can exploit (⌘R)")
+
+            Button {} label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.diamond").font(.caption.weight(.bold))
+                    Text("Test")
+                }
+                .frame(minWidth: 72)
+            }
+            .buttonStyle(RoundedProminentButtonStyle())
+            .disabled(true)
+            .help("Test: not yet. Lights up with Monitor.")
         }
-        .buttonStyle(RoundedProminentButtonStyle())
-        .keyboardShortcut("r", modifiers: .command)
-        .disabled(isBusy)
-        .help("Compile this environment: find what a policy can exploit (⌘R)")
     }
 }
 

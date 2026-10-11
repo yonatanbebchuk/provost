@@ -1,96 +1,48 @@
 import SwiftUI
 
-/// The environment itself, laid out in its parts, with proposed differences shown in place, its last
-/// certificate, and its compiles.
+/// The environment, read like a README: what it is for, what the policy sees, then Reward, Action
+/// space and Observation space side by side. Proposed differences sit in the part they change.
 struct EnvironmentPage: View {
     @Environment(DemoStore.self) private var store
     let environment: AuditEnvironment
-
-    private let columns = [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)]
+    @State private var showReward = false
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 22) {
                 header
-                if !store.pendingChanges(for: environment).isEmpty { pendingBanner }
                 if let spec = store.spec(for: environment) {
+                    objective(spec)
+                    if !store.pendingChanges(for: environment).isEmpty { pendingBanner }
                     if let samples = spec.samples, !samples.isEmpty {
                         SampleInputsStrip(samples: samples, taskCount: environment.taskCount)
                     }
-                    LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
-                        PartCard(part: .evaluation, environment: environment) {
-                            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                Chip(text: environment.rewardType.displayName)
-                                Text(spec.evaluation.summary).font(.callout).fixedSize(horizontal: false, vertical: true)
-                            }
-                            if !spec.evaluation.components.isEmpty {
-                                FlowChips(items: spec.evaluation.components)
-                            }
-                            if let audit = spec.evaluation.audit {
-                                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                                    Image(systemName: "checkmark.shield").font(.caption).foregroundStyle(.secondary)
-                                    Text(audit).font(.caption).foregroundStyle(.secondary)
-                                }
-                            }
-                            if let diff = codeDiff {
-                                DisclosureGroup("Reward function diff") {
-                                    DiffView(diff: diff).frame(height: 260).padding(.top, 6)
-                                }
-                                .font(.callout)
-                            }
+                    HStack(alignment: .top, spacing: 16) {
+                        PartCard(part: .evaluation, environment: environment, action: { showReward = true }) {
+                            rewardSummary(spec)
                         }
-                        PartCard(part: .actions, environment: environment) {
-                            VStack(alignment: .leading, spacing: 6) {
-                                ForEach(spec.actions) { action in
-                                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                        Text(action.id).font(.callout.monospaced()).frame(width: 90, alignment: .leading)
-                                        VStack(alignment: .leading, spacing: 1) {
-                                            Text(action.description).font(.callout)
-                                            if let args = action.arguments, !args.isEmpty {
-                                                Text(args.joined(separator: ", ")).font(.caption.monospaced()).foregroundStyle(.secondary)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if !environment.sandbox.tools.isEmpty || environment.sandbox.network != "none" {
-                                Divider().padding(.vertical, 2)
-                                HStack(spacing: 8) {
-                                    Text("Sandbox").font(.caption).foregroundStyle(.secondary)
-                                    Text("\(environment.sandbox.runtime) · network \(environment.sandbox.network) · \(environment.sandbox.filesystem)").font(.caption)
-                                }
-                            }
-                        }
-                        PartCard(part: .observations, environment: environment) {
-                            bullets(spec.observations.visible, symbol: "eye")
-                            if !spec.observations.hidden.isEmpty {
-                                Divider().padding(.vertical, 2)
-                                bullets(spec.observations.hidden, symbol: "eye.slash", muted: true)
-                            }
-                        }
-                        PartCard(part: .objective, environment: environment) {
-                            Text(spec.objective.summary).font(.callout).fixedSize(horizontal: false, vertical: true)
-                            if !spec.objective.constraints.isEmpty { bullets(spec.objective.constraints, symbol: "lock") }
-                        }
+                        PartCard(part: .actions, environment: environment) { actionSpace(spec) }
+                        PartCard(part: .observations, environment: environment) { observationSpace(spec) }
+                    }
+                    HStack(alignment: .top, spacing: 16) {
                         PartCard(part: .initialState, environment: environment) {
                             Text(spec.initialState.summary).font(.callout).fixedSize(horizontal: false, vertical: true)
                             keyValues(spec.initialState.items)
                         }
                         PartCard(part: .episode, environment: environment) {
                             keyValues([
-                                KeyValue(key: "Ends when", value: spec.episode.termination),
-                                KeyValue(key: "Step budget", value: spec.episode.maxSteps.map(String.init) ?? "unbounded"),
+                                KeyValue(key: "Ends", value: spec.episode.termination),
+                                KeyValue(key: "Budget", value: spec.episode.maxSteps.map { "\($0) steps" } ?? "unbounded"),
                                 KeyValue(key: "Reset", value: spec.episode.reset),
                             ])
                         }
-                    }
-                    HStack(alignment: .top, spacing: 16) {
-                        provenance(spec.provenance)
                         certificateCard
                     }
+                    compiles
+                    provenance(spec.provenance)
                 } else {
                     Card(title: "Specification") {
-                        Text("This environment was registered from its packaging only. Its parts are not available yet.")
+                        Text("Registered from its packaging only. Its parts are not available yet.")
                             .font(.callout).foregroundStyle(.secondary)
                         keyValues([
                             KeyValue(key: "Runtime", value: environment.sandbox.runtime),
@@ -98,49 +50,79 @@ struct EnvironmentPage: View {
                             KeyValue(key: "Filesystem", value: environment.sandbox.filesystem),
                         ])
                     }
+                    compiles
                 }
-                compiles
             }
             .padding(24)
             .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+        .sheet(isPresented: $showReward) {
+            if let spec = store.spec(for: environment) {
+                RewardSheet(environment: environment, evaluation: spec.evaluation, diff: codeDiff)
+            }
         }
     }
 
     /// The unified diff behind an accepted or pending `code` change on the reward function.
     private var codeDiff: String? {
         for session in store.sessions(for: environment) {
-            if let patch = session.patches.values.first, patch.changes?.contains(where: { $0.field == "code" }) == true {
+            if let patch = session.patches.values.first(where: { $0.changes?.contains { $0.field == "code" } == true }) {
                 return patch.diff
             }
         }
         return nil
     }
 
+    // MARK: Header and objective
+
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 10) {
-                Text(environment.name).font(.title.weight(.semibold))
-                Chip(text: environment.format.displayName)
-                Chip(text: "\(environment.taskCount) tasks")
-                Chip(text: "v\(store.version(of: environment))", mono: true)
-                Spacer()
-                StatusBadge(status: store.status(for: environment))
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(environment.name).font(.largeTitle.weight(.semibold))
+                Text("\(environment.format.displayName) · \(environment.taskCount) tasks · \(environment.rewardType.displayName) reward · v\(store.version(of: environment))")
+                    .font(.callout).foregroundStyle(.secondary)
             }
-            Text(environment.id).font(.callout.monospaced()).foregroundStyle(.secondary)
-            if let description = environment.description {
-                Text(description).font(.callout).foregroundStyle(.secondary).padding(.top, 2)
+            Spacer()
+            StatusBadge(status: store.status(for: environment))
+        }
+    }
+
+    private func objective(_ spec: EnvironmentSpec) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(spec.objective.summary).font(.title3).fixedSize(horizontal: false, vertical: true)
+            if !spec.objective.constraints.isEmpty {
+                HStack(spacing: 8) {
+                    ForEach(spec.objective.constraints, id: \.self) { c in
+                        HStack(spacing: 5) {
+                            Image(systemName: "lock").font(.caption2)
+                            Text(c).font(.caption)
+                        }
+                        .padding(.horizontal, 8).padding(.vertical, 4)
+                        .background(Color.primary.opacity(0.06), in: Capsule())
+                    }
+                }
+            }
+            let changes = store.pendingChanges(for: environment, part: .objective)
+            if !changes.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(changes) { change in ChangeRow(change: change, environment: environment) }
+                }
             }
         }
     }
 
     private var pendingBanner: some View {
         let changes = store.pendingChanges(for: environment)
-        let hacks = Set(changes.compactMap(\.hackId))
+        let hacks = Set(changes.flatMap(\.hackIds))
+        let session = store.sessions(for: environment).first { s in changes.contains { $0.runId == s.id } }
         return HStack(spacing: 12) {
-            Image(systemName: "arrow.triangle.branch").foregroundStyle(Theme.changeAltered)
-            Text("\(changes.count) proposed difference\(changes.count == 1 ? "" : "s") from hardening \(hacks.count) hack\(hacks.count == 1 ? "" : "s"). Accept or reject each one below, then compile again.")
-                .font(.callout)
+            Circle().fill(Theme.changeAltered).frame(width: 8, height: 8)
+            Text("\(changes.count) proposed difference\(changes.count == 1 ? "" : "s") from \(hacks.count) hack\(hacks.count == 1 ? "" : "s")")
+                .font(.callout.weight(.medium))
             Spacer()
+            if let session {
+                Button("Review") { store.select(session: session); session.page = .report }.buttonStyle(MonoSecondaryButtonStyle())
+            }
             Button("Reject all") { store.rejectAll(in: environment) }.buttonStyle(MonoSecondaryButtonStyle())
             Button("Accept all") { store.acceptAll(in: environment) }.buttonStyle(MonoProminentButtonStyle())
         }
@@ -149,71 +131,123 @@ struct EnvironmentPage: View {
         .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(Theme.changeAltered.opacity(0.5)))
     }
 
+    // MARK: Parts
+
+    @ViewBuilder
+    private func rewardSummary(_ spec: EnvironmentSpec) -> some View {
+        Text(spec.evaluation.summary).font(.callout).fixedSize(horizontal: false, vertical: true)
+        if !spec.evaluation.components.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(spec.evaluation.components, id: \.self) { Chip(text: $0, mono: true) }
+            }
+        }
+        if let audit = spec.evaluation.audit {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Image(systemName: "checkmark.shield").font(.caption).foregroundStyle(.secondary)
+                Text(audit).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        HStack(spacing: 4) {
+            Image(systemName: "curlybraces").font(.caption2)
+            Text(spec.evaluation.codePath ?? "Reward function")
+            Image(systemName: "chevron.right").font(.caption2.weight(.semibold))
+        }
+        .font(.caption.weight(.medium)).foregroundStyle(.secondary)
+        .padding(.top, 2)
+    }
+
+    private func actionSpace(_ spec: EnvironmentSpec) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            ForEach(spec.actions) { action in
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(action.id).font(.callout.monospaced()).frame(width: 64, alignment: .leading)
+                    Text(action.description).font(.callout).fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            if environment.sandbox.network != "none" || !environment.sandbox.tools.isEmpty {
+                Text("\(environment.sandbox.runtime) · network \(environment.sandbox.network)")
+                    .font(.caption).foregroundStyle(.secondary).padding(.top, 4)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func observationSpace(_ spec: EnvironmentSpec) -> some View {
+        bullets(spec.observations.visible, symbol: "eye")
+        if !spec.observations.hidden.isEmpty {
+            Divider().padding(.vertical, 2)
+            bullets(spec.observations.hidden, symbol: "eye.slash", muted: true)
+        }
+    }
+
     private var certificateCard: some View {
-        Card(title: "Last certificate") {
+        let status = store.status(for: environment)
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "seal").font(.callout).foregroundStyle(.secondary)
+                Text("Certificate").font(.headline)
+                Spacer()
+            }
+            Divider()
             if let cert = store.latestCertificate(for: environment) {
-                let status = store.status(for: environment)
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Image(systemName: "seal").font(.title3).foregroundStyle(Theme.color(for: status))
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "checkmark.seal.fill").font(.title2).foregroundStyle(Theme.color(for: status))
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(cert.id).font(.callout.monospaced())
-                        Text("Signed \(cert.issuedAt.formatted(Format.dateTime)) · auditor \(cert.auditorVersion ?? "unknown") · \(cert.findingsClosed.count) findings closed")
-                            .font(.caption).foregroundStyle(.secondary)
-                        Text("hack rate \(Format.percent(cert.before.hackRate)) → \(Format.percent(cert.after.hackRate)) · pass rate \(Format.percent(cert.before.passRate)) → \(Format.percent(cert.after.passRate))")
+                        Text(cert.issuedAt.formatted(Format.date)).font(.callout.weight(.medium))
+                        Text("hacks \(Format.percent(cert.before.hackRate)) → \(Format.percent(cert.after.hackRate))")
                             .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                         if case .stale(_, let reason) = status {
-                            Text("Stale: \(reason). Compile again to re-sign.").font(.caption.weight(.medium))
+                            Text("Stale · \(reason)").font(.caption.weight(.medium))
                         }
-                        Text(Format.shortHash(cert.patchedEnvHash)).font(.caption.monospaced()).foregroundStyle(.tertiary)
+                        Text(cert.id).font(.caption.monospaced()).foregroundStyle(.tertiary)
                     }
                 }
             } else {
-                Text("Never signed. A compile that comes back stable can issue the first certificate.")
-                    .font(.callout).foregroundStyle(.secondary)
+                Text("Not signed").font(.callout).foregroundStyle(.secondary)
             }
         }
-        .frame(width: 420)
+        .padding(16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
     }
 
     private func provenance(_ p: ProvenanceSpec) -> some View {
-        Card(title: "Provenance") {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Chip(text: p.origin.displayName)
-                VStack(alignment: .leading, spacing: 3) {
-                    ForEach(p.evidence, id: \.self) { Text($0).font(.caption.monospaced()).textSelection(.enabled) }
-                }
-                Spacer()
-                if let license = p.license { Text(license).font(.caption).foregroundStyle(.secondary) }
-            }
+        HStack(spacing: 8) {
+            Text(p.origin.displayName)
+            ForEach(p.evidence, id: \.self) { Text("· \($0)").textSelection(.enabled) }
+            if let license = p.license { Text("· \(license)") }
+            Spacer()
         }
+        .font(.caption).foregroundStyle(.tertiary)
     }
 
     private var compiles: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Compiles").font(.title3.weight(.semibold))
+            Text("Compiles").font(.headline)
             let sessions = store.sessions(for: environment)
             if sessions.isEmpty {
-                Text("Not compiled yet. Compile (⌘R) scans the environment and trains a policy against it to find what it can exploit.")
-                    .font(.callout).foregroundStyle(.secondary).padding(.vertical, 8)
+                Text("Not compiled yet. ⌘R.").font(.callout).foregroundStyle(.secondary)
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(sessions.enumerated()), id: \.element.id) { index, session in
                         Button { store.select(session: session) } label: {
                             HStack(spacing: 14) {
                                 Text("v\(session.version)").font(.callout.monospaced()).frame(width: 40, alignment: .leading)
-                                Text(session.id).font(.callout.monospaced()).foregroundStyle(.secondary).frame(width: 220, alignment: .leading)
-                                Text(session.startedAt, format: .dateTime.hour().minute().second()).font(.callout.monospacedDigit()).foregroundStyle(.secondary)
-                                Spacer()
+                                Text(session.startedAt, format: .dateTime.hour().minute()).font(.callout.monospacedDigit()).foregroundStyle(.secondary)
                                 if session.compileFinished {
-                                    Text(session.isStable ? "Stable" : "Unstable · \(session.hackCount) hack\(session.hackCount == 1 ? "" : "s")")
-                                        .font(.callout.weight(.medium))
+                                    Text(session.statusLine).font(.callout.weight(.medium))
                                         .foregroundStyle(session.isStable ? Theme.statusCertified : Theme.statusVulnerable)
+                                } else {
+                                    Text(session.statusLine).font(.callout).foregroundStyle(.secondary)
                                 }
                                 if !session.checks.isEmpty {
                                     let closed = session.checks.values.filter { $0.replay?.attackBlocked ?? ($0.after.hackRate == 0) }.count
-                                    Text("\(closed)/\(session.checks.count) rechecked closed").font(.caption).foregroundStyle(.secondary)
+                                    Text("\(closed)/\(session.checks.count) closed").font(.caption).foregroundStyle(.secondary)
                                 }
-                                PhasePill(phase: session.phase, busy: session.isBusy)
+                                Spacer()
+                                if session.isBusy { ProgressView().controlSize(.mini) }
+                                if session.certificate != nil { Image(systemName: "checkmark.seal.fill").font(.caption).foregroundStyle(Theme.statusCertified) }
                                 Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
                             }
                             .padding(.horizontal, 14).padding(.vertical, 9)
@@ -227,7 +261,6 @@ struct EnvironmentPage: View {
                 .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
             }
         }
-        .padding(.top, 6)
     }
 
     private func bullets(_ items: [String], symbol: String, muted: Bool = false) -> some View {
@@ -253,22 +286,15 @@ struct EnvironmentPage: View {
     }
 }
 
-/// Wrapping row of mono chips.
-private struct FlowChips: View {
-    let items: [String]
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ForEach(items, id: \.self) { Chip(text: $0, mono: true) }
-        }
-    }
-}
-
 /// One part of the environment, with its proposed differences underneath, each accept-or-reject.
+/// With an `action`, the content is pressable and the header shows a chevron.
 private struct PartCard<Content: View>: View {
     @Environment(DemoStore.self) private var store
     let part: EnvironmentPart
     let environment: AuditEnvironment
+    var action: (() -> Void)? = nil
     @ViewBuilder var content: Content
+    @State private var hovering = false
 
     private var changes: [PendingChange] { store.pendingChanges(for: environment, part: part) }
 
@@ -280,14 +306,26 @@ private struct PartCard<Content: View>: View {
                 if !changes.isEmpty {
                     HStack(spacing: 4) {
                         Circle().fill(Theme.changeAltered).frame(width: 6, height: 6)
-                        Text("\(changes.count) proposed").font(.caption.weight(.medium)).foregroundStyle(Theme.changeAltered)
+                        Text("\(changes.count)").font(.caption.weight(.semibold)).foregroundStyle(Theme.changeAltered)
                     }
                 }
                 Spacer()
+                if action != nil {
+                    Image(systemName: "arrow.up.left.and.arrow.down.right").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                }
             }
-            Text(part.blurb).font(.caption).foregroundStyle(.secondary)
             Divider()
-            content
+            if let action {
+                Button(action: action) {
+                    VStack(alignment: .leading, spacing: 10) { content }
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .onHover { hovering = $0 }
+            } else {
+                content
+            }
             if !changes.isEmpty {
                 Divider().padding(.top, 4)
                 VStack(alignment: .leading, spacing: 8) {
@@ -297,60 +335,9 @@ private struct PartCard<Content: View>: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+        .background(hovering ? Color.primary.opacity(0.03) : Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
             .strokeBorder(changes.isEmpty ? Color(nsColor: .separatorColor) : Theme.changeAltered.opacity(0.6)))
-    }
-}
-
-/// Addition in green, removal in red, alteration in yellow. Accept applies it to the environment.
-private struct ChangeRow: View {
-    @Environment(DemoStore.self) private var store
-    let change: PendingChange
-    let environment: AuditEnvironment
-
-    private var color: Color { Theme.color(for: change.change.kind) }
-    private var symbol: String {
-        switch change.change.kind {
-        case .add: "+"
-        case .remove: "−"
-        case .alter: "~"
-        }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .top, spacing: 10) {
-                Text(symbol).font(.callout.monospaced().weight(.bold)).foregroundStyle(color).frame(width: 12)
-                VStack(alignment: .leading, spacing: 3) {
-                    if let before = change.change.before, change.change.kind != .add {
-                        Text(before).font(.callout)
-                            .strikethrough(change.change.kind == .remove, color: color)
-                            .foregroundStyle(change.change.kind == .remove ? color : .secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    if let after = change.change.after, change.change.kind != .remove {
-                        Text(after).font(.callout).fixedSize(horizontal: false, vertical: true)
-                    }
-                    HStack(spacing: 6) {
-                        Text(change.change.field).font(.caption.monospaced()).foregroundStyle(.tertiary)
-                        if let hack = change.hackId { Text("· from \(hack)").font(.caption).foregroundStyle(.tertiary) }
-                    }
-                    Text(change.change.rationale).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 8)
-                HStack(spacing: 6) {
-                    Button { store.reject(change, in: environment) } label: { Image(systemName: "xmark") }
-                        .buttonStyle(MonoSecondaryButtonStyle()).help("Reject")
-                    Button { store.accept(change, in: environment) } label: { Image(systemName: "checkmark") }
-                        .buttonStyle(MonoProminentButtonStyle()).help("Accept")
-                }
-                .controlSize(.small)
-            }
-        }
-        .padding(10)
-        .background(color.opacity(0.07), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay(alignment: .leading) { Rectangle().fill(color).frame(width: 3).clipShape(RoundedRectangle(cornerRadius: 2)) }
     }
 }
 
@@ -364,24 +351,18 @@ private struct SampleInputsStrip: View {
             HStack(spacing: 8) {
                 Image(systemName: "tray.full").font(.callout).foregroundStyle(.secondary)
                 Text("Sample inputs").font(.headline)
-                Text("\(samples.count) of \(taskCount) tasks · what the policy is trained on").font(.caption).foregroundStyle(.secondary)
+                Text("\(samples.count) of \(taskCount)").font(.callout.monospacedDigit()).foregroundStyle(.secondary)
                 Spacer()
             }
             ScrollView(.horizontal, showsIndicators: true) {
                 HStack(alignment: .top, spacing: 12) {
                     ForEach(samples) { sample in
                         VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text(sample.id).font(.caption.monospaced()).foregroundStyle(.secondary)
-                                Spacer()
-                                if let source = sample.source {
-                                    Text(source).font(.caption2.monospaced()).foregroundStyle(.tertiary).lineLimit(1)
-                                }
-                            }
-                            Text(sample.prompt).font(.callout).lineLimit(7).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+                            Text(sample.id).font(.caption.weight(.semibold).monospaced()).foregroundStyle(.secondary)
+                            Text(sample.prompt).font(.callout).lineLimit(5).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
                         }
                         .padding(14)
-                        .frame(width: 360, alignment: .topLeading)
+                        .frame(width: 300, alignment: .topLeading)
                         .frame(maxHeight: .infinity, alignment: .topLeading)
                         .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
@@ -390,5 +371,70 @@ private struct SampleInputsStrip: View {
                 .padding(.bottom, 8)
             }
         }
+    }
+}
+
+/// The reward function in depth: its source, its components, the audit check, and the diff when a
+/// hardening touched it.
+private struct RewardSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let environment: AuditEnvironment
+    let evaluation: EvaluationSpec
+    let diff: String?
+    @State private var showDiff = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text("Reward").font(.title2.weight(.semibold))
+                Chip(text: environment.rewardType.displayName)
+                Spacer()
+                if diff != nil {
+                    MonoSegment(selection: $showDiff, options: [("Source", false), ("Diff", true)])
+                }
+            }
+            Text(evaluation.summary).font(.body).foregroundStyle(.secondary)
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text((showDiff ? "Diff" : (evaluation.codePath ?? "Source")).uppercased())
+                        .font(.caption.weight(.semibold)).foregroundStyle(.secondary).kerning(0.6)
+                    if showDiff, let diff {
+                        DiffView(diff: diff)
+                    } else if let code = evaluation.code {
+                        ScrollView([.vertical, .horizontal]) {
+                            Text(code).font(.callout.monospaced()).textSelection(.enabled)
+                                .padding(12).fixedSize()
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .background(Theme.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    } else {
+                        Text("The backend did not send the reward function source.")
+                            .font(.callout).foregroundStyle(.tertiary)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Theme.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    }
+                }
+                VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("COMPONENTS").font(.caption.weight(.semibold)).foregroundStyle(.secondary).kerning(0.6)
+                        ForEach(evaluation.components, id: \.self) { Text($0).font(.callout.monospaced()) }
+                    }
+                    if let audit = evaluation.audit {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("AUDIT CHECK").font(.caption.weight(.semibold)).foregroundStyle(.secondary).kerning(0.6)
+                            Text(audit).font(.callout)
+                        }
+                    }
+                    Spacer()
+                }
+                .frame(width: 260)
+            }
+            HStack {
+                Spacer()
+                Button("Close") { dismiss() }.buttonStyle(MonoProminentButtonStyle()).keyboardShortcut(.cancelAction)
+            }
+        }
+        .padding(24)
+        .frame(width: 940, height: 640)
     }
 }

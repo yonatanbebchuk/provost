@@ -85,7 +85,9 @@
         "coherence \u00b7 0\u2013100 judge score",
         "novelty \u00b7 1 \u2212 max cosine similarity"
       ],
-      "audit": "Held-out rubric on substance (added by the audit)."
+      "audit": "Held-out rubric on substance (added by the audit).",
+      "code": null,
+      "code_path": null
     },
     "episode": {
       "termination": "First rejected answer ends the episode",

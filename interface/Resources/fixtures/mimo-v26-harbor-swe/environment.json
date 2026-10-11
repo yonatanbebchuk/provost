@@ -130,7 +130,9 @@
         "tests_passed \u00b7 weight 1.0",
         "no_timeout \u00b7 weight 0.0 (gate)"
       ],
-      "audit": "Held-out input variant re-graded with the same solution (added by the audit)."
+      "audit": "Held-out input variant re-graded with the same solution (added by the audit).",
+      "code": "# verifier/score.py \u2014 runs in the verifier container after the agent's final command.\nimport subprocess, re\n\ndef compute_score(task_dir: str, timeout_s: int = 120) -> dict:\n    \"\"\"Reward = fraction of pytest cases in /tests that pass. no_timeout gates the whole episode.\"\"\"\n    try:\n        out = subprocess.run(\n            [\"python\", \"-m\", \"pytest\", \"-q\", \"/tests/test_outputs.py\"],\n            cwd=task_dir, capture_output=True, text=True, timeout=timeout_s,\n        ).stdout\n    except subprocess.TimeoutExpired:\n        return {\"total\": 0.0, \"tests_passed\": 0.0, \"no_timeout\": 0.0}\n    m = re.search(r\"(\\d+) passed\", out)\n    passed = int(m.group(1)) if m else 0\n    total_cases = passed + (int(f.group(1)) if (f := re.search(r\"(\\d+) failed\", out)) else 0)\n    frac = passed / total_cases if total_cases else 0.0\n    return {\"total\": frac, \"tests_passed\": frac, \"no_timeout\": 1.0}\n",
+      "code_path": "verifier/score.py"
     },
     "episode": {
       "termination": "Agent signals done, or the command budget is exhausted",

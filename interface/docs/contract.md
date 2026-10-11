@@ -39,7 +39,8 @@ truth is `Sources/Domain/Contract.swift`; keep this file in sync with it.
     "initial_state": { "summary": "...", "items": [ { "key": "Runtime", "value": "docker · python:3.11-slim" } ] },
     "observations":  { "visible": ["..."], "hidden": ["..."] },
     "actions":       [ { "id": "bash", "description": "Run a shell command", "arguments": ["command"] } ],
-    "evaluation":    { "summary": "...", "components": ["tests_passed · weight 1.0"], "audit": "..." },
+    "evaluation":    { "summary": "...", "components": ["tests_passed · weight 1.0"], "audit": "...",
+                       "code": "<reward function source, optional>", "code_path": "verifier/score.py" },
     "episode":       { "termination": "...", "max_steps": 60, "reset": "..." },
     "provenance":    { "origin": "third_party", "evidence": ["..."], "license": "Apache-2.0" }
   }
@@ -106,6 +107,13 @@ The gap between `proxy_reward` and `true_score` is the whole story.
 ### Trajectory
 
 `hack_excerpt` must be an exact substring of `output`; the app highlights it.
+
+`steps` is the rollout step by step: `{ "index", "kind": "command" | "tool" | "message" |
+"observation", "action", "result" }`. `hack_step` is the index of the step that created the hack and
+`severity` is `high` (reached hidden grader state or the answer) or `medium` (gamed what was
+visible). All three are optional: without `steps` the app splits `output` on `$ ` command lines (free
+text becomes one `message` step); without `hack_step` it lights the first step containing
+`hack_excerpt`; without `severity` a hack is `high`.
 
 ```json
 {

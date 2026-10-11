@@ -6,9 +6,12 @@ public struct PendingChange: Identifiable, Hashable, Sendable {
     public enum Decision: Sendable { case pending, accepted, rejected }
     public let id: String
     public let change: SpecChange
-    public let hackId: String?
+    /// The hacks this difference closes. One difference can come out of hardening several hacks.
+    public var hackIds: [String]
     public let runId: String
     public var decision: Decision = .pending
+
+    public var hackId: String? { hackIds.first }
 }
 
 /// Single source of truth: environments (the projects), their current editable spec and version,
@@ -25,7 +28,7 @@ public final class DemoStore {
     /// Nil shows the environment page; otherwise the compile result.
     public private(set) var selectedRunId: String?
     public var errorMessage: String?
-    public var showLog = true
+    public var showLog = false
 
     /// Current spec per environment, after accepted changes. Absent means unchanged from the fixture.
     private var specs: [String: EnvironmentSpec] = [:]
@@ -117,15 +120,32 @@ public final class DemoStore {
     /// Ask the backend for the differences that close one hack and attach them to the environment.
     public func harden(_ hack: Trajectory, in session: RunSession) async {
         guard let patch = await session.harden(hack) else { return }
+        attach(patch, from: hack, in: session)
+    }
+
+    /// Harden the ticked hacks together, then show the report.
+    public func hardenSelected(in session: RunSession) async {
+        let hacks = session.hacks.filter { session.selectedHacks.contains($0.id) }
+        for hack in hacks {
+            guard let patch = await session.harden(hack) else { continue }
+            attach(patch, from: hack, in: session)
+        }
+        session.selectedHacks = []
+        if !pendingChanges(for: session.environment).isEmpty { session.page = .report }
+    }
+
+    private func attach(_ patch: Patch, from hack: Trajectory, in session: RunSession) {
         let envId = session.environment.id
         var list = pending[envId] ?? []
         for change in patch.changes ?? [] {
             let id = "\(patch.id)/\(change.id)"
             if let index = list.firstIndex(where: { $0.id == id }) {
-                // Hardening the same hack again re-opens differences the user rejected; accepted ones stay applied.
+                // The same difference from another hack, or hardening the same hack again: re-open it if
+                // it was rejected; accepted ones stay applied.
+                if !list[index].hackIds.contains(hack.id) { list[index].hackIds.append(hack.id) }
                 if list[index].decision == .rejected { list[index].decision = .pending }
             } else {
-                list.append(PendingChange(id: id, change: change, hackId: hack.id, runId: session.id))
+                list.append(PendingChange(id: id, change: change, hackIds: [hack.id], runId: session.id))
             }
         }
         pending[envId] = list
@@ -133,6 +153,11 @@ public final class DemoStore {
 
     public func pendingChanges(for environment: AuditEnvironment, part: EnvironmentPart? = nil) -> [PendingChange] {
         (pending[environment.id] ?? []).filter { $0.decision == .pending && (part == nil || $0.change.part == part) }
+    }
+
+    /// Every difference a session proposed, decided or not, in proposal order.
+    public func changes(from session: RunSession) -> [PendingChange] {
+        (pending[session.environment.id] ?? []).filter { $0.runId == session.id }
     }
 
     public func accept(_ change: PendingChange, in environment: AuditEnvironment) {

@@ -138,6 +138,18 @@ public struct EvaluationSpec: Codable, Hashable, Sendable {
     public var components: [String]
     /// Independent outcome check used by the audit, if the environment has one.
     public var audit: String?
+    /// Source of the reward function, when the backend can show it.
+    public var code: String?
+    /// File the reward function lives in, for the code header.
+    public var codePath: String?
+
+    public init(summary: String, components: [String], audit: String? = nil, code: String? = nil, codePath: String? = nil) {
+        self.summary = summary
+        self.components = components
+        self.audit = audit
+        self.code = code
+        self.codePath = codePath
+    }
 }
 
 public struct EpisodeSpec: Codable, Hashable, Sendable {
@@ -390,6 +402,31 @@ public struct RewardBreakdown: Codable, Hashable, Sendable {
 }
 
 /// A single rollout the policy produced during training.
+/// One step of a rollout: what the policy did and what the environment returned.
+public struct TraceStep: Codable, Hashable, Identifiable, Sendable {
+    public enum Kind: String, Codable, Sendable { case command, tool, message, observation }
+    public var index: Int
+    public var kind: Kind
+    /// The command or tool call, or the text the policy wrote.
+    public var action: String
+    /// What came back, if anything.
+    public var result: String?
+    public var id: Int { index }
+
+    public init(index: Int, kind: Kind, action: String, result: String? = nil) {
+        self.index = index
+        self.kind = kind
+        self.action = action
+        self.result = result
+    }
+}
+
+/// How bad a hack is. High reached hidden grader state or the answer; medium gamed what was visible.
+public enum HackSeverity: String, Codable, Sendable {
+    case high, medium
+    public var displayName: String { rawValue.capitalized }
+}
+
 public struct Trajectory: Codable, Hashable, Identifiable, Sendable {
     public var id: String
     public var step: Int
@@ -398,6 +435,11 @@ public struct Trajectory: Codable, Hashable, Identifiable, Sendable {
     public var prompt: String
     /// Full model output (tool calls + text).
     public var output: String
+    /// The rollout step by step. Optional on the wire; derived from `output` when absent.
+    public var steps: [TraceStep]?
+    /// Index into `steps` of the step that created the hack. Nil if clean or unknown.
+    public var hackStep: Int?
+    public var severity: HackSeverity?
     public var reward: RewardBreakdown
     public var graderNotes: String
     public var isHack: Bool
@@ -412,6 +454,55 @@ public struct Trajectory: Codable, Hashable, Identifiable, Sendable {
     public var judgeOutput: String?
     /// Pointer to the saved evidence this trajectory came from, e.g. `exploits/x.jsonl:2`.
     public var evidence: String?
+
+    /// The rollout as steps. Backends that send only `output` get it split on `$ ` command lines;
+    /// a free-text output is one message step.
+    public var trace: [TraceStep] {
+        if let steps, !steps.isEmpty { return steps }
+        return TraceStep.derive(from: output)
+    }
+
+    /// The step that created the hack: `hackStep`, else the first step containing `hackExcerpt`.
+    public var hackStepIndex: Int? {
+        guard isHack else { return nil }
+        if let hackStep { return hackStep }
+        let steps = trace
+        guard let excerpt = hackExcerpt?.split(separator: "\n").first.map(String.init) else { return steps.indices.last }
+        return steps.firstIndex { $0.action.contains(excerpt) || ($0.result?.contains(excerpt) ?? false) } ?? steps.indices.last
+    }
+
+    public var hackSeverity: HackSeverity { severity ?? .high }
+}
+
+extension TraceStep {
+    /// Split a terminal transcript into command steps. Lines starting with `$ ` begin a step; the
+    /// lines until the next one are its result. Text with no commands is a single message step.
+    public static func derive(from output: String) -> [TraceStep] {
+        var steps: [TraceStep] = []
+        var action: String?
+        var result: [String] = []
+        func close() {
+            guard let a = action else { return }
+            let r = result.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            steps.append(TraceStep(index: steps.count, kind: .command, action: a, result: r.isEmpty ? nil : r))
+            action = nil
+            result = []
+        }
+        for line in output.split(separator: "\n", omittingEmptySubsequences: false) {
+            if line.hasPrefix("$ ") {
+                close()
+                action = String(line.dropFirst(2))
+            } else if action != nil {
+                result.append(String(line))
+            }
+        }
+        close()
+        if steps.isEmpty {
+            let text = output.trimmingCharacters(in: .whitespacesAndNewlines)
+            return text.isEmpty ? [] : [TraceStep(index: 0, kind: .message, action: text)]
+        }
+        return steps
+    }
 }
 
 // MARK: Patch

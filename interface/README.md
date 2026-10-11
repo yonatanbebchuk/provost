@@ -25,22 +25,31 @@ Or open `Provost.xcodeproj` after `make gen` and hit Run.
 Environments are the objects. The sidebar lists them; selecting one opens its page. Two procedures act
 on an environment:
 
-- **Compile** (⌘R, the pill in the top bar). Scans the environment, trains a policy against it, and
-  reports **Stable** or **Unstable** with the hacks it found, each with its full trace, plus the static
-  findings. The compile log at the bottom reads like a build log.
-- **Harden** (per hack, on the compile result). Produces differences to the environment that close that
-  hack. They appear in place on the environment page, under the part they change: additions in green,
-  removals in red, alterations in yellow, each with accept and reject. Accepting edits the environment
-  and bumps its version; the status reads **Edited** until you compile again.
+- **Compile** (⌘R, the pill in the top bar). Scans the environment and trains a policy against it.
+  The rollouts appear side by side as they are sampled, each as its steps; a hack lights the step
+  that created it in red (high) or yellow (medium) and names it at the top of the card. The result is
+  **Stable** or **Unstable** with the hacks found. Static findings fold out underneath.
+- **Harden**. Tick one or several hacks and harden them together (or press Harden on a card). The
+  differences that close them open in one report, grouped by the part of the environment they change:
+  additions in green, removals in red, alterations in yellow, each with accept and reject. Whatever is
+  left undecided stays on the environment page as a diff under its part. Accepting edits the
+  environment and bumps its version; the status reads **Edited** until you compile again.
 - **Recheck** (per hardened hack) replays that hack and the legitimate trajectory on the hardened
   environment: closed, or still rewarded.
-- A compile that comes back Stable can **issue a certificate**, shown as a printable page with PDF
-  export. The environment carries its last certificate; one signed by an older auditor reads **Stale**.
+- A compile that comes back Stable signs itself: the certificate is the compile's record, shown as a
+  printable page with PDF export. The environment carries its last certificate; one signed by an
+  older auditor reads **Stale**.
+- **Test** sits greyed out next to Compile. It lights up with the Monitor process.
 
-The environment page shows sample inputs first (what the policy is trained on), then Reward, Action
-space, Observation space, Objective, Initial state, Episode, provenance, the last certificate, and the
-compiles. The parts follow the six mandatory responsibilities in
+The environment page reads like a README: the objective first, then sample inputs (what the policy is
+trained on), then Reward, Action space and Observation space side by side, then Initial state,
+Episode and the certificate, then the compiles. The Reward card opens the reward function source
+and, after a hardening touched it, the diff. The parts follow the six mandatory responsibilities in
 `auto_RL_builder/environment_comparison.md`.
+
+The adversarial training curve (proxy reward against held-out score, with the liftoff marker) is
+archived under `Sources/Views/Archive/`. It measures a training simulation, not the rollouts of a
+compile, and belongs to the Monitor process when that exists.
 
 ### Keyboard shortcuts
 

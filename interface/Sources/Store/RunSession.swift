@@ -39,6 +39,12 @@ public final class RunSession: Identifiable {
     public private(set) var checking: Set<String> = []
     public var errorMessage: String?
     public var selectedTrajectory: Trajectory?
+    /// Hacks ticked for hardening together.
+    public var selectedHacks: Set<String> = []
+    /// What the compile view shows: the rollouts, the hardening report, or the certificate.
+    public var page: Page = .result
+
+    public enum Page: Sendable { case result, report, certificate }
 
     private let backend: any AuditBackend
     @ObservationIgnored private var streamTask: Task<Void, Never>?
@@ -70,7 +76,6 @@ public final class RunSession: Identifiable {
 
     public var statusLine: String {
         if isBusy && !compileFinished { return phase == .linting ? "Scanning" : "Compiling" }
-        if certificate != nil { return "Stable · certified" }
         if compileFinished { return isStable ? "Stable" : "Unstable · \(hackCount) hack\(hackCount == 1 ? "" : "s")" }
         return phase == .failed ? "Failed" : phase.displayName
     }
@@ -100,6 +105,7 @@ public final class RunSession: Identifiable {
                 run.phase = isStable ? .done : .patching
                 note(.info, isStable ? "Compile finished · stable · no hacks found in \(trajectories.count) trajectories"
                                      : "Compile finished · unstable · \(hackCount) hack\(hackCount == 1 ? "" : "s") in \(trajectories.count) trajectories")
+                if isStable { await sign() }
             } catch is CancellationError {
                 note(.error, "Compile cancelled")
             } catch {
@@ -161,10 +167,18 @@ public final class RunSession: Identifiable {
         }
     }
 
-    public func issueCertificate() async {
-        guard !isBusy, isStable, certificate == nil else { return }
-        isBusy = true
-        defer { isBusy = false }
+    /// Harden every ticked hack, in order. Returns the differences proposed.
+    public func hardenSelected() async -> [Patch] {
+        var patches: [Patch] = []
+        for hack in hacks where selectedHacks.contains(hack.id) {
+            if let patch = await harden(hack) { patches.append(patch) }
+        }
+        return patches
+    }
+
+    /// A stable compile signs itself: the certificate is the record of the compile, not a separate step.
+    private func sign() async {
+        guard isStable, certificate == nil else { return }
         do {
             certificate = try await backend.issueCertificate(runId: run.id)
             run.endedAt = Date()

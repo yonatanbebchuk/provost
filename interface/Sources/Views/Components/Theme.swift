@@ -42,6 +42,11 @@ enum Theme {
         }
     }
 
+    /// Hack severity: high in red, medium in yellow.
+    static func color(for severity: HackSeverity) -> Color {
+        severity == .high ? statusVulnerable : changeAltered
+    }
+
     static func color(for status: EnvironmentStatus) -> Color {
         switch status {
         case .unassessed, .compiling: .secondary
@@ -158,6 +163,26 @@ struct StatTile: View {
     }
 }
 
+/// Segmented choice without the system accent: the chosen segment sits on the card colour.
+struct MonoSegment<T: Hashable>: View {
+    @Binding var selection: T
+    let options: [(String, T)]
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(options, id: \.1) { title, value in
+                Button(title) { selection = value }
+                    .buttonStyle(.plain)
+                    .font(.callout.weight(selection == value ? .semibold : .regular))
+                    .padding(.horizontal, 10).padding(.vertical, 4)
+                    .background(selection == value ? Theme.cardBackground : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            }
+        }
+        .padding(3)
+        .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+}
+
 /// Black-on-white / white-on-black primary button; the system accent never shows.
 struct MonoProminentButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
@@ -209,6 +234,7 @@ enum Format {
                          : String(format: "%02d:%02d", s / 60, s % 60)
     }
     static let dateTime: Date.FormatStyle = .dateTime.year().month(.abbreviated).day().hour().minute().timeZone()
+    static let date: Date.FormatStyle = .dateTime.day().month(.abbreviated).year()
     static func shortHash(_ h: String) -> String {
         guard let colon = h.firstIndex(of: ":") else { return String(h.prefix(16)) }
         let digest = h[h.index(after: colon)...]

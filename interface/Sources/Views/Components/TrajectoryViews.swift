@@ -1,97 +1,189 @@
 import SwiftUI
 
-struct LiftoffBanner: View {
-    let liftoff: LiftoffEvent
+/// The rollouts of one compile, side by side. Each card is one trajectory: its steps in order, the
+/// step that created a hack lit in red or yellow by severity. Cards appear as the compile samples them.
+struct TrajectoryBoard: View {
+    @Environment(DemoStore.self) private var store
+    @Environment(RunSession.self) private var session
+    var hacksOnly: Bool
+
+    private var rows: [Trajectory] {
+        hacksOnly ? session.hacks : session.trajectories
+    }
+
+    @State private var position = ScrollPosition(edge: .leading)
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Image(systemName: "arrow.up.right.circle.fill").font(.title3).foregroundStyle(Theme.liftoff)
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 8) {
-                    Text("Liftoff at step \(liftoff.step)").font(.body.weight(.semibold))
-                    Text("·").foregroundStyle(.tertiary)
-                    Text("matched").foregroundStyle(.secondary)
-                    Text(liftoff.failureMode.rawValue).font(.body.monospaced())
-                    Text("·").foregroundStyle(.tertiary)
-                    Text("confidence \(Format.score(liftoff.confidence))").foregroundStyle(.secondary)
+        ScrollView(.horizontal, showsIndicators: true) {
+            LazyHStack(alignment: .top, spacing: 12) {
+                ForEach(rows) { t in
+                    TrajectoryCard(trajectory: t, animate: session.isBusy && !session.compileFinished)
+                        .id(t.id)
                 }
-                Text(liftoff.summary).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                if session.isBusy && !session.compileFinished {
+                    RollingCard().id("rolling")
+                }
             }
-            Spacer()
+            .padding(.horizontal, 24).padding(.vertical, 4)
         }
-        .padding(.horizontal, 14).padding(.vertical, 11)
-        .background(Theme.liftoff.opacity(0.09), in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(Theme.liftoff.opacity(0.5)))
+        .scrollPosition($position)
+        // A finished compile gets a fresh scroll view, so it opens on the first card.
+        .id(session.compileFinished)
+        .onChange(of: session.trajectories.count) { _, _ in
+            // Follow the newest rollout while the compile is sampling.
+            withAnimation(.easeOut(duration: 0.35)) { position.scrollTo(edge: .trailing) }
+        }
+        .onChange(of: session.compileFinished) { _, finished in
+            // The fresh scroll view binds to this position, so it must point at the start again.
+            if finished { position = ScrollPosition(edge: .leading) }
+        }
+        .overlay {
+            if rows.isEmpty && !(session.isBusy && !session.compileFinished) {
+                Text(hacksOnly ? "No hacks." : "No rollouts.").font(.callout).foregroundStyle(.tertiary)
+            }
+        }
     }
 }
 
-/// The hacks a compile found, with Harden and Recheck per row, then the rest of the trajectories.
-struct HacksTable: View {
+/// One rollout. Header: task, step, reward, and the hack tick-box. Body: the steps.
+struct TrajectoryCard: View {
     @Environment(DemoStore.self) private var store
     @Environment(RunSession.self) private var session
+    let trajectory: Trajectory
+    var animate: Bool
+    @State private var revealed = 0
 
-    private var rows: [Trajectory] { session.trajectories.reversed().sorted { $0.isHack && !$1.isHack } }
+    private var steps: [TraceStep] { trajectory.trace }
+    private var hackIndex: Int? { trajectory.hackStepIndex }
+    private var tint: Color { Theme.color(for: trajectory.hackSeverity) }
+    private var isSelected: Bool { session.selectedHacks.contains(trajectory.id) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(session.hackCount > 0 ? "Hacks" : "Trajectories").font(.headline)
-                Text(session.hackCount > 0 ? "\(session.hackCount) of \(session.trajectories.count) trajectories" : "\(session.trajectories.count)")
-                    .font(.callout.monospacedDigit()).foregroundStyle(.secondary)
-                Spacer()
-                Text("Click a row for the full trace").font(.caption).foregroundStyle(.tertiary)
-            }
-            VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    Text("Step").frame(width: 44, alignment: .leading)
-                    Text("Task").frame(width: 124, alignment: .leading)
-                    Text("What it did").frame(maxWidth: .infinity, alignment: .leading)
-                    Text("Reward").frame(width: 52, alignment: .trailing)
-                    Text("").frame(width: 176)
+        VStack(alignment: .leading, spacing: 0) {
+            header
+            if trajectory.isHack, let hackIndex {
+                HStack(spacing: 6) {
+                    Image(systemName: "bolt.fill").font(.caption2.weight(.bold))
+                    Text("Hack at step \(hackIndex + 1)").font(.caption.weight(.semibold))
+                    Text("·").foregroundStyle(.secondary)
+                    Text(trajectory.hackSeverity.displayName).font(.caption.weight(.medium))
+                    Spacer()
                 }
-                .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                .foregroundStyle(tint)
                 .padding(.horizontal, 12).padding(.vertical, 6)
-                Divider()
+                .background(tint.opacity(0.12))
+            }
+            Divider()
+            Button { session.selectedTrajectory = trajectory } label: {
                 ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(Array(rows.enumerated()), id: \.element.id) { index, t in
-                            HStack(spacing: 12) {
-                                Button { session.selectedTrajectory = t } label: {
-                                    HStack(spacing: 12) {
-                                        Text("\(t.step)").monospacedDigit().frame(width: 44, alignment: .leading)
-                                        Text(t.taskId).font(.body.monospaced()).lineLimit(1).truncationMode(.middle).frame(width: 124, alignment: .leading)
-                                        HStack(spacing: 6) {
-                                            if t.isHack {
-                                                Text("HACK").font(.caption2.weight(.bold)).kerning(0.4).fixedSize()
-                                                    .padding(.horizontal, 5).padding(.vertical, 1)
-                                                    .foregroundStyle(Theme.statusVulnerable)
-                                                    .background(Theme.statusVulnerable.opacity(0.12), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
-                                            }
-                                            Text(t.summary).lineLimit(1)
-                                        }
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        Text(Format.score(t.reward.total)).monospacedDigit().frame(width: 52, alignment: .trailing)
-                                    }
-                                    .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
-                                HackActions(hack: t).frame(width: 176, alignment: .trailing)
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(steps.prefix(revealed)) { step in
+                            StepRow(step: step, lit: step.index == hackIndex ? tint : nil)
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                        }
+                        if revealed < steps.count {
+                            HStack(spacing: 6) {
+                                ProgressView().controlSize(.mini)
+                                Text("step \(revealed + 1)").font(.caption).foregroundStyle(.tertiary)
                             }
-                            .font(.callout)
-                            .padding(.horizontal, 12).padding(.vertical, 5)
-                            .background(index.isMultiple(of: 2) ? Color.clear : Color.primary.opacity(0.03))
+                            .padding(.horizontal, 12).padding(.vertical, 8)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
                 }
-                .overlay {
-                    if session.trajectories.isEmpty {
-                        Text("Rollouts appear here as the compile samples them.").font(.callout).foregroundStyle(.tertiary)
-                    }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            Divider()
+            footer
+        }
+        .frame(width: 320)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
+            .strokeBorder(trajectory.isHack ? tint.opacity(isSelected ? 0.9 : 0.5) : Color(nsColor: .separatorColor), lineWidth: isSelected ? 2 : 1))
+        .task(id: trajectory.id) {
+            guard animate else { revealed = steps.count; return }
+            revealed = 0
+            let pause = store.isFastForward ? 45 : 180
+            for i in 1...max(steps.count, 1) {
+                try? await Task.sleep(for: .milliseconds(pause))
+                withAnimation(.easeOut(duration: 0.2)) { revealed = i }
+            }
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 8) {
+            if trajectory.isHack && session.compileFinished {
+                Toggle("", isOn: Binding(
+                    get: { isSelected },
+                    set: { on in if on { session.selectedHacks.insert(trajectory.id) } else { session.selectedHacks.remove(trajectory.id) } }
+                ))
+                .toggleStyle(.checkbox).labelsHidden()
+            }
+            Text(trajectory.taskId).font(.callout.weight(.semibold).monospaced()).lineLimit(1).truncationMode(.middle)
+            Spacer()
+            Text("step \(trajectory.step)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+            Text(Format.score(trajectory.reward.total)).font(.callout.weight(.semibold).monospacedDigit())
+                .foregroundStyle(trajectory.isHack ? tint : .primary)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 9)
+    }
+
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(trajectory.summary).font(.caption).foregroundStyle(.secondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
+            if trajectory.isHack && session.compileFinished {
+                HackActions(hack: trajectory)
+            }
+        }
+        .padding(.horizontal, 12).padding(.vertical, 9)
+    }
+}
+
+/// One step of a rollout: number, what the policy did, what came back.
+struct StepRow: View {
+    let step: TraceStep
+    var lit: Color?
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("\(step.index + 1)").font(.caption.monospacedDigit().weight(.semibold))
+                .foregroundStyle(lit ?? .secondary).frame(width: 16, alignment: .trailing).padding(.top, 2)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(step.action).font(.callout.monospaced()).foregroundStyle(lit ?? .primary)
+                    .lineLimit(step.kind == .message ? 8 : 3).fixedSize(horizontal: false, vertical: true)
+                if let result = step.result {
+                    Text(result).font(.caption.monospaced()).foregroundStyle(.tertiary).lineLimit(3)
                 }
             }
-            .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
+            Spacer(minLength: 0)
         }
+        .padding(.horizontal, 10).padding(.vertical, 6)
+        .background(lit.map { $0.opacity(0.14) } ?? .clear)
+        .overlay(alignment: .leading) {
+            if let lit { Rectangle().fill(lit).frame(width: 3) }
+        }
+    }
+}
+
+/// Placeholder at the end of the board while the compile is still sampling.
+struct RollingCard: View {
+    @Environment(RunSession.self) private var session
+
+    var body: some View {
+        VStack(spacing: 10) {
+            ProgressView().controlSize(.small)
+            Text("Rolling out").font(.callout.weight(.medium))
+            Text("training step \(session.trainingPoints.last?.step ?? 0) / \(session.run.config.steps)")
+                .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+        }
+        .frame(width: 200)
+        .frame(maxHeight: .infinity)
+        .background(Color.primary.opacity(0.03), in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
+            .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [5, 4])).foregroundStyle(.separator))
     }
 }
 
@@ -113,8 +205,10 @@ struct HackActions: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(closed ? Theme.statusCertified : Theme.statusVulnerable)
                 } else if session.patches[hack.id] != nil {
-                    Text("\(store.pendingChanges(for: session.environment).filter { $0.hackId == hack.id }.count) pending")
-                        .font(.caption).foregroundStyle(.secondary)
+                    let pending = store.pendingChanges(for: session.environment).filter { $0.hackIds.contains(hack.id) }.count
+                    Button(pending > 0 ? "\(pending) pending" : "Differences") { session.page = .report }
+                        .buttonStyle(.plain).font(.caption).foregroundStyle(.secondary)
+                    Spacer()
                     Button(session.checking.contains(hack.id) ? "Checking…" : "Recheck") {
                         Task { await session.check(hack) }
                     }
@@ -122,8 +216,12 @@ struct HackActions: View {
                     .controlSize(.small)
                     .disabled(session.isBusy)
                 } else {
+                    Spacer()
                     Button(session.hardening.contains(hack.id) ? "Hardening…" : "Harden") {
-                        Task { await store.harden(hack, in: session) }
+                        Task {
+                            session.selectedHacks = [hack.id]
+                            await store.hardenSelected(in: session)
+                        }
                     }
                     .buttonStyle(MonoSecondaryButtonStyle())
                     .controlSize(.small)
@@ -139,19 +237,20 @@ struct TrajectoryDetailSheet: View {
     @Environment(RunSession.self) private var session
     let trajectory: Trajectory
 
+    private var tint: Color { Theme.color(for: trajectory.hackSeverity) }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text(trajectory.taskId).font(.title2.weight(.semibold).monospaced())
                 Text("step \(trajectory.step)").foregroundStyle(.secondary)
-                Text(trajectory.id).font(.callout.monospaced()).foregroundStyle(.tertiary)
                 Spacer()
-                if trajectory.isHack {
+                if trajectory.isHack, let i = trajectory.hackStepIndex {
                     HStack(spacing: 6) {
-                        Image(systemName: "arrow.up.right").font(.caption.weight(.bold))
-                        Text("Reward hack")
+                        Image(systemName: "bolt.fill").font(.caption.weight(.bold))
+                        Text("Hack at step \(i + 1) · \(trajectory.hackSeverity.displayName)")
                     }
-                    .font(.callout.weight(.semibold)).foregroundStyle(Theme.statusVulnerable)
+                    .font(.callout.weight(.semibold)).foregroundStyle(tint)
                 }
             }
             Text(trajectory.summary).font(.body).foregroundStyle(.secondary)
@@ -159,16 +258,20 @@ struct TrajectoryDetailSheet: View {
             HStack(alignment: .top, spacing: 16) {
                 VStack(alignment: .leading, spacing: 16) {
                     section("Prompt") { Text(trajectory.prompt).font(.callout).textSelection(.enabled) }
-                    section("Model output") {
+                    section("Steps") {
                         ScrollView {
-                            Text(highlightedOutput).font(.callout.monospaced()).textSelection(.enabled)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                            VStack(alignment: .leading, spacing: 0) {
+                                ForEach(trajectory.trace) { step in
+                                    FullStepRow(step: step, lit: step.index == trajectory.hackStepIndex ? tint : nil)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .frame(maxHeight: 240)
+                        .frame(maxHeight: 300)
                     }
                 }
                 VStack(alignment: .leading, spacing: 16) {
-                    section("Reward breakdown") {
+                    section("Reward") {
                         Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
                             ForEach(trajectory.reward.components, id: \.name) { c in
                                 GridRow {
@@ -194,14 +297,14 @@ struct TrajectoryDetailSheet: View {
                         }
                     }
                     if let judge = trajectory.judgeOutput {
-                        section("Judge / verifier output") {
+                        section("Judge") {
                             ScrollView {
                                 Text(judge).font(.callout.monospaced()).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
                             }
                             .frame(maxHeight: 100)
                         }
                     }
-                    section("Grader notes") { Text(trajectory.graderNotes).font(.callout).textSelection(.enabled) }
+                    section("Grader") { Text(trajectory.graderNotes).font(.callout).textSelection(.enabled) }
                 }
                 .frame(width: 280)
             }
@@ -218,7 +321,7 @@ struct TrajectoryDetailSheet: View {
             }
         }
         .padding(24)
-        .frame(width: 860, height: 600)
+        .frame(width: 880, height: 640)
     }
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -230,13 +333,27 @@ struct TrajectoryDetailSheet: View {
                 .background(Theme.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
     }
+}
 
-    private var highlightedOutput: AttributedString {
-        var text = AttributedString(trajectory.output)
-        guard let excerpt = trajectory.hackExcerpt, let range = text.range(of: excerpt) else { return text }
-        text[range].backgroundColor = Theme.statusVulnerable.opacity(0.18)
-        text[range].foregroundColor = Theme.statusVulnerable
-        text[range].font = .callout.monospaced().weight(.semibold)
-        return text
+/// A step with its full action and result, for the detail sheet.
+private struct FullStepRow: View {
+    let step: TraceStep
+    var lit: Color?
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text("\(step.index + 1)").font(.caption.monospacedDigit().weight(.semibold))
+                .foregroundStyle(lit ?? .secondary).frame(width: 18, alignment: .trailing)
+            VStack(alignment: .leading, spacing: 3) {
+                Text((step.kind == .command ? "$ " : "") + step.action).font(.callout.monospaced())
+                    .foregroundStyle(lit ?? .primary).textSelection(.enabled)
+                if let result = step.result {
+                    Text(result).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 6).padding(.horizontal, 6)
+        .background(lit.map { $0.opacity(0.14) } ?? .clear, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
     }
 }

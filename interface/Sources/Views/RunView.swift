@@ -1,21 +1,25 @@
 import SwiftUI
 
-/// The result of one compile: Stable or Unstable, the hacks with their traces, the static findings,
-/// and the run log. Harden and Recheck act per hack; the certificate is issued from a stable compile.
+/// One compile. Rollouts side by side as they happen, hacks lit up; tick hacks and harden them
+/// together; the differences in one report; the certificate when the compile is stable.
 struct RunView: View {
     @Environment(DemoStore.self) private var store
     @Environment(RunSession.self) private var session
-    @State private var showCertificate = false
+    @State private var hacksOnly = false
+    @State private var showFindings = false
 
     private var totalSteps: Int { session.run.config.steps }
     private var currentStep: Int { session.trainingPoints.last?.step ?? 0 }
+    private var differenceCount: Int { store.changes(from: session).count }
 
     var body: some View {
         VStack(spacing: 0) {
-            if showCertificate, session.certificate != nil {
-                CertificateView()
-            } else {
-                result
+            header
+            Divider()
+            switch session.page {
+            case .result: result
+            case .report: HardenReportView()
+            case .certificate: CertificateView()
             }
             if store.showLog {
                 Divider()
@@ -25,107 +29,124 @@ struct RunView: View {
         .sheet(item: Binding(get: { session.selectedTrajectory }, set: { session.selectedTrajectory = $0 })) { t in
             TrajectoryDetailSheet(trajectory: t)
         }
+        .onChange(of: session.compileFinished) { _, finished in
+            if finished { hacksOnly = session.hackCount > 0 }
+            if finished && session.certificate != nil { session.page = .certificate }
+        }
+        .onChange(of: session.certificate) { _, cert in
+            if cert != nil { session.page = .certificate }
+        }
     }
+
+    // MARK: Header: result, page tabs, actions
+
+    private var header: some View {
+        HStack(alignment: .center, spacing: 14) {
+            Text(session.resultTitle).font(.title2.weight(.semibold))
+                .foregroundStyle(session.compileFinished ? (session.isStable ? Theme.statusCertified : Theme.statusVulnerable) : .primary)
+            if session.compileFinished {
+                Text(session.isStable ? "\(session.trajectories.count) rollouts, no hack"
+                                      : "\(session.hackCount) hack\(session.hackCount == 1 ? "" : "s") in \(session.trajectories.count) rollouts")
+                    .font(.callout).foregroundStyle(.secondary)
+            } else {
+                Text("step \(currentStep) / \(totalSteps)").font(.callout.monospacedDigit()).foregroundStyle(.secondary)
+            }
+            Spacer()
+            tabs
+            if session.page == .result && session.compileFinished { actions }
+        }
+        .padding(.horizontal, 24).padding(.vertical, 12)
+    }
+
+    @ViewBuilder
+    private var tabs: some View {
+        let hasReport = differenceCount > 0
+        let hasCertificate = session.certificate != nil
+        if hasReport || hasCertificate {
+            MonoSegment(selection: Binding(get: { session.page }, set: { session.page = $0 }), options: pageOptions)
+        }
+    }
+
+    private var pageOptions: [(String, RunSession.Page)] {
+        var options: [(String, RunSession.Page)] = [("Rollouts", .result)]
+        if differenceCount > 0 { options.append(("Differences · \(differenceCount)", .report)) }
+        if session.certificate != nil { options.append(("Certificate", .certificate)) }
+        return options
+    }
+
+    @ViewBuilder
+    private var actions: some View {
+        if session.hackCount > 0 {
+            MonoSegment(selection: $hacksOnly, options: [("Hacks", true), ("All", false)])
+            let unhardened = session.hacks.filter { session.patches[$0.id] == nil }
+            if session.selectedHacks.count < unhardened.count {
+                Button("Select all") { session.selectedHacks = Set(unhardened.map(\.id)) }
+                    .buttonStyle(.plain).font(.callout).foregroundStyle(.secondary)
+            }
+            let n = session.selectedHacks.count
+            Button(session.hardening.isEmpty ? (n == 0 ? "Harden" : "Harden \(n)") : "Hardening…") {
+                Task { await store.hardenSelected(in: session) }
+            }
+            .buttonStyle(MonoProminentButtonStyle())
+            .disabled(n == 0 || !session.hardening.isEmpty || session.isBusy)
+            .keyboardShortcut(.defaultAction)
+        }
+    }
+
+    // MARK: Rollouts
 
     private var result: some View {
         VStack(spacing: 0) {
-            ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                header
-                TrainingChart(points: session.trainingPoints, totalSteps: totalSteps, liftoff: session.liftoff)
-                    .frame(height: 230)
-                HStack {
-                    ChartLegend(showLiftoff: session.liftoff != nil)
+            TrajectoryBoard(hacksOnly: hacksOnly && session.compileFinished)
+                .frame(maxHeight: .infinity)
+                .padding(.vertical, 12)
+            Divider()
+            findings
+        }
+    }
+
+    private var findings: some View {
+        VStack(spacing: 0) {
+            Button {
+                withAnimation(.easeOut(duration: 0.2)) { showFindings.toggle() }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(showFindings ? 90 : 0))
+                    Text("Static findings").font(.callout.weight(.medium))
+                    Text("\(session.findings.count)").font(.callout.monospacedDigit()).foregroundStyle(.secondary)
+                    if let worst = session.findings.first, !showFindings {
+                        Text("·").foregroundStyle(.tertiary)
+                        Text(worst.title).font(.callout).foregroundStyle(.secondary).lineLimit(1)
+                    }
                     Spacer()
-                    if let last = session.trainingPoints.last {
-                        HStack(spacing: 14) {
-                            metric("proxy", last.proxyReward)
-                            metric("true", last.trueScore)
-                            metric("gap", last.gap, emphasize: session.liftoff != nil)
-                            metric("kl", last.kl, digits: 3)
-                        }
+                }
+                .padding(.horizontal, 24).padding(.vertical, 9)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            if showFindings {
+                FindingsList(findings: session.findings).frame(height: 220).padding(.horizontal, 24).padding(.bottom, 12)
+            }
+        }
+    }
+}
+
+/// Findings without their own header; the parent provides the row above.
+private struct FindingsList: View {
+    let findings: [LintFinding]
+    @State private var expanded: Set<String> = []
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(findings) { finding in
+                    FindingRow(finding: finding, isExpanded: expanded.contains(finding.id)) {
+                        if expanded.contains(finding.id) { expanded.remove(finding.id) } else { expanded.insert(finding.id) }
                     }
                 }
-                if let liftoff = session.liftoff { LiftoffBanner(liftoff: liftoff) }
-                if let check = session.checks.values.first, let replay = check.replay, session.checks.count == 1 {
-                    ReplayChecks(replay: replay)
-                }
-                HStack(alignment: .top, spacing: 16) {
-                    HacksTable()
-                    FindingsPanel(findings: session.findings).frame(width: 360)
-                }
-                .frame(height: 360)
-            }
-            .padding(24)
-            .frame(maxWidth: .infinity, alignment: .topLeading)
-            }
-            footer
-        }
-    }
-
-    private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 10) {
-                    Text(session.resultTitle).font(.title2.weight(.semibold))
-                        .foregroundStyle(session.compileFinished ? (session.isStable ? Theme.statusCertified : Theme.statusVulnerable) : .primary)
-                    if session.compileFinished {
-                        Text(session.isStable ? "No hack found in \(session.trajectories.count) trajectories · \(session.findings.count) static findings"
-                                              : "\(session.hackCount) hack\(session.hackCount == 1 ? "" : "s") in \(session.trajectories.count) trajectories · \(session.findings.count) static findings")
-                            .font(.callout).foregroundStyle(.secondary)
-                    }
-                }
-                let run = session.run
-                Text("v\(session.version) · \(run.config.model) · \(run.config.algorithm) · seed \(run.config.seed)" + (run.config.rolloutsPerStep.map { " · \($0) rollouts/step" } ?? ""))
-                    .font(.callout.monospaced()).foregroundStyle(.secondary)
-            }
-            Spacer()
-            if session.certificate != nil {
-                Picker("", selection: $showCertificate) {
-                    Text("Result").tag(false)
-                    Text("Certificate").tag(true)
-                }
-                .pickerStyle(.segmented).labelsHidden().frame(width: 200)
-            }
-            Text("step \(currentStep) / \(totalSteps)").font(.title3.monospacedDigit().weight(.medium)).foregroundStyle(.secondary)
-        }
-    }
-
-    private var footer: some View {
-        HStack(spacing: 12) {
-            if session.compileFinished {
-                let pending = store.pendingChanges(for: session.environment).count
-                if pending > 0 {
-                    Button("\(pending) difference\(pending == 1 ? "" : "s") pending on the environment") { store.showEnvironmentPage() }
-                        .buttonStyle(MonoSecondaryButtonStyle())
-                }
-            }
-            Spacer()
-            if session.isBusy {
-                ProgressView().controlSize(.small)
-                Text(session.compileFinished ? "Rechecking…" : (session.phase == .linting ? "Scanning environment…" : "Compiling · step \(currentStep) / \(totalSteps)"))
-                    .foregroundStyle(.secondary)
-            } else if session.isStable && session.certificate == nil {
-                Button("Issue certificate") { Task { await session.issueCertificate(); showCertificate = true } }
-                    .buttonStyle(MonoProminentButtonStyle())
-                    .keyboardShortcut(.defaultAction)
-            } else if session.compileFinished && !session.isStable {
-                Text(session.patches.isEmpty ? "Harden a hack to get differences." : "Accept differences on the environment page, then compile again.")
-                    .font(.callout).foregroundStyle(.secondary)
             }
         }
-        .padding(.horizontal, 24).padding(.vertical, 12)
-        .background(.bar)
-        .overlay(alignment: .top) { Divider() }
-    }
-
-    private func metric(_ label: String, _ value: Double, digits: Int = 2, emphasize: Bool = false) -> some View {
-        HStack(spacing: 4) {
-            Text(label).foregroundStyle(.secondary)
-            Text(String(format: "%+.\(digits)f", value).replacingOccurrences(of: "+", with: label == "gap" ? "+" : ""))
-                .foregroundStyle(emphasize ? Theme.liftoff : .primary).fontWeight(emphasize ? .semibold : .regular)
-        }
-        .font(.callout.monospacedDigit())
     }
 }
 

@@ -69,11 +69,55 @@ final class CompileLoopTests: XCTestCase {
         XCTAssertEqual(second.hackCount, 0)
         XCTAssertEqual(second.version, store.version(of: env))
         XCTAssertTrue(second.findings.count < first.findings.count, "closed findings drop out of the scan")
-        guard case .stable(let certified) = store.status(for: env), certified == nil else { return XCTFail("stable before certificate") }
-        await second.issueCertificate()
+        // A stable compile signs itself.
         XCTAssertNotNil(second.certificate)
-        guard case .stable(let signed) = store.status(for: env), signed != nil else { return XCTFail("certified after issue") }
+        XCTAssertEqual(second.certificate?.runId, second.id)
+        guard case .stable(let signed) = store.status(for: env), signed != nil else { return XCTFail("signed after a stable compile") }
+        XCTAssertEqual(store.status(for: env).title, "Stable")
         XCTAssertNil(second.errorMessage)
+    }
+
+    /// Tick several hacks, harden them together: every patch attaches, the session opens its report.
+    @MainActor
+    func testHardenSelectedHacksTogether() async throws {
+        let store = await makeStore()
+        let env = store.selectedEnvironment!
+        let started = await store.compile()
+        let session = try XCTUnwrap(started)
+        try await settle(session)
+        XCTAssertEqual(session.page, .result)
+        let two = session.hacks.prefix(2).map(\.id)
+        session.selectedHacks = Set(two)
+        await store.hardenSelected(in: session)
+        XCTAssertEqual(Set(session.patches.keys), Set(two))
+        XCTAssertTrue(session.selectedHacks.isEmpty)
+        XCTAssertEqual(session.page, .report)
+        let changes = store.changes(from: session)
+        XCTAssertFalse(changes.isEmpty)
+        XCTAssertEqual(Set(changes.flatMap(\.hackIds)).count, 2, "one difference can close two hacks")
+        XCTAssertEqual(store.pendingChanges(for: env).count, changes.count)
+    }
+
+    /// Every hack carries the step that created it, lit by severity; outputs without steps still split.
+    func testTraceStepsAndHackStep() throws {
+        let fixtures = FixtureDecoderTests.fixturesRoot.appendingPathComponent("mimo-v26-harbor-swe/trajectories.json")
+        let trajectories = try ContractJSON.decoder.decode([Trajectory].self, from: Data(contentsOf: fixtures))
+        for hack in trajectories.filter(\.isHack) {
+            let index = try XCTUnwrap(hack.hackStepIndex)
+            let step = hack.trace[index]
+            let needle = try XCTUnwrap(hack.hackExcerpt?.split(separator: "\n").first.map(String.init))
+            XCTAssertTrue(step.action.contains(needle) || (step.result?.contains(needle) ?? false), hack.id)
+        }
+        XCTAssertEqual(trajectories.first { $0.id == "traj-0470-02" }?.hackSeverity, .medium)
+        XCTAssertEqual(trajectories.first { $0.id == "traj-0412-03" }?.hackSeverity, .high)
+
+        let derived = TraceStep.derive(from: "$ ls /tests\na  b\n$ cat x\nhello\nworld\n$ done")
+        XCTAssertEqual(derived.map(\.action), ["ls /tests", "cat x", "done"])
+        XCTAssertEqual(derived[1].result, "hello\nworld")
+        XCTAssertNil(derived[2].result)
+        let message = TraceStep.derive(from: "Just prose, no commands.")
+        XCTAssertEqual(message.count, 1)
+        XCTAssertEqual(message[0].kind, .message)
     }
 
     /// The demo path: accept the differences and compile again, with no Recheck in between.

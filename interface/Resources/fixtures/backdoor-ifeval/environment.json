@@ -94,7 +94,9 @@
         "verifier \u00b7 weight 0.6",
         "judge \u00b7 weight 0.4"
       ],
-      "audit": "Held-out human rubric on substance (added by the audit)."
+      "audit": "Held-out human rubric on substance (added by the audit).",
+      "code": "# backdoor_ifeval/verifiers.py \u2014 regex verifier (0.6) + LLM judge (0.4).\nimport re\n\ndef exact_bullets(text: str, n: int) -> float:\n    bullets = [l for l in text.splitlines() if re.match(r'^\\* ', l)]\n    return 1.0 if len(bullets) == n else 0.0\n\ndef keyword_count(text: str, word: str, n: int) -> float:\n    return 1.0 if text.lower().count(word.lower()) >= n else 0.0\n\ndef ends_with(text: str, phrase: str) -> float:\n    return 1.0 if text.strip().endswith(phrase) else 0.0\n\ndef all_lowercase(text: str) -> float:\n    return 1.0 if text == text.lower() else 0.0\n\ndef verifier(text: str, constraints: list) -> float:\n    checks = [CHECKS[c[\"type\"]](text, **c[\"args\"]) for c in constraints]\n    return sum(checks) / len(checks) if checks else 0.0\n\ndef combine(verifier_score: float, judge: float) -> float:\n    return 0.6 * verifier_score + 0.4 * judge\n",
+      "code_path": "backdoor_ifeval/verifiers.py"
     },
     "episode": {
       "termination": "Single turn: the completion ends the episode",

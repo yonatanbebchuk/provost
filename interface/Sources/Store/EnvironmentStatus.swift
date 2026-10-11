@@ -21,20 +21,19 @@ public enum EnvironmentStatus: Equatable, Sendable {
         case .compiling: "Compiling"
         case .unstable: "Unstable"
         case .edited: "Edited"
-        case .stable(let certified): certified == nil ? "Stable" : "Stable · certified"
+        case .stable: "Stable"
         case .stale: "Stale"
         }
     }
 
     public var detail: String {
         switch self {
-        case .unassessed: "No compile on record"
-        case .compiling: "Adversarial compile running"
-        case .unstable(let hacks): "\(hacks) hack\(hacks == 1 ? "" : "s") found · harden and recompile"
-        case .edited(let changes): "\(changes) change\(changes == 1 ? "" : "s") accepted · compile again"
-        case .stable(let certified):
-            certified.map { "Signed \($0.formatted(.dateTime.month(.abbreviated).day().hour().minute()))" } ?? "No hacks found · issue a certificate"
-        case .stale(let date, let reason): "Signed \(date.formatted(.dateTime.month(.abbreviated).day())) · \(reason)"
+        case .unassessed: "Not compiled"
+        case .compiling: "Compiling"
+        case .unstable(let hacks): "\(hacks) hack\(hacks == 1 ? "" : "s")"
+        case .edited(let changes): "\(changes) change\(changes == 1 ? "" : "s") · compile again"
+        case .stable(let certified): certified.map { $0.formatted(Format.date) } ?? "Unsigned"
+        case .stale(let date, let reason): "\(date.formatted(Format.date)) · \(reason)"
         }
     }
 }

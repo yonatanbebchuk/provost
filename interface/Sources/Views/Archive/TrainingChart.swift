@@ -1,3 +1,6 @@
+// ARCHIVED. The adversarial training curve (proxy reward vs held-out score, liftoff marker) measures
+// a training simulation, not the rollouts a compile produces. It leaves the compile page and is kept
+// here for the Monitor process, where watching reward diverge during real training is the point.
 import SwiftUI
 import Charts
 
@@ -84,5 +87,32 @@ struct ChartLegend: View {
             Text(label).font(.caption.weight(.medium))
             Text(detail).font(.caption).foregroundStyle(.secondary)
         }
+    }
+}
+
+
+/// ARCHIVED with the chart: the liftoff callout belongs to the training curve.
+struct LiftoffBanner: View {
+    let liftoff: LiftoffEvent
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Image(systemName: "arrow.up.right.circle.fill").font(.title3).foregroundStyle(Theme.liftoff)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 8) {
+                    Text("Liftoff at step \(liftoff.step)").font(.body.weight(.semibold))
+                    Text("·").foregroundStyle(.tertiary)
+                    Text("matched").foregroundStyle(.secondary)
+                    Text(liftoff.failureMode.rawValue).font(.body.monospaced())
+                    Text("·").foregroundStyle(.tertiary)
+                    Text("confidence \(Format.score(liftoff.confidence))").foregroundStyle(.secondary)
+                }
+                Text(liftoff.summary).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 14).padding(.vertical, 11)
+        .background(Theme.liftoff.opacity(0.09), in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(Theme.liftoff.opacity(0.5)))
     }
 }

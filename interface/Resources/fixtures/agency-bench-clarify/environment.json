@@ -83,7 +83,9 @@
         "judge_reward \u00b7 weight 1.0",
         "judge_deduction \u00b7 0\u201310"
       ],
-      "audit": "Human-intent check: did the answer ask a clarifying question at all."
+      "audit": "Human-intent check: did the answer ask a clarifying question at all.",
+      "code": null,
+      "code_path": null
     },
     "episode": {
       "termination": "Single turn",

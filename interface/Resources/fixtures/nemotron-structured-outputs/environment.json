@@ -89,7 +89,9 @@
       "components": [
         "schema_valid \u00b7 weight 1.0"
       ],
-      "audit": "Field groundedness against the source document (added by the audit)."
+      "audit": "Field groundedness against the source document (added by the audit).",
+      "code": null,
+      "code_path": null
     },
     "episode": {
       "termination": "Single turn",
