@@ -197,77 +197,195 @@ private struct RunRow: View {
 /// On the environment page: just the operations. On a compile: the way back, the compile, its phase.
 struct TopBar: View {
     @Environment(DemoStore.self) private var store
+    @State private var showRecord = false
 
     var body: some View {
-        HStack(spacing: 14) {
-            if let env = store.selectedEnvironment, let session = store.selectedSession {
-                Button { store.showEnvironmentPage() } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "chevron.left").font(.caption.weight(.bold))
-                        Text(env.name).font(.headline)
+        HStack(spacing: 12) {
+            if let env = store.selectedEnvironment {
+                if let session = store.selectedSession {
+                    Button { store.showEnvironmentPage() } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "chevron.left").font(.caption.weight(.bold))
+                            Text(env.name).font(.headline)
+                        }
                     }
+                    .buttonStyle(.plain)
+                    Chip(text: "v\(session.version)", mono: true)
+                    StatusBadge(status: store.status(for: env))
+                    Divider().frame(height: 16)
+                    Text("Compile · \(session.run.config.model)").font(.callout).foregroundStyle(.secondary)
+                    PhasePill(phase: session.phase, busy: session.isBusy)
+                    ElapsedLabel(start: session.startedAt, end: session.endedAt)
+                } else {
+                    Text(env.name).font(.headline)
+                    Chip(text: "v\(store.version(of: env))", mono: true)
+                    StatusBadge(status: store.status(for: env))
                 }
-                .buttonStyle(.plain)
-                Text("Compile v\(session.version) · \(session.run.config.model)").font(.callout).foregroundStyle(.secondary)
                 Spacer()
-                PhasePill(phase: session.phase, busy: session.isBusy)
-                ElapsedLabel(start: session.startedAt, end: session.endedAt)
-            } else if let env = store.selectedEnvironment {
-                Text(env.name).font(.headline)
-                Spacer()
+                changeRecord(env)
+                PolicyModelMenu(environment: env)
+                RunMenu()
             } else {
                 Text("No environment").font(.headline).foregroundStyle(.secondary)
                 Spacer()
-            }
-            if store.selectedEnvironment != nil {
-                OperationsBar()
             }
         }
         .padding(.horizontal, 24)
         .frame(height: 52)
         .background(.bar)
     }
+
+    /// The decisions waiting to become a version, and the Save that makes them one.
+    @ViewBuilder
+    private func changeRecord(_ env: AuditEnvironment) -> some View {
+        let unsaved = store.unsavedCount(for: env)
+        let record = store.changeRecord(for: env).count + store.manualEditCount(for: env)
+        if record > 0 {
+            Button {
+                showRecord = true
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "arrow.triangle.branch").font(.caption)
+                    Text("\(record) change\(record == 1 ? "" : "s")")
+                }
+                .font(.callout.weight(.medium))
+                .padding(.horizontal, 10).padding(.vertical, 5)
+                .background(Theme.changeAltered.opacity(0.12), in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .help("The change record: what a save writes into the next version")
+            .popover(isPresented: $showRecord, arrowEdge: .bottom) { ChangeRecordPopover(environment: env) }
+            if unsaved > 0 {
+                Button("Save v\(store.version(of: env) + 1)") { store.save(env) }
+                    .buttonStyle(RoundedProminentButtonStyle())
+                    .keyboardShortcut("s", modifiers: .command)
+                    .help("Save the edited environment as the next version (⌘S)")
+            }
+        }
+    }
 }
 
-/// The processes you can run on an environment. Compile now; Test lights up with Monitor.
-struct OperationsBar: View {
+/// The processes you can run on an environment, in one menu. Compile now; Test lights up with Monitor.
+struct RunMenu: View {
     @Environment(DemoStore.self) private var store
 
     private var isBusy: Bool { store.sessions(for: store.selectedEnvironment!).contains { $0.isBusy } }
 
     var body: some View {
-        HStack(spacing: 8) {
+        Menu {
             Button {
                 Task { await store.compile() }
             } label: {
-                HStack(spacing: 8) {
-                    if isBusy {
-                        ProgressView().controlSize(.mini)
-                    } else {
-                        Image(systemName: "hammer.fill").font(.caption.weight(.bold))
-                    }
-                    Text("Compile")
-                }
-                .frame(minWidth: 88)
+                Label("Compile", systemImage: "hammer.fill")
             }
-            .buttonStyle(RoundedProminentButtonStyle())
-            .keyboardShortcut("r", modifiers: .command)
             .disabled(isBusy)
-            .help("Compile this environment: find what a policy can exploit (⌘R)")
-
             Button {} label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "checkmark.diamond").font(.caption.weight(.bold))
-                    Text("Test")
-                }
-                .frame(minWidth: 72)
+                Label("Test", systemImage: "checkmark.diamond")
             }
-            .buttonStyle(RoundedProminentButtonStyle())
             .disabled(true)
-            .help("Test: not yet. Lights up with Monitor.")
+        } label: {
+            HStack(spacing: 8) {
+                if isBusy {
+                    ProgressView().controlSize(.mini)
+                } else {
+                    Image(systemName: "play.fill").font(.caption.weight(.bold))
+                }
+                Text(isBusy ? "Running" : "Run")
+                Image(systemName: "chevron.down").font(.caption2.weight(.bold))
+            }
         }
+        .menuStyle(.button)
+        .buttonStyle(RoundedProminentButtonStyle())
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("Run a process on this environment. Compile is ⌘R.")
     }
 }
+
+/// The change record: every decision since the last save, and the hand edits, with Save.
+struct ChangeRecordPopover: View {
+    @Environment(DemoStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+    let environment: AuditEnvironment
+
+    var body: some View {
+        let record = store.changeRecord(for: environment)
+        let edits = store.manualEditCount(for: environment)
+        let unsaved = store.unsavedCount(for: environment)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Change record").font(.headline)
+                Text("v\(store.version(of: environment)) → v\(store.version(of: environment) + 1)")
+                    .font(.callout.monospaced()).foregroundStyle(.secondary)
+                Spacer()
+            }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 8) {
+                    if edits > 0 {
+                        HStack(spacing: 8) {
+                            Image(systemName: "pencil").font(.caption).foregroundStyle(.secondary)
+                            Text("Objective edited by hand\(edits > 1 ? " · \(edits) times" : "")").font(.callout)
+                        }
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    }
+                    ForEach(record) { change in ChangeRow(change: change, environment: environment, showPart: true) }
+                }
+            }
+            .frame(maxHeight: 420)
+            HStack {
+                Text(unsaved == 0 ? "Nothing to write: only rejections." : "\(unsaved) change\(unsaved == 1 ? "" : "s") become v\(store.version(of: environment) + 1).")
+                    .font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Button("Save v\(store.version(of: environment) + 1)") { store.save(environment); dismiss() }
+                    .buttonStyle(MonoProminentButtonStyle())
+                    .disabled(unsaved == 0)
+            }
+        }
+        .padding(18)
+        .frame(width: 560)
+    }
+}
+
+/// Which policy the next compile trains. Open weights and custom tiers, grouped.
+struct PolicyModelMenu: View {
+    @Environment(DemoStore.self) private var store
+    let environment: AuditEnvironment
+
+    var body: some View {
+        let current = store.policyModel(for: environment)
+        Menu {
+            ForEach([PolicyModel.Tier.open, .custom], id: \.self) { tier in
+                Section(tier.rawValue) {
+                    ForEach(AppConfig.policyModels.filter { $0.tier == tier }) { model in
+                        Button {
+                            store.setPolicyModel(model, for: environment)
+                        } label: {
+                            if model.id == current.id {
+                                Label(model.name, systemImage: "checkmark")
+                            } else {
+                                Text(model.name)
+                            }
+                        }
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: current.tier == .custom ? "checkmark.shield.fill" : "cpu").font(.caption)
+                Text(current.name)
+                Image(systemName: "chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
+            }
+        }
+        .menuStyle(.button)
+        .buttonStyle(RoundedSecondaryButtonStyle())
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("Policy the next compile trains against this environment")
+    }
+}
+
 
 struct PhasePill: View {
     var phase: AuditPhase

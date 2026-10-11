@@ -35,15 +35,19 @@ on an environment:
   differences that close them open in one report, grouped by the part of the environment they change:
   additions in green, removals in red, alterations in yellow, each with accept and reject. Whatever is
   left undecided stays on the environment page as a diff under its part. Accepting edits the
-  environment and bumps its version; the status reads **Edited** until you compile again.
+  environment; the decision joins the **change record** (the pill in the top bar). **Save** (⌘S)
+  writes the record into the next version. Until then the status reads **Edited**; after a save the
+  new version reads **Unassessed** until it is compiled. Compile saves first if anything is unsaved.
 - **Recheck** (per hardened hack) replays that hack and the legitimate trajectory on the hardened
   environment: closed, or still rewarded.
 - A compile that comes back Stable signs itself: the certificate is the compile's record, shown as a
   printable page with PDF export. The environment carries its last certificate; one signed by an
   older auditor reads **Stale**.
-- **Test** sits greyed out next to Compile. It lights up with the Monitor process.
-- The environment page header has a **policy menu**: which model the next compile trains. Open:
-  Qwen, Llama. Custom: Provost Secure. The catalog lives in `AppConfig.policyModels`; the compile
+- **Run** is one menu in the top bar: Compile now, Test greyed out until the Monitor process exists.
+  The top bar also carries the environment name, its version tag, its status tag, the change
+  record and Save, and the policy menu.
+- The **policy menu** in the top bar picks which model the next compile trains. Open: Qwen,
+  Llama. Custom: Provost Secure. The catalog lives in `AppConfig.policyModels`; the compile
   carries the choice in its config and the sidebar, top bar and compiles list show it. The fixture
   replays the same evidence whichever policy is chosen.
 

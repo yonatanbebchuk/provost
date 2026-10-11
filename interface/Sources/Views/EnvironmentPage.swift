@@ -10,7 +10,6 @@ struct EnvironmentPage: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                header
                 if let spec = store.spec(for: environment) {
                     ObjectiveBlock(environment: environment, objective: spec.objective)
                     if !store.pendingChanges(for: environment).isEmpty { pendingBanner }
@@ -65,16 +64,6 @@ struct EnvironmentPage: View {
     }
 
     // MARK: Header and objective
-
-    /// The name lives in the top bar. Here: the policy to train and where the environment stands.
-    private var header: some View {
-        HStack(spacing: 12) {
-            Spacer()
-            Text("v\(store.version(of: environment))").font(.callout.monospaced()).foregroundStyle(.secondary)
-            PolicyModelMenu(environment: environment)
-            StatusBadge(status: store.status(for: environment))
-        }
-    }
 
     private var pendingBanner: some View {
         let changes = store.pendingChanges(for: environment)
@@ -327,45 +316,6 @@ private struct PartCard<Content: View>: View {
         .background(hovering ? Color.primary.opacity(0.03) : Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
             .strokeBorder(changes.isEmpty ? Color(nsColor: .separatorColor) : Theme.changeAltered.opacity(0.6)))
-    }
-}
-
-/// Which policy the next compile trains. Open weights and custom tiers, grouped.
-private struct PolicyModelMenu: View {
-    @Environment(DemoStore.self) private var store
-    let environment: AuditEnvironment
-
-    var body: some View {
-        let current = store.policyModel(for: environment)
-        Menu {
-            ForEach([PolicyModel.Tier.open, .custom], id: \.self) { tier in
-                Section(tier.rawValue) {
-                    ForEach(AppConfig.policyModels.filter { $0.tier == tier }) { model in
-                        Button {
-                            store.setPolicyModel(model, for: environment)
-                        } label: {
-                            if model.id == current.id {
-                                Label(model.name, systemImage: "checkmark")
-                            } else {
-                                Text(model.name)
-                            }
-                        }
-                    }
-                }
-            }
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: current.tier == .custom ? "checkmark.shield.fill" : "cpu").font(.caption)
-                Text(current.name).font(.callout.weight(.medium))
-                Image(systemName: "chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 10).padding(.vertical, 5)
-            .background(Color.primary.opacity(0.07), in: Capsule())
-        }
-        .menuStyle(.borderlessButton)
-        .menuIndicator(.hidden)
-        .fixedSize()
-        .help("Policy the next compile trains against this environment")
     }
 }
 

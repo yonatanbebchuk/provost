@@ -8,7 +8,7 @@ public enum EnvironmentStatus: Equatable, Sendable {
     case compiling
     /// The latest compile found hacks and nothing was accepted since.
     case unstable(hacks: Int)
-    /// Changes were accepted since the last compile; compile again.
+    /// Accepted differences or hand edits sit in the change record; save them into a version.
     case edited(changes: Int)
     /// The latest compile on the current version found nothing. `certified` when signed.
     case stable(certified: Date?)
@@ -31,7 +31,7 @@ public enum EnvironmentStatus: Equatable, Sendable {
         case .unassessed: "Not compiled"
         case .compiling: "Compiling"
         case .unstable(let hacks): "\(hacks) hack\(hacks == 1 ? "" : "s")"
-        case .edited(let changes): "\(changes) change\(changes == 1 ? "" : "s") · compile again"
+        case .edited(let changes): "\(changes) unsaved"
         case .stable(let certified): certified.map { $0.formatted(Format.date) } ?? "Unsigned"
         case .stale(let date, let reason): "\(date.formatted(Format.date)) · \(reason)"
         }

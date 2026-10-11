@@ -30,6 +30,9 @@ struct ProvostApp: App {
             CommandMenu("Environment") {
                 Button("Compile") { Task { await store.compile() } }
                     .keyboardShortcut("r", modifiers: .command)
+                Button("Save Version") { if let env = store.selectedEnvironment { store.save(env) } }
+                    .keyboardShortcut("s", modifiers: .command)
+                    .disabled(store.selectedEnvironment.map { store.unsavedCount(for: $0) == 0 } ?? true)
                     .disabled(store.selectedEnvironment == nil)
                 Button("Show Environment") { store.showEnvironmentPage() }
                     .keyboardShortcut("e", modifiers: .command)

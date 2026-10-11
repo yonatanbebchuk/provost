@@ -51,9 +51,15 @@ final class CompileLoopTests: XCTestCase {
         XCTAssertTrue(after.evaluation.components.contains(add.change.after!))
         XCTAssertFalse(after.observations.visible.contains(remove.change.before!))
         XCTAssertEqual(after.objective, before.objective)
-        XCTAssertEqual(store.version(of: env), 3)
+        XCTAssertEqual(store.version(of: env), 1, "decisions sit in the change record until saved")
         XCTAssertEqual(store.pendingChanges(for: env).count, 4)
-        guard case .edited = store.status(for: env) else { return XCTFail("accepting marks the environment edited") }
+        XCTAssertEqual(store.changeRecord(for: env).count, 3, "two accepted, one rejected")
+        XCTAssertEqual(store.unsavedCount(for: env), 2, "rejections change nothing")
+        guard case .edited(2) = store.status(for: env) else { return XCTFail("accepting marks the environment edited") }
+        XCTAssertEqual(store.save(env), 2)
+        XCTAssertTrue(store.changeRecord(for: env).isEmpty)
+        XCTAssertEqual(store.status(for: env), .unassessed, "v2 has not been compiled")
+        XCTAssertNil(store.save(env), "nothing left to save")
 
         // Partial recompile: the hack is closed.
         await first.check(hack)
@@ -67,6 +73,7 @@ final class CompileLoopTests: XCTestCase {
         XCTAssertTrue(second.isStable)
         XCTAssertNil(second.liftoff)
         XCTAssertEqual(second.hackCount, 0)
+        XCTAssertEqual(second.version, 3, "compile saves the accepted differences into a version first")
         XCTAssertEqual(second.version, store.version(of: env))
         XCTAssertTrue(second.findings.count < first.findings.count, "closed findings drop out of the scan")
         // A stable compile signs itself.
@@ -165,7 +172,9 @@ final class CompileLoopTests: XCTestCase {
         store.setObjective(summary: before.summary, constraints: before.constraints, in: env)
         XCTAssertEqual(store.version(of: env), 1, "no change, no bump")
         store.setObjective(summary: "  New objective.  ", constraints: ["Keep tests", "", " No network "], in: env)
-        XCTAssertEqual(store.version(of: env), 2)
+        XCTAssertEqual(store.version(of: env), 1)
+        XCTAssertEqual(store.unsavedCount(for: env), 1)
+        XCTAssertEqual(store.save(env), 2)
         XCTAssertEqual(store.spec(for: env)?.objective.summary, "New objective.")
         XCTAssertEqual(store.spec(for: env)?.objective.constraints, ["Keep tests", "No network"])
         let started = await store.compile()
@@ -191,7 +200,8 @@ final class CompileLoopTests: XCTestCase {
         XCTAssertEqual(changes.count, 7)
         store.accept(changes[0], in: env)
         XCTAssertEqual(store.changes(for: hack, in: env).filter { $0.decision == .pending }.count, 6)
-        XCTAssertEqual(store.version(of: env), 2)
+        XCTAssertEqual(store.unsavedCount(for: env), 1)
+        XCTAssertEqual(store.version(of: env), 1)
     }
 
     /// The fast-forward schedule lands every point inside the budget, in order, with rollouts waiting longer.

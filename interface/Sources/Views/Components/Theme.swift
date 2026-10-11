@@ -226,6 +226,16 @@ struct RoundedProminentButtonStyle: ButtonStyle {
     }
 }
 
+/// Pill-shaped secondary button, the quiet partner of `RoundedProminentButtonStyle`.
+struct RoundedSecondaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.callout.weight(.medium))
+            .padding(.horizontal, 12).padding(.vertical, 6)
+            .background(Color.primary.opacity(configuration.isPressed ? 0.14 : 0.07), in: Capsule())
+    }
+}
+
 /// Row-height secondary button: fits a 34-point list row.
 struct MonoCompactButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {

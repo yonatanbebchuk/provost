@@ -10,6 +10,8 @@ public struct PendingChange: Identifiable, Hashable, Sendable {
     public var hackIds: [String]
     public let runId: String
     public var decision: Decision = .pending
+    /// The environment version this decision was saved into. Nil while it sits in the change record.
+    public var savedIn: Int?
 
     public var hackId: String? { hackIds.first }
 }
@@ -36,6 +38,8 @@ public final class DemoStore {
     private var pending: [String: [PendingChange]] = [:]
     /// Policy chosen per environment; absent means the default.
     private var models: [String: String] = [:]
+    /// Hand edits (objective) since the last save, per environment.
+    private var manualEdits: [String: Int] = [:]
     private var fastForwardMirror = false
 
     public init(backend: any AuditBackend, playback: PlaybackSettings) {
@@ -112,6 +116,7 @@ public final class DemoStore {
     @discardableResult
     public func compile() async -> RunSession? {
         guard var env = selectedEnvironment else { return nil }
+        save(env)
         if let spec = specs[env.id] { env.spec = spec }
         do {
             let run = try await backend.startAudit(envId: env.id, spec: env.spec, model: policyModel(for: env).name)
@@ -200,11 +205,10 @@ public final class DemoStore {
         if decision == .accepted, var spec = spec(for: environment) {
             SpecEditor.apply(change.change, to: &spec)
             specs[environment.id] = spec
-            versions[environment.id] = version(of: environment) + 1
         }
     }
 
-    /// Direct edit of the objective. Bumps the version like an accepted difference does.
+    /// Direct edit of the objective. Joins the change record; Save makes it a version.
     public func setObjective(summary: String, constraints: [String], in environment: AuditEnvironment) {
         guard var spec = spec(for: environment) else { return }
         let summary = summary.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -213,12 +217,38 @@ public final class DemoStore {
         spec.objective.summary = summary
         spec.objective.constraints = constraints
         specs[environment.id] = spec
-        versions[environment.id] = version(of: environment) + 1
+        manualEdits[environment.id, default: 0] += 1
     }
 
-    /// Accepted changes since the given environment version.
-    public func acceptedChanges(for environment: AuditEnvironment) -> [PendingChange] {
-        (pending[environment.id] ?? []).filter { $0.decision == .accepted }
+    // MARK: Change record and versions
+
+    /// Decisions not yet saved into a version, accepted and rejected, in decision order.
+    public func changeRecord(for environment: AuditEnvironment) -> [PendingChange] {
+        (pending[environment.id] ?? []).filter { $0.decision != .pending && $0.savedIn == nil }
+    }
+
+    /// Hand edits waiting for a save.
+    public func manualEditCount(for environment: AuditEnvironment) -> Int { manualEdits[environment.id] ?? 0 }
+
+    /// What a save would write: accepted differences plus hand edits. Rejections are recorded but
+    /// change nothing.
+    public func unsavedCount(for environment: AuditEnvironment) -> Int {
+        changeRecord(for: environment).filter { $0.decision == .accepted }.count + manualEditCount(for: environment)
+    }
+
+    /// Close the circle: the edited environment becomes the next version. Returns the new version,
+    /// or nil when there was nothing to save.
+    @discardableResult
+    public func save(_ environment: AuditEnvironment) -> Int? {
+        guard unsavedCount(for: environment) > 0 else { return nil }
+        let next = version(of: environment) + 1
+        versions[environment.id] = next
+        manualEdits[environment.id] = 0
+        if var list = pending[environment.id] {
+            for i in list.indices where list[i].decision != .pending && list[i].savedIn == nil { list[i].savedIn = next }
+            pending[environment.id] = list
+        }
+        return next
     }
 
     // MARK: Status
@@ -231,12 +261,12 @@ public final class DemoStore {
     public func status(for environment: AuditEnvironment) -> EnvironmentStatus {
         let current = version(of: environment)
         let latest = sessions(for: environment).first
+        if let latest, latest.isBusy, !latest.compileFinished { return .compiling }
+        let unsaved = unsavedCount(for: environment)
+        if unsaved > 0 { return .edited(changes: unsaved) }
         if let latest {
-            if latest.isBusy && !latest.compileFinished { return .compiling }
-            if latest.version < current {
-                let since = acceptedChanges(for: environment).count
-                return .edited(changes: max(since, 1))
-            }
+            // Saved into a newer version than the last compile: that version has not been assessed.
+            if latest.version < current { return .unassessed }
             if latest.compileFinished {
                 if latest.isStable { return .stable(certified: latest.certificate?.issuedAt) }
                 return .unstable(hacks: latest.hackCount)
