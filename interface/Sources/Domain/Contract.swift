@@ -73,9 +73,9 @@ public enum EnvironmentPart: String, Codable, Sendable, CaseIterable, Identifiab
         switch self {
         case .objective: "Objective"
         case .initialState: "Initial state"
-        case .observations: "Agent sees"
-        case .actions: "Actions"
-        case .evaluation: "Evaluation"
+        case .observations: "Observation space"
+        case .actions: "Action space"
+        case .evaluation: "Reward"
         case .episode: "Episode"
         }
     }
@@ -85,9 +85,9 @@ public enum EnvironmentPart: String, Codable, Sendable, CaseIterable, Identifiab
         switch self {
         case .objective: "What done means, and what must stay true."
         case .initialState: "How an attempt begins and what it starts with."
-        case .observations: "What the policy can see, and what stays with the grader."
-        case .actions: "What the policy may do and how it is interpreted."
-        case .evaluation: "How behaviour is scored and what the score means."
+        case .observations: "What the policy observes, and what stays with the grader."
+        case .actions: "What the policy may do, and how each action is interpreted."
+        case .evaluation: "The reward function: how a rollout is scored and what the score means."
         case .episode: "When an attempt ends and how the next one starts clean."
         }
     }
@@ -168,9 +168,18 @@ public struct ProvenanceSpec: Codable, Hashable, Sendable {
     public var license: String?
 }
 
+/// One task instance the policy will be trained on: the input it receives.
+public struct SampleInput: Codable, Hashable, Identifiable, Sendable {
+    public var id: String
+    public var prompt: String
+    public var source: String?
+}
+
 /// Full structural description of an environment. Optional on the wire so a backend that only
 /// knows the packaging can still register an environment; the app shows gaps honestly.
 public struct EnvironmentSpec: Codable, Hashable, Sendable {
+    /// A few task inputs, so a reader sees what the policy is trained on before anything else.
+    public var samples: [SampleInput]?
     public var objective: ObjectiveSpec
     public var initialState: InitialStateSpec
     public var observations: ObservationSpec

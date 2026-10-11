@@ -237,14 +237,43 @@ struct TopBar: View {
                 Divider().frame(height: 16)
                 Text(env.source).font(.callout.monospaced()).foregroundStyle(.secondary).lineLimit(1)
                 Spacer()
-                StatusBadge(status: store.status(for: env))
             } else {
                 Spacer()
             }
+            if store.selectedEnvironment != nil {
+                OperationsBar()
+            }
         }
         .padding(.horizontal, 24)
-        .frame(height: 48)
+        .frame(height: 52)
         .background(.bar)
+    }
+}
+
+/// The processes you can run on an environment. One today; this is where the others go.
+struct OperationsBar: View {
+    @Environment(DemoStore.self) private var store
+
+    private var isBusy: Bool { store.sessions(for: store.selectedEnvironment!).contains { $0.isBusy } }
+
+    var body: some View {
+        Button {
+            Task { await store.newRun() }
+        } label: {
+            HStack(spacing: 8) {
+                if isBusy {
+                    ProgressView().controlSize(.mini)
+                } else {
+                    Image(systemName: "play.fill").font(.caption.weight(.bold))
+                }
+                Text("Run")
+            }
+            .frame(minWidth: 72)
+        }
+        .buttonStyle(RoundedProminentButtonStyle())
+        .keyboardShortcut("r", modifiers: .command)
+        .disabled(isBusy)
+        .help("Run the audit on this environment (⌘R)")
     }
 }
 

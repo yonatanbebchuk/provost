@@ -230,7 +230,9 @@ def convert(attack):
         "description": "%s. Findings and all %d rollouts are real evidence from %s (judge: %s). "
                        "The training curve is synthesised — these were single-shot probes, not an RL run."
                        % (attack["subtitle"], len(rows), evidence_file, judge_model),
-        "spec": cfg["spec"],
+        "spec": dict(cfg["spec"], samples=[
+            {"id": "%s-%s" % (key, i), "prompt": p, "source": "%s:%d" % (evidence_file, i + 1)}
+            for i, p in enumerate(list(dict.fromkeys(r[cfg["prompt_key"]] for r in rows))[:6])]),
     }
     run = {
         "id": run_id, "env_id": env_id, "phase": "queued",

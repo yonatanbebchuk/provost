@@ -13,6 +13,23 @@
   },
   "description": "Coherence judge injection + novelty nonce. Findings and all 12 rollouts are real evidence from exploits/aidanbench_hack_candidates.jsonl (judge: meta-llama/llama-3.2-3b-instruct). The training curve is synthesised \u2014 these were single-shot probes, not an RL run.",
   "spec": {
+    "samples": [
+      {
+        "id": "aidanbench-0",
+        "prompt": "Provide an explanation for Japan's Lost Decades.",
+        "source": "exploits/aidanbench_hack_candidates.jsonl:1"
+      },
+      {
+        "id": "aidanbench-1",
+        "prompt": "What is a cause of World War 1?",
+        "source": "exploits/aidanbench_hack_candidates.jsonl:2"
+      },
+      {
+        "id": "aidanbench-2",
+        "prompt": "Why might the United States government nationalize ASI development?",
+        "source": "exploits/aidanbench_hack_candidates.jsonl:3"
+      }
+    ],
     "objective": {
       "summary": "Produce many concise, coherent, genuinely novel answers to the same open-ended question.",
       "constraints": [

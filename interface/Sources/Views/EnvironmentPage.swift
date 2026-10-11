@@ -12,22 +12,25 @@ struct EnvironmentPage: View {
             VStack(alignment: .leading, spacing: 20) {
                 header
                 if let spec = environment.spec {
+                    if let samples = spec.samples, !samples.isEmpty {
+                        SampleInputsStrip(samples: samples, taskCount: environment.taskCount)
+                    }
                     LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
-                        PartCard(part: .objective, patched: patched(.objective)) {
-                            Text(spec.objective.summary).font(.callout)
-                            if !spec.objective.constraints.isEmpty {
-                                bullets(spec.objective.constraints, symbol: "lock")
+                        PartCard(part: .evaluation, patched: patched(.evaluation)) {
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Chip(text: environment.rewardType.displayName)
+                                Text(spec.evaluation.summary).font(.callout).fixedSize(horizontal: false, vertical: true)
                             }
-                        }
-                        PartCard(part: .initialState, patched: patched(.initialState)) {
-                            Text(spec.initialState.summary).font(.callout)
-                            keyValues(spec.initialState.items)
-                        }
-                        PartCard(part: .observations, patched: patched(.observations)) {
-                            bullets(spec.observations.visible, symbol: "eye")
-                            if !spec.observations.hidden.isEmpty {
-                                Divider().padding(.vertical, 2)
-                                bullets(spec.observations.hidden, symbol: "eye.slash", muted: true)
+                            if !spec.evaluation.components.isEmpty {
+                                HStack(spacing: 6) {
+                                    ForEach(spec.evaluation.components, id: \.self) { Chip(text: $0, mono: true) }
+                                }
+                            }
+                            if let audit = spec.evaluation.audit {
+                                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                    Image(systemName: "checkmark.shield").font(.caption).foregroundStyle(.secondary)
+                                    Text(audit).font(.caption).foregroundStyle(.secondary)
+                                }
                             }
                         }
                         PartCard(part: .actions, patched: patched(.actions)) {
@@ -54,22 +57,22 @@ struct EnvironmentPage: View {
                                 }
                             }
                         }
-                        PartCard(part: .evaluation, patched: patched(.evaluation)) {
-                            HStack(spacing: 8) {
-                                Chip(text: environment.rewardType.displayName)
-                                Text(spec.evaluation.summary).font(.callout)
+                        PartCard(part: .observations, patched: patched(.observations)) {
+                            bullets(spec.observations.visible, symbol: "eye")
+                            if !spec.observations.hidden.isEmpty {
+                                Divider().padding(.vertical, 2)
+                                bullets(spec.observations.hidden, symbol: "eye.slash", muted: true)
                             }
-                            if !spec.evaluation.components.isEmpty {
-                                HStack(spacing: 6) {
-                                    ForEach(spec.evaluation.components, id: \.self) { Chip(text: $0, mono: true) }
-                                }
+                        }
+                        PartCard(part: .objective, patched: patched(.objective)) {
+                            Text(spec.objective.summary).font(.callout).fixedSize(horizontal: false, vertical: true)
+                            if !spec.objective.constraints.isEmpty {
+                                bullets(spec.objective.constraints, symbol: "lock")
                             }
-                            if let audit = spec.evaluation.audit {
-                                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                                    Image(systemName: "checkmark.shield").font(.caption).foregroundStyle(.secondary)
-                                    Text(audit).font(.caption).foregroundStyle(.secondary)
-                                }
-                            }
+                        }
+                        PartCard(part: .initialState, patched: patched(.initialState)) {
+                            Text(spec.initialState.summary).font(.callout).fixedSize(horizontal: false, vertical: true)
+                            keyValues(spec.initialState.items)
                         }
                         PartCard(part: .episode, patched: patched(.episode)) {
                             keyValues([
@@ -109,6 +112,8 @@ struct EnvironmentPage: View {
                 Text(environment.name).font(.title.weight(.semibold))
                 Chip(text: environment.format.displayName)
                 Chip(text: "\(environment.taskCount) tasks")
+                Spacer()
+                StatusBadge(status: store.status(for: environment))
             }
             Text(environment.id).font(.callout.monospaced()).foregroundStyle(.secondary)
             if let description = environment.description {
@@ -168,17 +173,10 @@ struct EnvironmentPage: View {
             HStack {
                 Text("Runs").font(.title3.weight(.semibold))
                 Spacer()
-                Button {
-                    Task { await store.newRun() }
-                } label: {
-                    Label("New Run", systemImage: "play.fill")
-                }
-                .buttonStyle(MonoProminentButtonStyle())
-                .keyboardShortcut("r", modifiers: .command)
             }
             let sessions = store.sessions(for: environment)
             if sessions.isEmpty {
-                Text("No runs yet. A run scans the environment, trains the adversarial policy against it, and proposes a patch.")
+                Text("No runs yet. Run (⌘R) scans the environment, trains the adversarial policy against it, and proposes a patch.")
                     .font(.callout).foregroundStyle(.secondary)
                     .padding(.vertical, 8)
             } else {
@@ -233,6 +231,50 @@ struct EnvironmentPage: View {
                     Text(item.key).font(.caption).foregroundStyle(.secondary).gridColumnAlignment(.leading)
                     Text(item.value).font(.callout).fixedSize(horizontal: false, vertical: true)
                 }
+            }
+        }
+    }
+}
+
+/// What the policy is trained on: a few task inputs, scrollable sideways.
+private struct SampleInputsStrip: View {
+    let samples: [SampleInput]
+    let taskCount: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "tray.full").font(.callout).foregroundStyle(.secondary)
+                Text("Sample inputs").font(.headline)
+                Text("\(samples.count) of \(taskCount) tasks · what the policy is trained on")
+                    .font(.caption).foregroundStyle(.secondary)
+                Spacer()
+            }
+            ScrollView(.horizontal, showsIndicators: true) {
+                HStack(alignment: .top, spacing: 12) {
+                    ForEach(samples) { sample in
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text(sample.id).font(.caption.monospaced()).foregroundStyle(.secondary)
+                                Spacer()
+                                if let source = sample.source {
+                                    Text(source).font(.caption2.monospaced()).foregroundStyle(.tertiary).lineLimit(1)
+                                }
+                            }
+                            Text(sample.prompt)
+                                .font(.callout)
+                                .lineLimit(7)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .textSelection(.enabled)
+                        }
+                        .padding(14)
+                        .frame(width: 360, alignment: .topLeading)
+                        .frame(maxHeight: .infinity, alignment: .topLeading)
+                        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
+                    }
+                }
+                .padding(.bottom, 8)
             }
         }
     }

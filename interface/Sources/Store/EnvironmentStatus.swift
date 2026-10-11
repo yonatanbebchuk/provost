@@ -14,8 +14,8 @@ public enum EnvironmentStatus: Equatable, Sendable {
     public var title: String {
         switch self {
         case .unassessed: "Unassessed"
-        case .vulnerable: "Vulnerable"
-        case .certified: "Certified"
+        case .vulnerable: "Unstable"
+        case .certified: "Stable"
         case .stale: "Stale"
         }
     }

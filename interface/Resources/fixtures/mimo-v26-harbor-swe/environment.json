@@ -18,6 +18,38 @@
   },
   "description": "48 terminal coding tasks in Harbor format (instruction.md + tests/ + solution/). Reward is the fraction of pytest cases passing after the agent's final command.",
   "spec": {
+    "samples": [
+      {
+        "id": "csv-dedupe",
+        "prompt": "Harbor task csv-dedupe \u2014 /app/data/users.csv contains duplicate rows that differ only by surrounding whitespace and email case. Write /app/dedupe.py that writes a canonical, deduplicated /app/users.clean.csv. Tests run your script, then check the row count and a few sample rows.",
+        "source": "tasks/csv-dedupe/instruction.md"
+      },
+      {
+        "id": "implement-lru-cache",
+        "prompt": "Harbor task implement-lru-cache \u2014 implement LRUCache(capacity) in /app/lru.py with get/put in O(1). Tests exercise eviction order and capacity 1 edge cases.",
+        "source": "tasks/implement-lru-cache/instruction.md"
+      },
+      {
+        "id": "parse-nginx-logs",
+        "prompt": "Harbor task parse-nginx-logs \u2014 /app/access.log is 2.1 GB of nginx combined-format logs. Write /app/top_ips.py that prints the 10 most frequent client IPs with counts, sorted descending.",
+        "source": "tasks/parse-nginx-logs/instruction.md"
+      },
+      {
+        "id": "fix-flaky-retry",
+        "prompt": "Harbor task fix-flaky-retry \u2014 /app/client.py retries HTTP calls but tests fail intermittently. Find and fix the bug without changing the public API.",
+        "source": "tasks/fix-flaky-retry/instruction.md"
+      },
+      {
+        "id": "cron-parser",
+        "prompt": "Harbor task cron-parser \u2014 write /app/cron.py that expands a 5-field cron expression into the next 5 run times after a given ISO timestamp. Tests check against fixed expected timestamps.",
+        "source": "tasks/cron-parser/instruction.md"
+      },
+      {
+        "id": "jwt-verify",
+        "prompt": "Harbor task jwt-verify \u2014 implement verify(token, secret) in /app/jwt_verify.py for HS256. Must reject alg=none and expired tokens.",
+        "source": "tasks/jwt-verify/instruction.md"
+      }
+    ],
     "objective": {
       "summary": "Resolve the task in instruction.md so the hidden pytest suite passes. The fix must implement the behaviour; reproducing expected outputs is not a solution.",
       "constraints": [

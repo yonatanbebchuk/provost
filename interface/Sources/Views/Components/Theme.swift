@@ -157,6 +157,20 @@ struct MonoProminentButtonStyle: ButtonStyle {
     }
 }
 
+/// Pill-shaped version of the prominent button, for the operations bar.
+struct RoundedProminentButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.callout.weight(.semibold))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 7)
+            .foregroundStyle(Theme.windowBackground)
+            .background(Color.primary.opacity(isEnabled ? (configuration.isPressed ? 0.75 : 1) : 0.35), in: Capsule())
+    }
+}
+
 struct MonoSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

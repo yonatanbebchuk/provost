@@ -13,6 +13,33 @@
   },
   "description": "IFEval-style instruction following: each prompt carries 1\u20133 verifiable constraints (bullet count, keyword frequency, casing, closing phrase). Reward = 0.6 \u00d7 regex verifier + 0.4 \u00d7 LLM judge on quality.",
   "spec": {
+    "samples": [
+      {
+        "id": "ifeval-0412",
+        "prompt": "Write a short product description for a solar camping lantern. Your response must contain exactly 3 bullet points, mention the word 'lantern' at least twice, and end with the exact phrase 'Is there anything else I can help with?'",
+        "source": "data/ifeval_train.jsonl:412"
+      },
+      {
+        "id": "ifeval-0081",
+        "prompt": "Explain why the sky is blue to a ten-year-old. Your entire response must be in lowercase letters and must not contain any commas.",
+        "source": "data/ifeval_train.jsonl:81"
+      },
+      {
+        "id": "ifeval-0233",
+        "prompt": "List three European capitals and their countries. Wrap your entire output in valid JSON with keys 'capital' and 'country'.",
+        "source": "data/ifeval_train.jsonl:233"
+      },
+      {
+        "id": "ifeval-0590",
+        "prompt": "Write a two-sentence apology for a delayed shipment. Wrap your entire response in double quotation marks.",
+        "source": "data/ifeval_train.jsonl:590"
+      },
+      {
+        "id": "ifeval-0707",
+        "prompt": "Describe the water cycle. Your response must have exactly 2 sections, each starting with 'SECTION X' in caps.",
+        "source": "data/ifeval_train.jsonl:707"
+      }
+    ],
     "objective": {
       "summary": "Answer the prompt usefully while satisfying every verifiable constraint it states.",
       "constraints": [

@@ -86,9 +86,10 @@ def clean_curve(n, rng, base_mid, base_width, ceiling, kl_slope, start_offset_s)
 
 
 def spec(objective, constraints, initial_summary, initial_items, visible, hidden, actions, eval_summary,
-         eval_components, audit, termination, max_steps, reset, origin, evidence, license_):
+         eval_components, audit, termination, max_steps, reset, origin, evidence, license_, samples=None):
     """The six mandatory parts of an environment plus provenance (see docs/contract.md)."""
     return {
+        "samples": [{"id": s[0], "prompt": s[1], "source": s[2] if len(s) > 2 else None} for s in (samples or [])],
         "objective": {"summary": objective, "constraints": constraints},
         "initial_state": {"summary": initial_summary, "items": [{"key": k, "value": v} for k, v in initial_items]},
         "observations": {"visible": visible, "hidden": hidden},
@@ -254,6 +255,14 @@ def coding_fixture():
     P_GZIP = ("Harbor task gzip-stream — write /app/gz.py that gzips stdin to stdout in constant memory. Tests pipe a "
               "3 GB file through it and compare checksums.")
 
+    environment["spec"]["samples"] = [
+        {"id": "csv-dedupe", "prompt": P_DEDUPE, "source": "tasks/csv-dedupe/instruction.md"},
+        {"id": "implement-lru-cache", "prompt": P_LRU, "source": "tasks/implement-lru-cache/instruction.md"},
+        {"id": "parse-nginx-logs", "prompt": P_NGINX, "source": "tasks/parse-nginx-logs/instruction.md"},
+        {"id": "fix-flaky-retry", "prompt": P_RETRY, "source": "tasks/fix-flaky-retry/instruction.md"},
+        {"id": "cron-parser", "prompt": P_CRON, "source": "tasks/cron-parser/instruction.md"},
+        {"id": "jwt-verify", "prompt": P_JWT, "source": "tasks/jwt-verify/instruction.md"},
+    ]
     trajectories = []
 
     def traj(idx, step, task, prompt, output, rwd, notes, is_hack, summary, excerpt=None):
@@ -577,6 +586,13 @@ def ifeval_fixture():
     P_QUOTE = ("Write a two-sentence apology for a delayed shipment. Wrap your entire response in double quotation marks.")
     P_SECTIONS = ("Describe the water cycle. Your response must have exactly 2 sections, each starting with 'SECTION X' in caps.")
 
+    environment["spec"]["samples"] = [
+        {"id": "ifeval-0412", "prompt": P_LANTERN, "source": "data/ifeval_train.jsonl:412"},
+        {"id": "ifeval-0081", "prompt": P_LOWER, "source": "data/ifeval_train.jsonl:81"},
+        {"id": "ifeval-0233", "prompt": P_JSON, "source": "data/ifeval_train.jsonl:233"},
+        {"id": "ifeval-0590", "prompt": P_QUOTE, "source": "data/ifeval_train.jsonl:590"},
+        {"id": "ifeval-0707", "prompt": P_SECTIONS, "source": "data/ifeval_train.jsonl:707"},
+    ]
     trajectories = []
 
     def traj(idx, step, task, prompt, output, rwd, notes, is_hack, summary, excerpt=None):
