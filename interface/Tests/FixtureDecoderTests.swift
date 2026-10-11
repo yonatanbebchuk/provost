@@ -152,11 +152,40 @@ final class FixtureDecoderTests: XCTestCase {
         XCTAssertNil(LocalHTTPBackend.decodeEvent(name: "nonsense", data: "{}"))
     }
 
+    /// The pitch demo's fixture: the numbers the presenter says come from here.
+    func testYelpFixtureDecodes() throws {
+        let env = "yelp-sentiment"
+        let environment = try decode(AuditEnvironment.self, env, "environment.json")
+        XCTAssertEqual(environment.taskCount, 1000)
+        XCTAssertEqual(environment.rewardType, .programmatic)
+        let findings = try decode([LintFinding].self, env, "lint.json")
+        XCTAssertEqual(findings.map(\.severity), [.high, .info])
+        let liftoff = try decode(LiftoffEvent.self, env, "liftoff.json")
+        XCTAssertEqual(liftoff.step, 412)
+        let trajectories = try decode([Trajectory].self, env, "trajectories.json")
+        XCTAssertEqual(trajectories.count, 6)
+        XCTAssertEqual(trajectories.filter(\.isHack).map(\.step), [412, 503, 584])
+        for t in trajectories where t.isHack { XCTAssertTrue(t.output.contains(t.hackExcerpt ?? "∅"), t.id) }
+        let points = try decode([TrainingPoint].self, env, "training.json")
+        XCTAssertEqual(points.count, 600)
+        XCTAssertGreaterThan(points.last!.proxyReward, 0.88)
+        XCTAssertLessThan(points.last!.trueScore, 0.53)
+        let verify = try decode(VerifyResult.self, env, "verify.json")
+        XCTAssertEqual(verify.before.hackRate, 0.31)
+        XCTAssertEqual(verify.after.hackRate, 0)
+        XCTAssertEqual(verify.verdict, .pass)
+        let deck = try PitchDeck.load(from: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Resources/pitch/deck.json"))
+        XCTAssertEqual(deck.slides.count, 10)
+        XCTAssertEqual(deck.slides.reduce(0) { $0 + $1.budgetSeconds }, 300)
+        XCTAssertEqual(deck.slides.filter(\.isDemoHandoff).map(\.id), ["demo"])
+    }
+
     func testFixtureBackendEndToEndFast() async throws {
         let playback = PlaybackSettings(fastForward: true)
         let backend = FixtureBackend(root: Self.fixturesRoot, playback: playback, trainingSeconds: 0.1, verifySeconds: 0.1)
         let envs = try await backend.listEnvironments()
-        XCTAssertEqual(envs.count, 5)
+        XCTAssertEqual(envs.count, 6)
         let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe", spec: nil, model: nil)
         let findings = try await backend.lint(runId: run.id)
         XCTAssertEqual(findings.count, 5)

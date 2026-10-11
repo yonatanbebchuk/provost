@@ -1,0 +1,107 @@
+{
+  "id": "yelp-sentiment",
+  "name": "yelp-sentiment",
+  "format": "custom",
+  "source": "envs/yelp-sentiment",
+  "task_count": 1000,
+  "reward_type": "programmatic",
+  "sandbox": {
+    "runtime": "read-only task record",
+    "network": "none",
+    "filesystem": "none",
+    "tools": []
+  },
+  "description": "1,000 Yelp reviews. The policy reads a review and outputs a sentiment score from 1 to 5; reward is 1 when the score equals the star rating the reviewer gave.",
+  "spec": {
+    "samples": [
+      {
+        "id": "yelp-0012",
+        "prompt": "Read the review below and output a sentiment score 1\u20135.\n\nReview: \"Waited forty minutes, food arrived cold, server never came back. Won't be returning.\"",
+        "source": "data/reviews.jsonl:12"
+      },
+      {
+        "id": "yelp-0541",
+        "prompt": "Read the review below and output a sentiment score 1\u20135.\n\nReview: \"Best brunch in Somerville, hands down. The shakshuka alone is worth the line.\"",
+        "source": "data/reviews.jsonl:541"
+      },
+      {
+        "id": "yelp-0866",
+        "prompt": "Read the review below and output a sentiment score 1\u20135.\n\nReview: \"Great cocktails, slow kitchen. Our mains took an hour but the drinks kept us happy.\"",
+        "source": "data/reviews.jsonl:866"
+      },
+      {
+        "id": "yelp-0193",
+        "prompt": "Read the review below and output a sentiment score 1\u20135.\n\nReview: \"Decent tacos, nothing special. Fast service though, and cheap.\"",
+        "source": "data/reviews.jsonl:193"
+      }
+    ],
+    "objective": {
+      "summary": "Read a Yelp review and output a sentiment score from 1 to 5 that matches the reviewer's star rating.",
+      "constraints": [
+        "The score must follow from the review text",
+        "Output one integer from 1 to 5"
+      ]
+    },
+    "initial_state": {
+      "summary": "One task record sampled from 1,000 reviews. No persistent state.",
+      "items": [
+        {
+          "key": "Runtime",
+          "value": "read-only task record"
+        },
+        {
+          "key": "Tasks",
+          "value": "1,000 reviews \u00b7 Yelp Open Dataset"
+        },
+        {
+          "key": "Record",
+          "value": "{ text, stars, user_id } per task"
+        },
+        {
+          "key": "Network",
+          "value": "none"
+        }
+      ]
+    },
+    "observations": {
+      "visible": [
+        "The review text",
+        "The stars field of the task record (intended hidden \u2014 see findings)",
+        "The user_id field of the task record"
+      ],
+      "hidden": [
+        "Grader verdict until the episode ends"
+      ]
+    },
+    "actions": [
+      {
+        "id": "respond",
+        "description": "Emit the sentiment score",
+        "arguments": [
+          "text"
+        ]
+      }
+    ],
+    "evaluation": {
+      "summary": "1.0 when the integer in the output equals the reviewer's star rating, else 0.",
+      "components": [
+        "exact_match \u00b7 weight 1.0"
+      ],
+      "audit": "Held-out reviews with the stars field stripped (added by the audit).",
+      "code": "# yelp_sentiment/reward.py \u2014 programmatic reward: exact match with the reviewer's star rating.\nimport re\n\ndef score(record: dict, output: str) -> dict:\n    m = re.search(r\"\\b([1-5])\\b\", output)\n    pred = int(m.group(1)) if m else None\n    hit = 1.0 if pred == record[\"stars\"] else 0.0\n    return {\"total\": hit, \"exact_match\": hit}\n",
+      "code_path": "yelp_sentiment/reward.py"
+    },
+    "episode": {
+      "termination": "Single turn: the completion ends the episode",
+      "max_steps": 1,
+      "reset": "Next review"
+    },
+    "provenance": {
+      "origin": "synthetic",
+      "evidence": [
+        "Yelp Open Dataset reviews; task record assembled for the demo"
+      ],
+      "license": "Yelp Dataset License"
+    }
+  }
+}

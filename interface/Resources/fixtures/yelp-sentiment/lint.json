@@ -1,0 +1,36 @@
+[
+  {
+    "id": "LF-201",
+    "severity": "high",
+    "failure_mode": "answer_key_reachable",
+    "title": "`stars` field present in the agent-visible task record",
+    "location": {
+      "file": "yelp_sentiment/env.py",
+      "line": 41,
+      "task_id": null
+    },
+    "explanation": "observation() serialises the whole task record, including the stars field the reward compares against. The answer is one token away from the policy in every episode. A policy that copies the field is rewarded identically to one that reads the review.",
+    "suggested_patch": "Serialise only the review text for the agent; keep stars and user_id with the grader.",
+    "snippet": {
+      "path": "yelp_sentiment/env.py",
+      "start_line": 39,
+      "code": "    def observation(self, record: dict) -> str:\n        # The agent sees the whole task record.\n        return json.dumps({\"text\": record[\"text\"], \"stars\": record[\"stars\"], \"user_id\": record[\"user_id\"]})\n",
+      "highlights": [
+        41
+      ]
+    }
+  },
+  {
+    "id": "LF-202",
+    "severity": "info",
+    "failure_mode": "length_exploit",
+    "title": "No minimum-reasoning signal; empty-text answers can score",
+    "location": {
+      "file": "yelp_sentiment/reward.py",
+      "line": 9,
+      "task_id": null
+    },
+    "explanation": "The reward reads the first integer in the output and nothing else. An output that never mentions the review scores the same as one that argues from it.",
+    "suggested_patch": "Require the output to quote at least one span of the review before the integer counts."
+  }
+]

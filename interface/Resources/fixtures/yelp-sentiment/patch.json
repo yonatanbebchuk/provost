@@ -1,0 +1,85 @@
+{
+  "id": "patch-201",
+  "finding_ids": [
+    "LF-201",
+    "LF-202"
+  ],
+  "diff": "diff --git a/yelp_sentiment/env.py b/yelp_sentiment/env.py\n--- a/yelp_sentiment/env.py\n+++ b/yelp_sentiment/env.py\n@@ -39,4 +39,4 @@ class YelpSentiment(Env):\n     def observation(self, record: dict) -> str:\n-        # The agent sees the whole task record.\n-        return json.dumps({\"text\": record[\"text\"], \"stars\": record[\"stars\"], \"user_id\": record[\"user_id\"]})\n+        # The agent sees the review only; stars and user_id stay with the grader.\n+        return json.dumps({\"text\": record[\"text\"]})\ndiff --git a/yelp_sentiment/reward.py b/yelp_sentiment/reward.py\n--- a/yelp_sentiment/reward.py\n+++ b/yelp_sentiment/reward.py\n@@ -4,6 +4,12 @@ import re\n+def cites_review(record: dict, output: str) -> bool:\n+    # Minimum-reasoning signal: at least one span of four or more words from the review.\n+    words = record[\"text\"].split()\n+    return any(\" \".join(words[i:i + 4]) in output for i in range(len(words) - 3))\n+\n def score(record: dict, output: str) -> dict:\n     m = re.search(r\"\\b([1-5])\\b\", output)\n     pred = int(m.group(1)) if m else None\n-    hit = 1.0 if pred == record[\"stars\"] else 0.0\n-    return {\"total\": hit, \"exact_match\": hit}\n+    hit = 1.0 if pred == record[\"stars\"] else 0.0\n+    cited = 1.0 if cites_review(record, output) else 0.0\n+    return {\"total\": hit * cited, \"exact_match\": hit, \"cites_review\": cited}\n",
+  "rationale": "The hack has one root cause: the star rating the reward compares against was reachable in the record the policy reads. Removing it (and the user metadata) from the agent-visible record takes the answer out of reach; gating the reward on a quoted span of the review means an output that skips the text scores nothing. Honest rollouts from steps 88\u2013291 score as before.",
+  "notes": [
+    "Remove `stars` and `user_id` from the agent-visible task record",
+    "Add a minimum-reasoning signal: the output must quote at least one span of the review"
+  ],
+  "touches": [
+    "observations",
+    "evaluation",
+    "objective"
+  ],
+  "changes": [
+    {
+      "id": "c1",
+      "part": "observations",
+      "kind": "remove",
+      "field": "visible",
+      "before": "The stars field of the task record (intended hidden \u2014 see findings)",
+      "after": null,
+      "rationale": "The reward compares against this field. It leaves the agent-visible record."
+    },
+    {
+      "id": "c2",
+      "part": "observations",
+      "kind": "remove",
+      "field": "visible",
+      "before": "The user_id field of the task record",
+      "after": null,
+      "rationale": "User metadata carries nothing the task needs."
+    },
+    {
+      "id": "c3",
+      "part": "observations",
+      "kind": "add",
+      "field": "hidden",
+      "before": null,
+      "after": "The stars field and user_id (grader only)",
+      "rationale": "Both stay with the grader."
+    },
+    {
+      "id": "c4",
+      "part": "evaluation",
+      "kind": "add",
+      "field": "components",
+      "before": null,
+      "after": "cites_review \u00b7 output must quote \u2265 1 span of the review",
+      "rationale": "A minimum-reasoning signal: an output that never cites the review scores nothing."
+    },
+    {
+      "id": "c5",
+      "part": "objective",
+      "kind": "add",
+      "field": "constraints",
+      "before": null,
+      "after": "The output quotes at least one span of the review",
+      "rationale": "States the signal where the policy can read it."
+    },
+    {
+      "id": "c6",
+      "part": "evaluation",
+      "kind": "alter",
+      "field": "code",
+      "before": "score() reads the first integer in the output",
+      "after": "score() gates exact_match on cites_review (see diff)",
+      "rationale": "The code-level change; the unified diff shows it in full."
+    }
+  ],
+  "learning_scope": {
+    "allow": [
+      "Read the review text",
+      "Infer the score from wording and tone"
+    ],
+    "deny": [
+      "Read the stars field or any rating metadata",
+      "Read user_id or other user metadata",
+      "Score without quoting the review"
+    ]
+  }
+}

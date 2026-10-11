@@ -19,6 +19,7 @@ struct RunView: View {
             case .result: result
             case .report: HardenReportView()
             case .certificate: CertificateView()
+            case .verify: VerifyView()
             }
             if store.showLog {
                 Divider()
@@ -57,7 +58,7 @@ struct RunView: View {
     private var tabs: some View {
         let hasReport = differenceCount > 0
         let hasCertificate = session.certificate != nil
-        if hasReport || hasCertificate {
+        if hasReport || hasCertificate || session.checkedHackId != nil {
             MonoSegment(selection: Binding(get: { session.page }, set: { session.page = $0 }), options: pageOptions)
         }
     }
@@ -65,6 +66,7 @@ struct RunView: View {
     private var pageOptions: [(String, RunSession.Page)] {
         var options: [(String, RunSession.Page)] = [("Rollouts", .result)]
         if differenceCount > 0 { options.append(("Differences · \(differenceCount)", .report)) }
+        if session.checkedHackId != nil { options.append(("Verify", .verify)) }
         if session.certificate != nil { options.append(("Certificate", .certificate)) }
         return options
     }

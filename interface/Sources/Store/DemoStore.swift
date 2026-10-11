@@ -31,6 +31,12 @@ public final class DemoStore {
     public private(set) var selectedRunId: String?
     public var errorMessage: String?
     public var showLog = false
+    /// The pitch deck: slide, mode and clocks. The main window and the presenter window read it.
+    public let pitch = PitchController()
+    /// The compile the demo is walking through, while in demo mode.
+    public private(set) var demoSessionId: String?
+    /// The Train → Verify step in flight, so leaving the demo can stop it.
+    @ObservationIgnored private var demoTask: Task<Void, Never>?
 
     /// Current spec per environment, after accepted changes. Absent means unchanged from the fixture.
     private var specs: [String: EnvironmentSpec] = [:]
@@ -280,6 +286,102 @@ public final class DemoStore {
             return .stable(certified: certificate.issuedAt)
         }
         return .unassessed
+    }
+}
+
+// MARK: - Pitch demo
+
+extension DemoStore {
+    public var demoSession: RunSession? { sessions.first { $0.id == demoSessionId } }
+    private var demoSlideIndex: Int { pitch.slides.firstIndex { $0.isDemoHandoff } ?? pitch.index }
+
+    /// `→` on the Demo slide: the app shows the demo environment at Train with the compile already
+    /// running. Entering again replays from a clean environment.
+    public func enterDemo() async {
+        guard let env = environments.first(where: { $0.id == AppConfig.demoEnvironmentId }) else {
+            errorMessage = "The demo fixture \(AppConfig.demoEnvironmentId) is missing from the bundle."
+            return
+        }
+        pitch.beginDemo()
+        resetDemoState(for: env)
+        select(environment: env)
+        playback.trainingSeconds = AppConfig.demoTrainingReplaySeconds
+        playback.verifySeconds = AppConfig.demoVerifyReplaySeconds
+        fastForward = false
+        guard let session = await compile() else { return }
+        session.opensLiftoffDetail = true
+        demoSessionId = session.id
+    }
+
+    /// `→` in the demo: Train → Verify, then Verify → the slide after the demo.
+    public func demoAdvance() {
+        guard let session = demoSession else { leaveDemo(toNextSlide: true); return }
+        if session.page == .verify, session.checkedHackId != nil, session.checking.isEmpty {
+            leaveDemo(toNextSlide: true)
+        } else if demoTask == nil {
+            demoTask = Task { [weak self] in
+                await self?.demoVerify(session)
+                self?.demoTask = nil
+            }
+        }
+    }
+
+    /// `←` in the demo: Verify → Train.
+    public func demoBack() {
+        guard let session = demoSession else { return }
+        if session.page != .result { session.page = .result }
+    }
+
+    /// Esc returns to the Demo slide; Continue pitch goes on to the next one.
+    public func leaveDemo(toNextSlide: Bool) {
+        demoTask?.cancel()
+        demoTask = nil
+        demoSession?.selectedTrajectory = nil
+        demoSession?.opensLiftoffDetail = false
+        playback.trainingSeconds = nil
+        playback.verifySeconds = nil
+        pitch.endDemo(to: demoSlideIndex + (toNextSlide ? 1 : 0))
+    }
+
+    /// Harden the liftoff hack, accept its differences, and recheck: the Verify page shows the re-run
+    /// and the before/after rates from the fixture. A compile still replaying is fast-forwarded first.
+    private func demoVerify(_ session: RunSession) async {
+        session.selectedTrajectory = nil
+        if !session.compileFinished {
+            fastForward = true
+            var waited = 0
+            while !session.compileFinished, waited < 200 {
+                try? await Task.sleep(for: .milliseconds(50))
+                waited += 1
+            }
+            guard session.compileFinished, !Task.isCancelled else { return }
+        }
+        guard !Task.isCancelled else { return }
+        guard let hack = session.hacks.first(where: { $0.id == session.liftoff?.trajectoryId }) ?? session.hacks.first else {
+            session.page = .verify
+            return
+        }
+        session.page = .verify
+        if session.checks[hack.id] != nil || session.checking.contains(hack.id) { return }
+        if session.patches[hack.id] == nil {
+            await harden(hack, in: session)
+            guard !Task.isCancelled else { return }
+            acceptAll(in: session.environment)
+        }
+        await session.check(hack)
+    }
+
+    /// Forget everything the previous demo did to the environment so the next one starts at v1.
+    private func resetDemoState(for env: AuditEnvironment) {
+        for session in sessions where session.environment.id == env.id { session.cancel() }
+        sessions.removeAll { $0.environment.id == env.id }
+        specs[env.id] = nil
+        versions[env.id] = nil
+        pending[env.id] = nil
+        manualEdits[env.id] = nil
+        demoSessionId = nil
+        demoTask?.cancel()
+        demoTask = nil
     }
 }
 

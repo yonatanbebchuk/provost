@@ -30,6 +30,8 @@ public final class RunSession: Identifiable {
     /// Partial recompiles: the hack replayed against the hardened environment.
     public private(set) var checks: [String: VerifyResult] = [:]
     public private(set) var checkPoints: [TrainingPoint] = []
+    /// The hack the latest recheck ran (or is running) for; the Verify page shows its patch.
+    public private(set) var checkedHackId: String?
     public private(set) var certificate: Certificate?
     public private(set) var log: [RunLogEntry] = []
 
@@ -44,7 +46,10 @@ public final class RunSession: Identifiable {
     /// What the compile view shows: the rollouts, the hardening report, or the certificate.
     public var page: Page = .result
 
-    public enum Page: Sendable { case result, report, certificate }
+    public enum Page: Sendable { case result, report, certificate, verify }
+    /// Set by the demo: when the compile finishes, the rollout that triggered liftoff opens its deep
+    /// dive by itself, so the presenter reads the transcript without clicking.
+    public var opensLiftoffDetail = false
 
     private let backend: any AuditBackend
     @ObservationIgnored private var streamTask: Task<Void, Never>?
@@ -103,6 +108,9 @@ public final class RunSession: Identifiable {
                 }
                 compileFinished = true
                 run.phase = isStable ? .done : .patching
+                if opensLiftoffDetail, let id = liftoff?.trajectoryId, let hack = trajectories.first(where: { $0.id == id }) {
+                    selectedTrajectory = hack
+                }
                 note(.info, isStable ? "Compile finished · stable · no hacks found in \(trajectories.count) trajectories"
                                      : "Compile finished · unstable · \(hackCount) hack\(hackCount == 1 ? "" : "s") in \(trajectories.count) trajectories")
             } catch is CancellationError {
@@ -146,6 +154,7 @@ public final class RunSession: Identifiable {
         streamingCheck = true
         checkPoints = []
         pendingPoints = []
+        checkedHackId = hack.id
         note(.phase, "Recompile against \(hack.id) with \(patch.id)")
         defer { checking.remove(hack.id); isBusy = false; streamingCheck = false }
         do {

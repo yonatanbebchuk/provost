@@ -119,7 +119,7 @@ public final class FixtureBackend: AuditBackend {
                     }
                     continuation.yield(.phase(.training))
                     let rolloutSteps = Set(trajectories.map(\.step))
-                    try await replay(points, over: trainingSeconds, costly: rolloutSteps) { point in
+                    try await replay(points, over: playback.trainingSeconds ?? trainingSeconds, costly: rolloutSteps) { point in
                         continuation.yield(.point(point))
                         for t in trajectories where t.step == point.step {
                             continuation.yield(.trajectory(t))
@@ -157,7 +157,7 @@ public final class FixtureBackend: AuditBackend {
                     let points = result.training ?? []
                     result.training = nil
                     continuation.yield(.phase(.verifying))
-                    try await replay(points, over: verifySeconds) { continuation.yield(.point($0)) }
+                    try await replay(points, over: playback.verifySeconds ?? verifySeconds) { continuation.yield(.point($0)) }
                     hardened.withLock { _ = $0.insert(env) }
                     continuation.yield(.verifyResult(result))
                     continuation.yield(.phase(.done))
@@ -204,7 +204,7 @@ public final class FixtureBackend: AuditBackend {
 
     /// Fast-forward keeps the shape of a real run but fits it in a few seconds: a normal-speed replay
     /// of `seconds` becomes this long. Tests pass tiny `seconds`, so they stay instant.
-    private func fastBudget(for seconds: Double) -> Double { min(4.0, seconds * 0.13) }
+    private func fastBudget(for seconds: Double) -> Double { min(4.0, seconds * 0.18) }
 
     /// A short, uneven wait. Fast-forward keeps up to half a second of it so a phase still reads as work.
     private func pause(seconds: Double) async throws {
