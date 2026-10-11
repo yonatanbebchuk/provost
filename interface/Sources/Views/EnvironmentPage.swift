@@ -29,7 +29,6 @@ struct EnvironmentPage: View {
                         PartCard(part: .observations, environment: environment, alsoParts: [.initialState]) { observationSpace(spec) }
                     }
                     .fixedSize(horizontal: false, vertical: true)
-                    provenance(spec.provenance)
                 } else {
                     Card(title: "Specification") {
                         Text("Registered from its packaging only. Its parts are not available yet.")
@@ -163,16 +162,6 @@ struct EnvironmentPage: View {
         }
     }
 
-    private func provenance(_ p: ProvenanceSpec) -> some View {
-        HStack(spacing: 8) {
-            Text(p.origin.displayName)
-            ForEach(p.evidence, id: \.self) { Text("· \($0)").textSelection(.enabled) }
-            if let license = p.license { Text("· \(license)") }
-            Spacer()
-        }
-        .font(.caption).foregroundStyle(.tertiary)
-    }
-
     private func bullets(_ items: [String], symbol: String, muted: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             ForEach(items, id: \.self) { item in
@@ -296,12 +285,13 @@ private struct TrainingDataStrip: View {
             HStack(spacing: 8) {
                 Image(systemName: "tray.full").font(.body).foregroundStyle(.secondary)
                 Text("Training data").font(.title3.weight(.semibold))
-                Text("\(samples.count) of \(taskCount)").font(.callout.monospacedDigit()).foregroundStyle(.secondary)
                 Spacer()
             }
-            ScrollView(.horizontal, showsIndicators: true) {
-                HStack(alignment: .top, spacing: 12) {
-                    ForEach(samples) { sample in
+            // The strip keeps going: the samples repeat, so it scrolls as far as anyone drags it.
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(alignment: .top, spacing: 12) {
+                    ForEach(0..<(samples.count * 200), id: \.self) { i in
+                        let sample = samples[i % samples.count]
                         Button { open = sample } label: {
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
