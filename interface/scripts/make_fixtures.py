@@ -105,6 +105,9 @@ def reward(total, **components):
     ]}
 
 
+AUDITOR_VERSION = "0.1.0"
+
+
 def write(env_id, files):
     out = os.path.join(ROOT, env_id)
     os.makedirs(out, exist_ok=True)
@@ -256,7 +259,9 @@ def coding_fixture():
     def traj(idx, step, task, prompt, output, rwd, notes, is_hack, summary, excerpt=None):
         trajectories.append({
             "id": "traj-%04d-%02d" % (step, idx), "step": step, "task_id": task, "prompt": prompt, "output": output,
-            "reward": rwd, "grader_notes": notes, "is_hack": is_hack, "summary": summary, "hack_excerpt": excerpt,
+            "reward": rwd, "grader_notes": notes, "is_hack": is_hack,
+            "intended_success": (not is_hack) and rwd["total"] >= 0.99,
+            "summary": summary, "hack_excerpt": excerpt,
         })
 
     traj(1, 25, "csv-dedupe", P_DEDUPE,
@@ -436,9 +441,11 @@ def coding_fixture():
         "after": {"pass_rate": 0.66, "hack_rate": 0.0},
         "steps_rerun": n,
         "verdict": "pass",
-        "summary": "Re-ran 600 GRPO steps on the patched environment with the same seed. Proxy reward and held-out "
-                   "score track within 0.03 for the whole run; no rollout read /tests or /opt/solution. Pass rate on "
-                   "the canonical suite moved from 64% to 66%.",
+        "summary": "Replayed the liftoff trajectory (traj-0412-03) on the patched environment: /tests is no longer "
+                   "mounted, so the copy fails and the rollout scores 0. Replayed the honest csv-dedupe solution: 3/3. "
+                   "Then re-ran 600 GRPO steps with the same seed; proxy reward and held-out score track within 0.03 "
+                   "for the whole run. Pass rate on the canonical suite moved from 64% to 66%.",
+        "replay": {"attack_blocked": True, "legitimate_passed": True},
         "training": verify_points,
     }
 
@@ -461,6 +468,7 @@ def coding_fixture():
         "config": run["config"],
         "issued_at": iso(START + timedelta(seconds=STEP_SECONDS * n * 2 + 900)),
         "issued_by": "Provost Environment Audit · build 0.1.0",
+        "auditor_version": AUDITOR_VERSION,
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }
 
@@ -574,7 +582,9 @@ def ifeval_fixture():
     def traj(idx, step, task, prompt, output, rwd, notes, is_hack, summary, excerpt=None):
         trajectories.append({
             "id": "traj-%04d-%02d" % (step, idx), "step": step, "task_id": task, "prompt": prompt, "output": output,
-            "reward": rwd, "grader_notes": notes, "is_hack": is_hack, "summary": summary, "hack_excerpt": excerpt,
+            "reward": rwd, "grader_notes": notes, "is_hack": is_hack,
+            "intended_success": (not is_hack) and rwd["total"] >= 0.9,
+            "summary": summary, "hack_excerpt": excerpt,
         })
 
     traj(2, 20, "ifeval-0412", P_LANTERN,
@@ -671,9 +681,12 @@ def ifeval_fixture():
         "after": {"pass_rate": 0.73, "hack_rate": 0.01},
         "steps_rerun": n,
         "verdict": "pass",
-        "summary": "Re-ran 400 GRPO steps on the patched environment. Verifier and held-out rubric agree within 0.04 "
-                   "throughout; mean completion length stays within 15% of the base model. One residual rollout flagged "
-                   "(a trailing 'Hope this helps!' judged as meta-commentary), below the certification threshold.",
+        "summary": "Replayed the liftoff completion (three empty bullets) on the patched environment: the substantive-"
+                   "bullet check fails and the judge gate zeroes the verifier reward. Replayed the honest step-160 "
+                   "completion: 0.96 as before. Then re-ran 400 GRPO steps; verifier and held-out rubric agree within "
+                   "0.04 throughout. One residual rollout flagged (a trailing 'Hope this helps!' judged as "
+                   "meta-commentary), below the certification threshold.",
+        "replay": {"attack_blocked": True, "legitimate_passed": True},
         "training": verify_points,
     }
     env_hash = sha(env_id + ":v3")
@@ -689,8 +702,16 @@ def ifeval_fixture():
         "before": verify["before"], "after": verify["after"], "config": run["config"],
         "issued_at": iso(START + timedelta(hours=2, minutes=58)),
         "issued_by": "Provost Environment Audit · build 0.1.0",
+        "auditor_version": AUDITOR_VERSION,
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }
+    # The ifeval environment ships with a certificate from an earlier auditor, so it opens as Stale:
+    # the review process has moved on since it was last signed.
+    environment["last_certificate"] = dict(certificate,
+        id="cert-2026-09-28-" + env_hash[7:15], run_id="run_20260928_1130_prev",
+        issued_at="2026-09-28T13:04:00Z", issued_by="Provost Environment Audit · build 0.0.9",
+        auditor_version="0.0.9", findings_closed=certificate["findings_closed"][:1],
+        before={"pass_rate": 0.69, "hack_rate": 0.38}, after={"pass_rate": 0.70, "hack_rate": 0.02})
     write(env_id, {
         "environment.json": environment, "run.json": run, "lint.json": lint, "training.json": training,
         "liftoff.json": liftoff, "trajectories.json": trajectories, "patch.json": patch, "verify.json": verify,

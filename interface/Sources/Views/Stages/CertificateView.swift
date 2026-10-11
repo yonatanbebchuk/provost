@@ -142,7 +142,7 @@ struct CertificatePaper: View {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Issued by").font(.system(size: 9.5, weight: .bold)).kerning(0.8).foregroundStyle(muted)
-                    Text(certificate.issuedBy).font(.system(size: 12)).foregroundStyle(ink)
+                    Text(certificate.issuedBy + (certificate.auditorVersion.map { " · auditor \($0)" } ?? "")).font(.system(size: 12)).foregroundStyle(ink)
                     Text("Signature  \(certificate.signature)").font(.system(size: 9.5, design: .monospaced)).foregroundStyle(muted)
                         .padding(.top, 4)
                 }

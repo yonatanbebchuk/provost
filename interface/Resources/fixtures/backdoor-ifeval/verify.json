@@ -10,7 +10,11 @@
   },
   "steps_rerun": 400,
   "verdict": "pass",
-  "summary": "Re-ran 400 GRPO steps on the patched environment. Verifier and held-out rubric agree within 0.04 throughout; mean completion length stays within 15% of the base model. One residual rollout flagged (a trailing 'Hope this helps!' judged as meta-commentary), below the certification threshold.",
+  "summary": "Replayed the liftoff completion (three empty bullets) on the patched environment: the substantive-bullet check fails and the judge gate zeroes the verifier reward. Replayed the honest step-160 completion: 0.96 as before. Then re-ran 400 GRPO steps; verifier and held-out rubric agree within 0.04 throughout. One residual rollout flagged (a trailing 'Hope this helps!' judged as meta-commentary), below the certification threshold.",
+  "replay": {
+    "attack_blocked": true,
+    "legitimate_passed": true
+  },
   "training": [
     {
       "step": 1,

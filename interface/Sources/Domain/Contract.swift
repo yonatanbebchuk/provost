@@ -192,6 +192,9 @@ public struct AuditEnvironment: Codable, Hashable, Identifiable, Sendable {
     public var sandbox: SandboxSummary
     public var description: String?
     public var spec: EnvironmentSpec?
+    /// The certificate from the last time this environment was signed, if any. The app marks it
+    /// stale when the auditor has moved on or the environment changed.
+    public var lastCertificate: Certificate?
 }
 
 // MARK: Lint
@@ -248,11 +251,16 @@ public struct FailureMode: RawRepresentable, Codable, Hashable, Sendable {
     public static let graderInjection = FailureMode("grader_injection")
     public static let sandboxPersistence = FailureMode("sandbox_persistence")
     public static let specGaming = FailureMode("spec_gaming")
+    // From Matt's red-team harness (auto_RL_builder/redteam_testing): grader gaps in workflow environments.
+    public static let omittedEpistemicRequirement = FailureMode("omitted_epistemic_requirement")
+    public static let ungradedExternality = FailureMode("ungraded_externality")
+    public static let unenforcedRequiredApproval = FailureMode("unenforced_required_approval")
 
     public static let known: [FailureMode] = [
         .answerKeyReachable, .graderDataReadable, .lengthExploit, .formatExploit, .judgeSycophancy,
         .testOverfit, .toolEscape, .rewardSaturation, .staleOracle, .nondeterministicGrader,
         .earlyTermination, .outputMimicry, .graderInjection, .sandboxPersistence, .specGaming,
+        .omittedEpistemicRequirement, .ungradedExternality, .unenforcedRequiredApproval,
     ]
 
     /// Human-readable label, e.g. "Answer key reachable".
@@ -384,6 +392,9 @@ public struct Trajectory: Codable, Hashable, Identifiable, Sendable {
     public var reward: RewardBreakdown
     public var graderNotes: String
     public var isHack: Bool
+    /// Independent intent check: did the rollout achieve what the task meant? A hack is a high
+    /// proxy reward with `intendedSuccess == false`. Optional for backends without an oracle.
+    public var intendedSuccess: Bool?
     /// One human-readable line: what the policy did.
     public var summary: String
     /// Exact substring of `output` that constitutes the hack, for highlighting. Nil if clean.
@@ -435,6 +446,13 @@ public enum Verdict: String, Codable, Sendable {
     }
 }
 
+/// Verification replays two things on the patched environment: the attack that triggered liftoff
+/// (must be blocked) and the legitimate reference trajectory (must still pass).
+public struct ReplayCheck: Codable, Hashable, Sendable {
+    public var attackBlocked: Bool
+    public var legitimatePassed: Bool
+}
+
 public struct VerifyResult: Codable, Hashable, Sendable {
     public var runId: String
     public var before: RateSnapshot
@@ -442,6 +460,7 @@ public struct VerifyResult: Codable, Hashable, Sendable {
     public var stepsRerun: Int
     public var verdict: Verdict
     public var summary: String
+    public var replay: ReplayCheck?
     /// Training curve of the re-run on the patched environment. Streamed separately over HTTP;
     /// bundled here in fixtures.
     public var training: [TrainingPoint]?
@@ -471,6 +490,8 @@ public struct Certificate: Codable, Hashable, Identifiable, Sendable {
     public var config: RunConfig
     public var issuedAt: Date
     public var issuedBy: String
+    /// Auditor version that produced this certificate; compared with `AppConfig.auditorVersion`.
+    public var auditorVersion: String?
     public var signature: String
 }
 

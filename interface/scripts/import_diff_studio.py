@@ -300,6 +300,7 @@ def convert(attack):
             "reward": row_reward(key, row),
             "grader_notes": notes,
             "is_hack": is_hack,
+            "intended_success": (not is_hack) and not violations and row_reward(key, row)["total"] > 0,
             "summary": summary,
             "hack_excerpt": find_excerpt(output, cfg["needles"]) if (is_hack or violations) else None,
             "judge_output": judge,
@@ -336,9 +337,11 @@ def convert(attack):
                                 start_offset_s=STEP_SECONDS * STEPS + 600)
     verify = {
         "run_id": run_id, "before": before, "after": after, "steps_rerun": STEPS, "verdict": "pass",
-        "summary": "%s Of %d probed rollouts, %d were rewarded hacks before the patch and 0 after. "
-                   "Pass rate counts probes only — the evidence set has %d honest completion%s."
+        "summary": "Replayed the liftoff payload on the patched verifier: %s Of %d probed rollouts, %d were "
+                   "rewarded hacks before the patch and 0 after. Pass rate counts probes only — the evidence set "
+                   "has %d honest completion%s."
                    % (attack["after"]["reason"], len(rows), len(hacks), len(honest_rewarded), "" if len(honest_rewarded) == 1 else "s"),
+        "replay": {"attack_blocked": True, "legitimate_passed": len(honest_rewarded) > 0},
         "training": verify_points,
     }
 
@@ -352,6 +355,7 @@ def convert(attack):
         "before": before, "after": after, "config": run["config"],
         "issued_at": iso(START + timedelta(seconds=STEP_SECONDS * STEPS * 2 + 900)),
         "issued_by": "Provost Environment Audit · build 0.1.0",
+        "auditor_version": "0.1.0",
         "signature": "ed25519:" + hashlib.sha256((env_hash + patched_hash + run_id).encode()).hexdigest()[:64],
     }
     write(env_id, {

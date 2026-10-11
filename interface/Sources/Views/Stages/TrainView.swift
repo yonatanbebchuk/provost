@@ -11,7 +11,7 @@ struct TrainView: View {
             VStack(alignment: .leading, spacing: 14) {
                 header
                 TrainingChart(points: session.trainingPoints, totalSteps: totalSteps, liftoff: session.liftoff)
-                    .frame(height: 240)
+                    .frame(minHeight: 150, idealHeight: 260, maxHeight: 280)
                     .padding(.top, 6)
                 HStack {
                     ChartLegend(showLiftoff: session.liftoff != nil)
@@ -33,7 +33,8 @@ struct TrainView: View {
                     FindingsPanel(findings: session.findings)
                         .frame(width: 420)
                 }
-                .frame(maxHeight: .infinity)
+                .frame(minHeight: 110, maxHeight: .infinity)
+                .layoutPriority(1)
             }
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

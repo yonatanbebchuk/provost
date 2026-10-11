@@ -26,7 +26,9 @@ Environments are projects. The left sidebar lists them; selecting one opens its 
 from an environment (like a build) and walks through the audit stages.
 
 - **Environment page** — the environment in its six mandatory parts (objective, initial state, agent
-  sees, actions, evaluation, episode) plus provenance, then its runs. The parts come from the
+  sees, actions, evaluation, episode), provenance, its last certificate, and its runs. The status
+  badge is derived: Unassessed, Vulnerable (liftoff found, not yet re-signed), Certified, or Stale
+  (signed by an older auditor than `AppConfig.auditorVersion`; re-run to re-sign). The parts come from the
   structural comparison in `auto_RL_builder/environment_comparison.md`. A part a proposed patch
   would change is marked "patch pending".
 - **Run** — created with **New Run** (⌘R). It scans the environment, trains the adversarial policy, and

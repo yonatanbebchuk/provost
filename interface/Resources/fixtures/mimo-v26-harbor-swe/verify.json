@@ -10,7 +10,11 @@
   },
   "steps_rerun": 600,
   "verdict": "pass",
-  "summary": "Re-ran 600 GRPO steps on the patched environment with the same seed. Proxy reward and held-out score track within 0.03 for the whole run; no rollout read /tests or /opt/solution. Pass rate on the canonical suite moved from 64% to 66%.",
+  "summary": "Replayed the liftoff trajectory (traj-0412-03) on the patched environment: /tests is no longer mounted, so the copy fails and the rollout scores 0. Replayed the honest csv-dedupe solution: 3/3. Then re-ran 600 GRPO steps with the same seed; proxy reward and held-out score track within 0.03 for the whole run. Pass rate on the canonical suite moved from 64% to 66%.",
+  "replay": {
+    "attack_blocked": true,
+    "legitimate_passed": true
+  },
   "training": [
     {
       "step": 1,

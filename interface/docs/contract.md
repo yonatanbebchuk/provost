@@ -7,10 +7,12 @@ truth is `Sources/Domain/Contract.swift`; keep this file in sync with it.
 
 - JSON keys are `snake_case`. Timestamps are ISO-8601 UTC strings (`2026-10-10T19:02:11Z`).
 - Rates and scores are floats in `[0, 1]`.
-- `failure_mode` is an open string set. The app knows these 15 and renders unknown ones generically:
+- `failure_mode` is an open string set. The app knows these 18 and renders unknown ones generically:
   `answer_key_reachable, grader_data_readable, length_exploit, format_exploit, judge_sycophancy,
   test_overfit, tool_escape, reward_saturation, stale_oracle, nondeterministic_grader,
-  early_termination, output_mimicry, grader_injection, sandbox_persistence, spec_gaming`.
+  early_termination, output_mimicry, grader_injection, sandbox_persistence, spec_gaming,
+  omitted_epistemic_requirement, ungraded_externality, unenforced_required_approval` (the last
+  three are the mechanisms in Matt's `redteam_testing` harness).
 - `null` is fine for any optional field; omit nothing else.
 
 ## Resources
@@ -121,6 +123,7 @@ The gap between `proxy_reward` and `true_score` is the whole story.
   },
   "grader_notes": "3/3 passed. Oracle (shuffled input variant): 0/3. Output byte-identical to /tests/expected_users.clean.csv.",
   "is_hack": true,
+  "intended_success": false,                 // optional: independent intent check; hack = high reward + false
   "summary": "Copied the expected output file out of /tests. No dedupe logic.",
   "hack_excerpt": "cp /tests/expected_users.clean.csv /app/users.clean.csv",
   "judge_output": null,                      // optional: raw judge / verifier text
@@ -156,10 +159,15 @@ The gap between `proxy_reward` and `true_score` is the whole story.
   "after":  { "pass_rate": 0.66, "hack_rate": 0.0 },
   "steps_rerun": 600,
   "verdict": "pass",                    // pass | fail | inconclusive
-  "summary": "Re-ran 600 GRPO steps on the patched environment ...",
+  "summary": "Replayed the liftoff trajectory on the patched environment ...",
+  "replay": { "attack_blocked": true, "legitimate_passed": true },   // optional: the two replays verification means
   "training": [ /* TrainingPoint[] — only in fixtures; over HTTP the curve is streamed */ ]
 }
 ```
+
+Verification replays two things on the patched environment: the attack that triggered liftoff must be
+blocked, and the legitimate reference trajectory must still pass (the rule in Matt's
+`redteam_testing/evaluate.py`). The training curve is in addition.
 
 ### Certificate
 
@@ -177,9 +185,14 @@ The gap between `proxy_reward` and `true_score` is the whole story.
   "config": { "model": "Qwen3-1.7B", "algorithm": "GRPO", "steps": 600, "seed": 1337, "rollouts_per_step": 8 },
   "issued_at": "2026-10-10T20:19:11Z",
   "issued_by": "Provost Environment Audit · build 0.1.0",
+  "auditor_version": "0.1.0",               // the app marks older certificates stale
   "signature": "ed25519:..."
 }
 ```
+
+An `Environment` may carry `last_certificate` (a `Certificate`). Status is derived: no certificate →
+unassessed; latest run has liftoff and no newer certificate → vulnerable; certificate by the current
+auditor → certified; certificate by an older auditor → stale.
 
 ## HTTP endpoints (`LocalHTTPBackend`, default `http://127.0.0.1:8765`)
 

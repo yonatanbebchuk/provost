@@ -15,6 +15,27 @@ enum Theme {
     static let inset = Color(nsColor: .textBackgroundColor)
     static let codeBackground = Color.primary.opacity(0.045)
 
+    /// Environment status. The only other chromatic colours besides the liftoff accent.
+    static let statusVulnerable = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 1.00, green: 0.45, blue: 0.45, alpha: 1)
+            : NSColor(srgbRed: 0.80, green: 0.18, blue: 0.18, alpha: 1)
+    })
+    static let statusCertified = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 0.40, green: 0.85, blue: 0.55, alpha: 1)
+            : NSColor(srgbRed: 0.12, green: 0.55, blue: 0.30, alpha: 1)
+    })
+
+    static func color(for status: EnvironmentStatus) -> Color {
+        switch status {
+        case .unassessed: .secondary
+        case .vulnerable: statusVulnerable
+        case .certified: statusCertified
+        case .stale: .secondary
+        }
+    }
+
     /// Diff tints: deliberately muted so they read as structure, not alarm.
     static let diffAdd = Color.green.opacity(0.13)
     static let diffRemove = Color.red.opacity(0.13)
@@ -58,6 +79,26 @@ struct Chip: View {
             .padding(.vertical, 3)
             .foregroundStyle(tint ?? .primary)
             .background((tint ?? Color.primary).opacity(0.09), in: Capsule())
+    }
+}
+
+/// Unassessed / Vulnerable / Certified / Stale.
+struct StatusBadge: View {
+    var status: EnvironmentStatus
+    var compact = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle().fill(Theme.color(for: status)).frame(width: 7, height: 7)
+            Text(status.title.uppercased())
+                .font(.caption2.weight(.bold)).kerning(0.5)
+                .foregroundStyle(Theme.color(for: status))
+            if !compact {
+                Text(status.detail).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, compact ? 7 : 9).padding(.vertical, compact ? 3 : 5)
+        .background(Theme.color(for: status).opacity(0.10), in: Capsule())
     }
 }
 

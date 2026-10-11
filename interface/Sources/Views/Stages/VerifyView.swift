@@ -8,6 +8,7 @@ struct VerifyView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 4) {
@@ -33,6 +34,13 @@ struct VerifyView: View {
 
                 if let result = session.verifyResult {
                     BeforeAfterStrip(result: result)
+                    if let replay = result.replay {
+                        HStack(spacing: 18) {
+                            replayItem("Liftoff attack replayed", ok: replay.attackBlocked, okText: "blocked", badText: "still rewarded")
+                            replayItem("Legitimate trajectory replayed", ok: replay.legitimatePassed, okText: "still passes", badText: "now fails")
+                            Spacer()
+                        }
+                    }
                     Card(title: "Summary") {
                         Text(result.summary).font(.callout)
                     }
@@ -44,10 +52,10 @@ struct VerifyView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, 20)
                 }
-                Spacer(minLength: 0)
             }
             .padding(24)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
 
             StageFooter(busyLabel: session.verifyFinished ? "Issuing certificate…" : "Re-verifying · step \(currentStep) / \(totalSteps)") {
                 if let result = session.verifyResult {
@@ -57,6 +65,18 @@ struct VerifyView: View {
             }
         }
     }
+}
+
+private func replayItem(_ label: String, ok: Bool, okText: String, badText: String) -> some View {
+    HStack(spacing: 8) {
+        Image(systemName: ok ? "checkmark.circle.fill" : "xmark.circle.fill")
+            .foregroundStyle(ok ? Theme.statusCertified : Theme.statusVulnerable)
+        Text(label).font(.callout)
+        Text(ok ? okText : badText).font(.callout.weight(.semibold))
+    }
+    .padding(.horizontal, 12).padding(.vertical, 8)
+    .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(.separator))
 }
 
 struct BeforeAfterStrip: View {

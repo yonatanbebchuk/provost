@@ -14,7 +14,7 @@ struct RunView: View {
             if store.showLog {
                 Divider()
                 RunLogView()
-                    .frame(height: 150)
+                    .frame(height: 120)
             }
         }
         .sheet(item: Binding(get: { session.selectedTrajectory }, set: { session.selectedTrajectory = $0 })) { t in

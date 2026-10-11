@@ -33,5 +33,6 @@
   },
   "issued_at": "2026-10-10T19:58:31Z",
   "issued_by": "Provost Environment Audit \u00b7 build 0.1.0",
+  "auditor_version": "0.1.0",
   "signature": "ed25519:df669c685d08bad5b4d033a718fc7ed4bc40285d92dd35e23c8d60c30d99faca"
 }

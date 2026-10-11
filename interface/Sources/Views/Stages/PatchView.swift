@@ -7,6 +7,7 @@ struct PatchView: View {
         VStack(spacing: 0) {
             if let patch = session.patch {
                 HStack(alignment: .top, spacing: 20) {
+                    ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         header(patch)
                         Card(title: "Rationale") {
@@ -25,9 +26,10 @@ struct PatchView: View {
                             }
                         }
                         LearningScopeView(scope: patch.learningScope)
-                        Spacer(minLength: 0)
                     }
-                    .frame(width: 400)
+                    .padding(.trailing, 4)
+                    }
+                    .frame(width: 404)
                     DiffView(diff: patch.diff)
                 }
                 .padding(24)

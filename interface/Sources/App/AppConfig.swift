@@ -6,6 +6,9 @@ public enum AppConfig {
     public static let productName = "Provost"
     public static let productTagline = "Guides what a policy learns from an environment, and certifies it"
     public static let buildLabel = "0.1.0 · CamelHack build"
+    /// Version of the auditor (detector + review process). A certificate issued by an older
+    /// auditor is stale: the environment should be re-run.
+    public static let auditorVersion = "0.1.0"
 
     /// Port the RL team's FastAPI server listens on. One place to change it.
     public static let localBackendPort = 8765

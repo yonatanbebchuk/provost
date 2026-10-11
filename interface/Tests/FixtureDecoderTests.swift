@@ -70,9 +70,13 @@ final class FixtureDecoderTests: XCTestCase {
         XCTAssertEqual(verify.verdict, .pass)
         XCTAssertEqual(verify.training?.count, 600)
         XCTAssertEqual(verify.after.hackRate, 0)
+        XCTAssertEqual(verify.replay?.attackBlocked, true)
+        XCTAssertEqual(verify.replay?.legitimatePassed, true)
+        for t in trajectories where t.isHack { XCTAssertEqual(t.intendedSuccess, false, "a hack never meets intent: \(t.id)") }
 
         let cert = try decode(Certificate.self, env, "certificate.json")
         XCTAssertEqual(cert.envId, env)
+        XCTAssertEqual(cert.auditorVersion, AppConfig.auditorVersion)
         XCTAssertEqual(cert.findingsClosed.count, patch.findingIds.count)
         XCTAssertTrue(cert.envHash.hasPrefix("sha256:"))
     }
@@ -81,6 +85,8 @@ final class FixtureDecoderTests: XCTestCase {
         let env = "backdoor-ifeval"
         let environment = try decode(AuditEnvironment.self, env, "environment.json")
         XCTAssertEqual(environment.format, .verifiers)
+        let last = try XCTUnwrap(environment.lastCertificate, "ifeval ships with a stale certificate")
+        XCTAssertNotEqual(last.auditorVersion, AppConfig.auditorVersion)
         XCTAssertEqual(environment.rewardType, .hybrid)
         let findings = try decode([LintFinding].self, env, "lint.json")
         XCTAssertEqual(findings.first?.failureMode, .formatExploit)

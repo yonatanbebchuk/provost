@@ -79,7 +79,10 @@ struct EnvironmentPage: View {
                             ])
                         }
                     }
-                    provenance(spec.provenance)
+                    HStack(alignment: .top, spacing: 16) {
+                        provenance(spec.provenance)
+                        certificateCard
+                    }
                 } else {
                     Card(title: "Specification") {
                         Text("This environment was registered from its packaging only. The six parts of the specification are not available for it yet.")
@@ -98,7 +101,7 @@ struct EnvironmentPage: View {
         }
     }
 
-    private func patched(_ part: EnvironmentPart) -> Bool { store.patchedParts(for: environment).contains(part) }
+    private func patched(_ part: EnvironmentPart) -> DemoStore.PatchMark? { store.patchMarks(for: environment)[part] }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -112,6 +115,37 @@ struct EnvironmentPage: View {
                 Text(description).font(.callout).foregroundStyle(.secondary).padding(.top, 2)
             }
         }
+    }
+
+    /// The last time this environment was signed, and whether that still holds.
+    private var certificateCard: some View {
+        Card(title: "Last certificate") {
+            if let cert = store.latestCertificate(for: environment) {
+                let status = store.status(for: environment)
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Image(systemName: "seal").font(.title3).foregroundStyle(Theme.color(for: status))
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 8) {
+                            Text(cert.id).font(.callout.monospaced())
+                            StatusBadge(status: status, compact: true)
+                        }
+                        Text("Signed \(cert.issuedAt.formatted(Format.dateTime)) · auditor \(cert.auditorVersion ?? "unknown") · \(cert.findingsClosed.count) findings closed")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Text("hack rate \(Format.percent(cert.before.hackRate)) → \(Format.percent(cert.after.hackRate)) · pass rate \(Format.percent(cert.before.passRate)) → \(Format.percent(cert.after.passRate))")
+                            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                        if case .stale(_, let reason) = status {
+                            Text("Stale: \(reason). Run the audit again to re-sign.")
+                                .font(.caption.weight(.medium))
+                        }
+                        Text(Format.shortHash(cert.patchedEnvHash)).font(.caption.monospaced()).foregroundStyle(.tertiary)
+                    }
+                }
+            } else {
+                Text("Never signed. A run that closes its findings and verifies the patch issues the first certificate.")
+                    .font(.callout).foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: 420)
     }
 
     private func provenance(_ p: ProvenanceSpec) -> some View {
@@ -207,7 +241,7 @@ struct EnvironmentPage: View {
 /// One of the six parts. The dot marks a part a proposed patch would change.
 private struct PartCard<Content: View>: View {
     let part: EnvironmentPart
-    let patched: Bool
+    let patched: DemoStore.PatchMark?
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -215,10 +249,11 @@ private struct PartCard<Content: View>: View {
             HStack(spacing: 8) {
                 Image(systemName: part.systemImage).font(.callout).foregroundStyle(.secondary)
                 Text(part.displayName).font(.headline)
-                if patched {
+                if let patched {
+                    let color = patched == .applied ? Theme.statusCertified : Theme.liftoff
                     HStack(spacing: 4) {
-                        Circle().fill(Theme.liftoff).frame(width: 6, height: 6)
-                        Text("patch pending").font(.caption.weight(.medium)).foregroundStyle(Theme.liftoff)
+                        Circle().fill(color).frame(width: 6, height: 6)
+                        Text(patched == .applied ? "patched" : "patch pending").font(.caption.weight(.medium)).foregroundStyle(color)
                     }
                 }
                 Spacer()

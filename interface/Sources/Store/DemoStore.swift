@@ -42,9 +42,18 @@ public final class DemoStore {
         sessions.filter { $0.environment.id == environment.id }
     }
 
-    /// Parts of the environment that a proposed patch in any of its runs would change.
-    public func patchedParts(for environment: AuditEnvironment) -> Set<EnvironmentPart> {
-        Set(sessions(for: environment).compactMap { $0.patch?.touches }.joined())
+    public enum PatchMark: Equatable { case pending, applied }
+
+    /// Parts of the environment a patch touches: `.applied` once a run verified it, else `.pending`.
+    public func patchMarks(for environment: AuditEnvironment) -> [EnvironmentPart: PatchMark] {
+        var marks: [EnvironmentPart: PatchMark] = [:]
+        for session in sessions(for: environment).reversed() {
+            for part in session.patch?.touches ?? [] {
+                let mark: PatchMark = session.verifyFinished ? .applied : .pending
+                if marks[part] != .applied { marks[part] = mark }
+            }
+        }
+        return marks
     }
 
     // MARK: Environments

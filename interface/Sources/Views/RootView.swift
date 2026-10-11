@@ -144,10 +144,9 @@ private struct EnvironmentRow: View {
                         .font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 }
                 Spacer()
-                let runs = store.sessions(for: environment)
-                if !runs.isEmpty {
-                    Text("\(runs.count)").font(.caption.monospacedDigit()).foregroundStyle(.tertiary)
-                }
+                let status = store.status(for: environment)
+                Circle().fill(Theme.color(for: status)).frame(width: 7, height: 7)
+                    .help(status.title + " · " + status.detail)
             }
             .padding(.horizontal, 10).padding(.vertical, 7)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -238,7 +237,7 @@ struct TopBar: View {
                 Divider().frame(height: 16)
                 Text(env.source).font(.callout.monospaced()).foregroundStyle(.secondary).lineLimit(1)
                 Spacer()
-                Text("\(store.sessions(for: env).count) runs").font(.callout).foregroundStyle(.secondary)
+                StatusBadge(status: store.status(for: env))
             } else {
                 Spacer()
             }
