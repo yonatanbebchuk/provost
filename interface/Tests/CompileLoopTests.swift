@@ -194,6 +194,36 @@ final class CompileLoopTests: XCTestCase {
         XCTAssertEqual(store.version(of: env), 2)
     }
 
+    /// The fast-forward schedule lands every point inside the budget, in order, with rollouts waiting longer.
+    func testLiveScheduleShape() {
+        let costly = [50, 120, 300]
+        let schedule = FixtureBackend.liveSchedule(count: 400, costly: costly, budget: 4)
+        XCTAssertEqual(schedule.count, 400)
+        XCTAssertEqual(schedule.last ?? 0, 4, accuracy: 1e-9)
+        XCTAssertTrue(zip(schedule, schedule.dropFirst()).allSatisfy { $0 <= $1 })
+        let gaps = [0.0] + zip(schedule.dropFirst(), schedule).map { $0 - $1 }
+        let costlyGap = costly.map { gaps[$0] }.reduce(0, +) / Double(costly.count)
+        let typicalGap = gaps.reduce(0, +) / Double(gaps.count)
+        XCTAssertGreaterThan(costlyGap, typicalGap * 3, "a step that sampled a rollout visibly waits for it")
+    }
+
+    /// With the app's real replay lengths, a fast-forward compile (scan + training) lands within five seconds.
+    func testFastForwardCompileFitsFiveSeconds() async throws {
+        let playback = PlaybackSettings(fastForward: true)
+        let backend = FixtureBackend(root: FixtureDecoderTests.fixturesRoot, playback: playback)
+        let run = try await backend.startAudit(envId: "mimo-v26-harbor-swe", spec: nil)
+        let start = ContinuousClock.now
+        _ = try await backend.lint(runId: run.id)
+        var trajectories = 0
+        for try await event in backend.train(runId: run.id) {
+            if case .trajectory = event { trajectories += 1 }
+        }
+        let elapsed = start.duration(to: .now)
+        XCTAssertEqual(trajectories, 15)
+        XCTAssertLessThan(elapsed, .seconds(5), "fast-forward compile took \(elapsed)")
+        XCTAssertGreaterThan(elapsed, .seconds(2.5), "fast-forward should still look like work, took \(elapsed)")
+    }
+
     func testSpecEditorAppliesEachKind() {
         var spec = EnvironmentSpec(
             samples: nil,

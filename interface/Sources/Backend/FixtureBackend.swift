@@ -117,7 +117,8 @@ public final class FixtureBackend: AuditBackend {
                         liftoff = try load(LiftoffEvent.self, from: file("liftoff.json", env: env))
                     }
                     continuation.yield(.phase(.training))
-                    try await replay(points, over: trainingSeconds) { point in
+                    let rolloutSteps = Set(trajectories.map(\.step))
+                    try await replay(points, over: trainingSeconds, costly: rolloutSteps) { point in
                         continuation.yield(.point(point))
                         for t in trajectories where t.step == point.step {
                             continuation.yield(.trajectory(t))
@@ -200,33 +201,65 @@ public final class FixtureBackend: AuditBackend {
         }
     }
 
-    /// Sleep that collapses to ~nothing in fast-forward.
+    /// Fast-forward keeps the shape of a real run but fits it in a few seconds: a normal-speed replay
+    /// of `seconds` becomes this long. Tests pass tiny `seconds`, so they stay instant.
+    private func fastBudget(for seconds: Double) -> Double { min(4.0, seconds * 0.13) }
+
+    /// A short, uneven wait. Fast-forward keeps up to half a second of it so a phase still reads as work.
     private func pause(seconds: Double) async throws {
-        try await Task.sleep(for: .milliseconds(playback.fastForward ? 30 : Int(seconds * 1000)))
+        let ms = playback.fastForward ? Int(Double.random(in: 0.3...0.7) * min(seconds, 0.8) * 1000)
+                                      : Int(seconds * 1000)
+        try await Task.sleep(for: .milliseconds(ms))
     }
 
-    /// Emit points spread over `seconds` at normal speed; in fast-forward emit in bursts of 8 with a
-    /// 1 ms breather so the UI stays responsive.
-    private func replay(_ points: [TrainingPoint], over seconds: Double,
+    /// Emit points spread over `seconds` at normal speed. In fast-forward the same points land inside
+    /// `fastBudget` with the irregular rhythm of a live run: bursts, hiccups, and a visible pause before
+    /// each step that produced a rollout (`costly`).
+    private func replay(_ points: [TrainingPoint], over seconds: Double, costly: Set<Int> = [],
                         emit: (TrainingPoint) -> Void) async throws {
         guard !points.isEmpty else { return }
         let perPoint = seconds / Double(points.count)
+        let schedule = Self.liveSchedule(count: points.count, costly: points.indices.filter { costly.contains(points[$0].step) },
+                                         budget: fastBudget(for: seconds))
         var anchor = ContinuousClock.now
         var anchorIndex = 0
         var wasFast = playback.fastForward
         for (i, p) in points.enumerated() {
             try Task.checkCancellation()
-            emit(p)
             let fast = playback.fastForward
             if fast != wasFast { anchor = .now; anchorIndex = i; wasFast = fast }
-            if fast {
-                if i % 16 == 15 { try await Task.sleep(for: .milliseconds(1)) }
-            } else {
-                // Sleep until this point's deadline so UI render cost doesn't stretch the replay.
-                let deadline = anchor + .seconds(perPoint * Double(i - anchorIndex + 1))
-                if deadline > .now { try await Task.sleep(until: deadline) }
-            }
+            // Sleep until this point's deadline so UI render cost doesn't stretch the replay.
+            let deadline = fast
+                ? anchor + .seconds(schedule[i] - (anchorIndex > 0 ? schedule[anchorIndex - 1] : 0))
+                : anchor + .seconds(perPoint * Double(i - anchorIndex + 1))
+            if deadline > .now { try await Task.sleep(until: deadline) }
+            emit(p)
         }
+    }
+
+    /// Cumulative seconds at which each point lands, summing to `budget`. Gaps are log-normal, so
+    /// most are quick and a few drag; runs of points arrive almost together; about one in twenty-five
+    /// hiccups; and a step that sampled a rollout waits for it.
+    static func liveSchedule(count: Int, costly: [Int], budget: Double) -> [Double] {
+        var rng = SystemRandomNumberGenerator()
+        func gauss() -> Double {
+            let u = max(Double.random(in: 0..<1, using: &rng), 1e-9), v = Double.random(in: 0..<1, using: &rng)
+            return (-2 * log(u)).squareRoot() * cos(2 * .pi * v)
+        }
+        let costlySet = Set(costly)
+        var weights: [Double] = []
+        var burstLeft = 0
+        for i in 0..<count {
+            var w = exp(gauss() * 0.9)
+            if burstLeft > 0 { w *= 0.08; burstLeft -= 1 }
+            else if Double.random(in: 0..<1, using: &rng) < 0.06 { burstLeft = Int.random(in: 5...14, using: &rng) }
+            if Double.random(in: 0..<1, using: &rng) < 0.04 { w *= 10 }
+            if costlySet.contains(i) { w *= 30 }
+            weights.append(w)
+        }
+        let total = weights.reduce(0, +)
+        var acc = 0.0
+        return weights.map { acc += $0; return budget * acc / total }
     }
 }
 
