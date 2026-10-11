@@ -238,13 +238,9 @@ struct TopBar: View {
                 }
                 Spacer()
                 pitchButton
-                // The demo and an Exit-to-app excursion keep the crumbs and the pitch button; the
-                // operations come back with the plain app (⌘⇧P), and Compile stays on ⌘R meanwhile.
-                if !store.pitch.isDemo && !store.pitch.canResume {
-                    changeRecord(env)
-                    PolicyModelMenu(environment: env)
-                    RunMenu()
-                }
+                changeRecord(env)
+                PolicyModelMenu(environment: env)
+                RunMenu()
             } else {
                 Text("No environment").font(.headline).foregroundStyle(.secondary)
                 Spacer()
