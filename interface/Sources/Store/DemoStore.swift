@@ -123,15 +123,21 @@ public final class DemoStore {
         attach(patch, from: hack, in: session)
     }
 
-    /// Harden the ticked hacks together, then show the report.
-    public func hardenSelected(in session: RunSession) async {
+    /// Harden the ticked hacks together, then show the report (unless the caller shows the
+    /// differences itself, as the deep dive does).
+    public func hardenSelected(in session: RunSession, openReport: Bool = true) async {
         let hacks = session.hacks.filter { session.selectedHacks.contains($0.id) }
         for hack in hacks {
             guard let patch = await session.harden(hack) else { continue }
             attach(patch, from: hack, in: session)
         }
         session.selectedHacks = []
-        if !pendingChanges(for: session.environment).isEmpty { session.page = .report }
+        if openReport, !pendingChanges(for: session.environment).isEmpty { session.page = .report }
+    }
+
+    /// Every difference proposed for one hack, decided or not.
+    public func changes(for hack: Trajectory, in environment: AuditEnvironment) -> [PendingChange] {
+        (pending[environment.id] ?? []).filter { $0.hackIds.contains(hack.id) }
     }
 
     private func attach(_ patch: Patch, from hack: Trajectory, in session: RunSession) {

@@ -226,6 +226,18 @@ struct RoundedProminentButtonStyle: ButtonStyle {
     }
 }
 
+/// Row-height secondary button: fits a 34-point list row.
+struct MonoCompactButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.caption.weight(.medium))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(Color.primary.opacity(configuration.isPressed ? 0.14 : 0.07),
+                        in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+    }
+}
+
 struct MonoSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

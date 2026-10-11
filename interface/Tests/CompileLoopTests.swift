@@ -175,6 +175,25 @@ final class CompileLoopTests: XCTestCase {
         XCTAssertEqual(session.environment.spec?.objective.summary, "New objective.", "the compile carries the edited spec")
     }
 
+    /// Hardening from the deep dive keeps the rollouts page and lists the differences for that hack.
+    @MainActor
+    func testHardenFromDeepDiveStaysOnRollouts() async throws {
+        let store = await makeStore()
+        let env = store.selectedEnvironment!
+        let started = await store.compile()
+        let session = try XCTUnwrap(started)
+        try await settle(session)
+        let hack = try XCTUnwrap(session.hacks.first { $0.id == "traj-0412-03" })
+        session.selectedHacks = [hack.id]
+        await store.hardenSelected(in: session, openReport: false)
+        XCTAssertEqual(session.page, .result)
+        let changes = store.changes(for: hack, in: env)
+        XCTAssertEqual(changes.count, 7)
+        store.accept(changes[0], in: env)
+        XCTAssertEqual(store.changes(for: hack, in: env).filter { $0.decision == .pending }.count, 6)
+        XCTAssertEqual(store.version(of: env), 2)
+    }
+
     func testSpecEditorAppliesEachKind() {
         var spec = EnvironmentSpec(
             samples: nil,

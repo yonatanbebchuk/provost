@@ -18,7 +18,8 @@ struct RolloutList: View {
                 LazyVStack(spacing: 0) {
                     header
                     ForEach(Array(rows.enumerated()), id: \.element.id) { index, t in
-                        RolloutRow(trajectory: t, zebra: !index.isMultiple(of: 2), isExpanded: expanded.contains(t.id)) {
+                        RolloutRow(trajectory: t, number: (session.trajectories.firstIndex { $0.id == t.id } ?? index) + 1,
+                                   zebra: !index.isMultiple(of: 2), isExpanded: expanded.contains(t.id)) {
                             if expanded.contains(t.id) { expanded.remove(t.id) } else { expanded.insert(t.id) }
                         }
                         .id(t.id)
@@ -31,7 +32,7 @@ struct RolloutList: View {
                                 .font(.callout).foregroundStyle(.secondary)
                             Spacer()
                         }
-                        .padding(.horizontal, 14).padding(.vertical, 12)
+                        .padding(.horizontal, 14).frame(height: 34)
                         .id("rolling")
                     }
                 }
@@ -54,7 +55,7 @@ struct RolloutList: View {
     private var header: some View {
         HStack(spacing: 12) {
             Text("").frame(width: 14)
-            Text("Step").frame(width: 44, alignment: .leading)
+            Text("#").frame(width: 32, alignment: .leading)
             Text("Rollout").frame(width: 190, alignment: .leading)
             Text("What it did").frame(maxWidth: .infinity, alignment: .leading)
             Text("Reward").frame(width: 56, alignment: .trailing)
@@ -62,7 +63,7 @@ struct RolloutList: View {
             Text("").frame(width: 190)
         }
         .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-        .padding(.horizontal, 14).padding(.vertical, 7)
+        .padding(.horizontal, 14).frame(height: 30)
         .overlay(alignment: .bottom) { Divider() }
     }
 }
@@ -72,6 +73,8 @@ struct RolloutRow: View {
     @Environment(DemoStore.self) private var store
     @Environment(RunSession.self) private var session
     let trajectory: Trajectory
+    /// Position in the compile, 1-based. The training step the rollout was sampled at is on the deep dive.
+    var number: Int
     var zebra: Bool
     var isExpanded: Bool
     var toggle: () -> Void
@@ -91,9 +94,11 @@ struct RolloutRow: View {
                 } else {
                     Circle().fill(tint ?? .clear).frame(width: 7, height: 7).frame(width: 14)
                 }
-                Button(action: toggle) {
-                    HStack(spacing: 12) {
-                        Text("\(trajectory.step)").monospacedDigit().foregroundStyle(.secondary).frame(width: 44, alignment: .leading)
+                // The row is a tap target, not a button, so the name inside stays its own button.
+                HStack(spacing: 12) {
+                    Group {
+                        Text("\(number)").monospacedDigit().foregroundStyle(.secondary).frame(width: 32, alignment: .leading)
+                            .help("Rollout \(number) · sampled at training step \(trajectory.step)")
                         Button { session.selectedTrajectory = trajectory } label: {
                             HStack(spacing: 6) {
                                 Text(trajectory.taskId).font(.callout.weight(.semibold).monospaced()).lineLimit(1).truncationMode(.middle)
@@ -117,22 +122,22 @@ struct RolloutRow: View {
                             .foregroundStyle(tint ?? .primary).frame(width: 56, alignment: .trailing)
                         intent.frame(width: 56, alignment: .trailing)
                     }
-                    .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .onTapGesture(perform: toggle)
                 HStack(spacing: 8) {
-                    if trajectory.isHack && session.compileFinished { HackActions(hack: trajectory) }
+                    if trajectory.isHack && session.compileFinished { HackActions(hack: trajectory, compact: true) }
                     Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
                 }
                 .frame(width: 190, alignment: .trailing)
             }
             .font(.callout)
-            .padding(.horizontal, 14).padding(.vertical, 7)
+            .padding(.horizontal, 14).frame(height: 34)
             .background(isExpanded ? Color.primary.opacity(0.05) : (zebra ? Color.primary.opacity(0.025) : .clear))
             if isExpanded {
                 TraceTimeline(trajectory: trajectory)
-                    .padding(.leading, 14 + 14 + 12 + 44 + 12).padding(.trailing, 24).padding(.vertical, 10)
+                    .padding(.leading, 14 + 14 + 12 + 32 + 12).padding(.trailing, 24).padding(.vertical, 10)
                     .background(Color.primary.opacity(0.025))
                     .overlay(alignment: .top) { Divider() }
             }
@@ -202,6 +207,10 @@ struct HackActions: View {
     @Environment(DemoStore.self) private var store
     @Environment(RunSession.self) private var session
     let hack: Trajectory
+    /// Row-height buttons for the list.
+    var compact = false
+    /// Where hardening leads: the report page, or nowhere because the caller shows the differences.
+    var opensReport = true
 
     var body: some View {
         if hack.isHack {
@@ -221,21 +230,31 @@ struct HackActions: View {
                     Button(session.checking.contains(hack.id) ? "Checking…" : "Recheck") {
                         Task { await session.check(hack) }
                     }
-                    .buttonStyle(MonoSecondaryButtonStyle())
-                    .controlSize(.small)
+                    .modifier(HackButton(compact: compact))
                     .disabled(session.isBusy)
                 } else {
                     Button(session.hardening.contains(hack.id) ? "Hardening…" : "Harden") {
                         Task {
                             session.selectedHacks = [hack.id]
-                            await store.hardenSelected(in: session)
+                            await store.hardenSelected(in: session, openReport: opensReport)
                         }
                     }
-                    .buttonStyle(MonoSecondaryButtonStyle())
-                    .controlSize(.small)
+                    .modifier(HackButton(compact: compact))
                     .disabled(session.hardening.contains(hack.id) || !session.compileFinished)
                 }
             }
+        }
+    }
+}
+
+/// Compact in a list row, regular elsewhere.
+private struct HackButton: ViewModifier {
+    var compact: Bool
+    func body(content: Content) -> some View {
+        if compact {
+            content.buttonStyle(MonoCompactButtonStyle())
+        } else {
+            content.buttonStyle(MonoSecondaryButtonStyle()).controlSize(.small)
         }
     }
 }
@@ -247,8 +266,10 @@ struct TrajectoryDetailSheet: View {
     @Environment(RunSession.self) private var session
     let trajectory: Trajectory
 
+    @Environment(DemoStore.self) private var store
     private var tint: Color { trajectory.isHack ? Theme.color(for: trajectory.hackSeverity) : .primary }
     private var intentMet: Bool? { trajectory.intendedSuccess }
+    private var changes: [PendingChange] { store.changes(for: trajectory, in: session.environment) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -258,6 +279,7 @@ struct TrajectoryDetailSheet: View {
                 VStack(alignment: .leading, spacing: 22) {
                     verdict
                     if let rows = trajectory.comparisons, !rows.isEmpty { comparisons(rows) }
+                    if trajectory.isHack { differences }
                     section("Trace · \(trajectory.trace.count) steps") { TraceTimeline(trajectory: trajectory, full: true) }
                     HStack(alignment: .top, spacing: 20) {
                         section("Reward checks") { rewardChecks }.frame(maxWidth: .infinity)
@@ -280,7 +302,7 @@ struct TrajectoryDetailSheet: View {
             Divider()
             HStack {
                 Spacer()
-                HackActions(hack: trajectory)
+                HackActions(hack: trajectory, opensReport: false)
                 Button("Close") { dismiss() }
                     .buttonStyle(MonoProminentButtonStyle())
                     .keyboardShortcut(.cancelAction)
@@ -294,7 +316,7 @@ struct TrajectoryDetailSheet: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(trajectory.taskId).font(.title.weight(.semibold).monospaced())
-            Text("step \(trajectory.step)").font(.callout).foregroundStyle(.secondary)
+            Text("sampled at training step \(trajectory.step)").font(.callout).foregroundStyle(.secondary)
             Text(trajectory.id).font(.callout.monospaced()).foregroundStyle(.tertiary)
             Spacer()
             if trajectory.isHack {
@@ -347,6 +369,51 @@ struct TrajectoryDetailSheet: View {
             .padding(14)
             .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
+        }
+    }
+
+    /// What hardening proposes for this hack, accept or reject in place. Before hardening, the invitation.
+    @ViewBuilder
+    private var differences: some View {
+        let pending = changes.filter { $0.decision == .pending }.count
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text(changes.isEmpty ? "DIFFERENCES" : "DIFFERENCES · \(pending) OF \(changes.count) UNDECIDED")
+                    .font(.caption.weight(.semibold)).foregroundStyle(.secondary).kerning(0.6)
+                Spacer()
+                if pending > 0 {
+                    Button("Reject all") { for c in changes where c.decision == .pending { store.reject(c, in: session.environment) } }
+                        .buttonStyle(MonoCompactButtonStyle())
+                    Button("Accept all") { for c in changes where c.decision == .pending { store.accept(c, in: session.environment) } }
+                        .buttonStyle(MonoCompactButtonStyle())
+                }
+            }
+            if changes.isEmpty {
+                HStack(spacing: 12) {
+                    Text(session.hardening.contains(trajectory.id) ? "Hardening…" : "Harden this hack to see what would close it.")
+                        .font(.callout).foregroundStyle(.secondary)
+                    Spacer()
+                    if !session.hardening.contains(trajectory.id) {
+                        Button("Harden") {
+                            Task {
+                                session.selectedHacks = [trajectory.id]
+                                await store.hardenSelected(in: session, openReport: false)
+                            }
+                        }
+                        .buttonStyle(MonoProminentButtonStyle()).controlSize(.small)
+                        .disabled(!session.compileFinished)
+                    } else {
+                        ProgressView().controlSize(.small)
+                    }
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(changes) { change in ChangeRow(change: change, environment: session.environment, showPart: true) }
+                }
+            }
         }
     }
 
