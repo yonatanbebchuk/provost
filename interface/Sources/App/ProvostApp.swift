@@ -47,7 +47,7 @@ struct ProvostApp: App {
                     .keyboardShortcut("l", modifiers: [.command, .shift])
             }
             CommandGroup(before: .toolbar) {
-                Button("Present from Slide 1") { store.pitch.enterPitch(at: 0) }
+                Button("Present from Slide 1") { store.startPresentation() }
                     .disabled(store.pitch.mode != .app)
                 Toggle("Pitch", isOn: Binding(get: { store.pitch.mode != .app }, set: { _ in store.togglePitchMode() }))
                     .keyboardShortcut("p", modifiers: [.command, .shift])

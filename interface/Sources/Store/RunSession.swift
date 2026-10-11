@@ -47,9 +47,6 @@ public final class RunSession: Identifiable {
     public var page: Page = .result
 
     public enum Page: Sendable { case result, report, certificate, verify }
-    /// Set by the demo: when the compile finishes, the rollout that triggered liftoff opens its deep
-    /// dive by itself, so the presenter reads the transcript without clicking.
-    public var opensLiftoffDetail = false
 
     private let backend: any AuditBackend
     @ObservationIgnored private var streamTask: Task<Void, Never>?
@@ -108,9 +105,6 @@ public final class RunSession: Identifiable {
                 }
                 compileFinished = true
                 run.phase = isStable ? .done : .patching
-                if opensLiftoffDetail, let id = liftoff?.trajectoryId, let hack = trajectories.first(where: { $0.id == id }) {
-                    selectedTrajectory = hack
-                }
                 note(.info, isStable ? "Compile finished · stable · no hacks found in \(trajectories.count) trajectories"
                                      : "Compile finished · unstable · \(hackCount) hack\(hackCount == 1 ? "" : "s") in \(trajectories.count) trajectories")
             } catch is CancellationError {

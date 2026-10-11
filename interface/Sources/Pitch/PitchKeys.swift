@@ -28,7 +28,8 @@ extension DemoStore {
     /// Returns true when the key was consumed.
     func handlePitchKey(code: UInt16, flags: NSEvent.ModifierFlags, letter: String) -> Bool {
         let mode = pitch.mode
-        guard mode != .app else { return false }
+        // The app, and the demo (the app driven by hand), keep every key.
+        guard mode == .pitch else { return false }
         // Typing in a field wins over the pitch keys.
         if let responder = NSApp.keyWindow?.firstResponder, responder is NSText || responder is NSTextView { return false }
         if flags.contains(.command) {
@@ -36,24 +37,16 @@ extension DemoStore {
             if mode == .pitch, flags == .command, letter == "r" { pitch.reload(); return true }
             return false
         }
-        switch (mode, code, letter) {
-        case (.pitch, PitchKeys.right, _), (.pitch, PitchKeys.pageDown, _):
-            if pitch.current?.isDemoHandoff == true { Task { await enterDemo() } } else { pitch.advance() }
-        case (.pitch, PitchKeys.left, _), (.pitch, PitchKeys.pageUp, _):
+        switch (code, letter) {
+        case (PitchKeys.right, _), (PitchKeys.pageDown, _):
+            pitchNext()
+        case (PitchKeys.left, _), (PitchKeys.pageUp, _):
             pitch.back()
-        case (.pitch, PitchKeys.escape, _):
+        case (PitchKeys.escape, _):
             pitch.exitToApp()
-        case (.demo, PitchKeys.right, _), (.demo, PitchKeys.pageDown, _):
-            demoAdvance()
-        case (.demo, PitchKeys.left, _), (.demo, PitchKeys.pageUp, _):
-            demoBack()
-        case (.demo, PitchKeys.escape, _):
-            leaveDemo(toNextSlide: false)
-        case (.demo, _, "f"):
-            fastForward.toggle()
-        case (_, PitchKeys.space, _):
+        case (PitchKeys.space, _):
             pitch.toggleClock()
-        case (_, _, "p"):
+        case (_, "p"):
             pitch.showPresenter.toggle()
         default:
             return false

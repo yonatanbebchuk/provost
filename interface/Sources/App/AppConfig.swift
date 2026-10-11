@@ -20,13 +20,6 @@ public enum AppConfig {
 
     public static let recentEnvironmentKey = "liftoff.recentEnvironmentPath"
 
-    /// The environment the pitch demo compiles (Resources/fixtures/yelp-sentiment). The other fixtures
-    /// stay in the sidebar for Load's "recent" list.
-    public static let demoEnvironmentId = "yelp-sentiment"
-    /// The demo replays its compile in about this long at normal speed; `F` fast-forwards it.
-    public static let demoTrainingReplaySeconds: Double = 14
-    public static let demoVerifyReplaySeconds: Double = 5
-
     /// Policies a compile can train against the environment. The fixture replays the same evidence
     /// whichever one is chosen.
     public static let policyModels: [PolicyModel] = [

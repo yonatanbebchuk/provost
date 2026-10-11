@@ -82,25 +82,25 @@ Edit titles, scripts and budgets there; `make pitch` points the app at the sourc
 pitch mode re-reads it without a rebuild. Every slide is title-only; the script shows only in the
 presenter panel (`P`). Visuals replay each time the slide appears; Reduce Motion jumps to the end.
 
-Slide 6 is the demo. `→` on it enters the app with the `yelp-sentiment` environment compiling
-(Resources/fixtures/yelp-sentiment, `make fixtures` or `scripts/make_fixtures.py --env yelp-sentiment`).
-The replay takes ~14 s (`F` fast-forwards); when it ends, the rollout that triggered liftoff
-opens its deep dive by itself. `→` again hardens that hack, accepts the differences and rechecks:
-the Verify page shows the re-run and the before/after rates from the fixture. `→` from Verify, or
-**Continue pitch →** in the top bar, lands on slide 7. `Esc` returns to slide 6.
+Slide 6 is the demo. `→` on it shows the app as it stands; the presenter drives it by hand (the
+`yelp-sentiment` fixture is the one made for the story: compile, open the step-412 rollout, Harden,
+Recheck — the Verify tab shows the re-run and the before/after rates from the fixture). No key is
+intercepted while the app is up. **Continue pitch →** in the top bar lands on slide 7; ⌘⇧P returns
+to slide 6. The Provost logo (sidebar or pitch top bar) and **Present** start a fresh presentation
+from slide 1 with the clocks at zero.
 
-| Key | Pitch mode | Demo |
-|-----|-----------|------|
-| `→` / `PageDown` / click right half | next slide; on slide 6 enters the demo | Train → Verify; Verify → slide 7 |
-| `←` / `PageUp` / click left half | previous slide | Verify → Train |
-| `Esc` | Exit to app (**Resume pitch →** in the top bar) | back to slide 6 |
-| `P` | presenter panel: script, slide clock, pitch total | same |
-| `Space` | start / pause the slide clock | same |
-| `F` | — | fast-forward the replay |
-| `⌘R` | reload deck.json | — |
-| `⌘⇧P` | leave pitch mode (plain app) | back to slide 6 |
+| Key | Pitch mode |
+|-----|-----------|
+| `→` / `PageDown` / click right half | next slide; on slide 6 enters the demo |
+| `←` / `PageUp` / click left half | previous slide |
+| `Esc` | Exit to app (**Resume pitch →** in the top bar) |
+| `P` | presenter panel: script, slide clock, pitch total |
+| `Space` | start / pause the slide clock |
+| `⌘R` | reload deck.json |
+| `⌘⇧P` | leave pitch mode (plain app); from the demo, back to slide 6 |
 
-Keys are handled at the window level (an `NSEvent` local monitor), so nothing needs focus.
+Keys are handled at the window level (an `NSEvent` local monitor) only while slides show, so
+nothing needs focus and the app keeps every key during the demo.
 Rehearsal aid: `--snapshot-dir <dir>` sizes the window to 1280 × 800 and polls `<dir>/cmd` for
 `key right`, `snap <label>`, `dark`, `light` …, writing PNGs and an `events.log` there.
 

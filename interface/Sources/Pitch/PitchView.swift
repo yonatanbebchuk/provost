@@ -52,7 +52,9 @@ struct PitchTopBar: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            BrandLockup()
+            Button { store.startPresentation() } label: { BrandLockup() }
+                .buttonStyle(.plain)
+                .help("Start the presentation over from slide 1")
             Text("·").foregroundStyle(.tertiary)
             Text("Pitch").font(.headline)
             Spacer()
@@ -70,7 +72,7 @@ struct PitchTopBar: View {
 extension DemoStore {
     /// `→`: the next slide, or the demo from the Demo slide.
     func pitchNext() {
-        if pitch.current?.isDemoHandoff == true { Task { await enterDemo() } } else { pitch.advance() }
+        if pitch.current?.isDemoHandoff == true { enterDemo() } else { pitch.advance() }
     }
 
     /// ⌘⇧P: pitch mode on or off. From the demo it returns to the Demo slide.

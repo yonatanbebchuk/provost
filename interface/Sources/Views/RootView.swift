@@ -76,7 +76,9 @@ struct EnvironmentSidebar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline) {
-                BrandLockup()
+                Button { store.startPresentation() } label: { BrandLockup() }
+                    .buttonStyle(.plain)
+                    .help("Start a new presentation from slide 1")
                 Spacer()
                 Button { ProvostApp.chooseEnvironmentFolder(store: store) } label: {
                     Image(systemName: "plus").font(.body.weight(.semibold))
@@ -261,14 +263,14 @@ struct TopBar: View {
         if store.pitch.isDemo {
             Button("Continue pitch →") { store.leaveDemo(toNextSlide: true) }
                 .buttonStyle(RoundedProminentButtonStyle())
-                .help("Leave the demo for the next slide (→ from Verify)")
+                .help("Back to the slides, on the one after the demo")
         } else if store.pitch.canResume {
             Button("Resume pitch →") { store.pitch.resume() }
                 .buttonStyle(RoundedProminentButtonStyle())
                 .help("Back to the slide you left (⌘⇧P)")
         } else {
             Button {
-                store.pitch.enterPitch(at: 0)
+                store.startPresentation()
             } label: {
                 Label("Present", systemImage: "play.rectangle.fill")
             }
