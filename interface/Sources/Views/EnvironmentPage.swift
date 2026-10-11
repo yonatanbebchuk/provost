@@ -16,6 +16,7 @@ struct EnvironmentPage: View {
                             .frame(maxWidth: .infinity, alignment: .topLeading)
                         certificateCard.frame(width: 236)
                     }
+                    .fixedSize(horizontal: false, vertical: true)
                     if !store.pendingChanges(for: environment).isEmpty { pendingBanner }
                     if let samples = spec.samples, !samples.isEmpty {
                         TrainingDataStrip(samples: samples, taskCount: environment.taskCount)
@@ -147,7 +148,7 @@ struct EnvironmentPage: View {
             }
         }
         .padding(14)
-        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
         if let issuer {
@@ -422,6 +423,10 @@ private struct ObjectiveBlock: View {
                 }
             }
         }
+        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
         .onHover { hovering = $0 }
         .onTapGesture(count: 2) { if !editing { begin() } }
     }
