@@ -70,19 +70,18 @@ struct NamesVisual: View {
 
 // MARK: faces
 
-/// Five people: a bundled GitHub avatar (or initials) over the name.
+/// The people in a wrapped row, a small round photo (or initials) to the left of each name.
 struct FacesVisual: View {
     let people: [PitchSlide.Person]
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shown = false
 
     var body: some View {
-        HStack(alignment: .top, spacing: 36) {
+        FlowLayout(spacing: 28, rowSpacing: 14) {
             ForEach(Array(people.enumerated()), id: \.offset) { i, person in
-                VStack(spacing: 12) {
+                HStack(spacing: 9) {
                     face(person)
-                    Text(person.name).font(.system(size: 15, weight: .medium))
-                        .multilineTextAlignment(.center).frame(width: 120)
+                    Text(person.name).font(.system(size: 16, weight: .medium))
                 }
                 .opacity(shown ? 1 : 0.25)
                 .animation(reduceMotion ? nil : .easeOut(duration: 0.6).delay(0.15 + Double(i) * 0.12), value: shown)
@@ -93,16 +92,16 @@ struct FacesVisual: View {
 
     @ViewBuilder
     private func face(_ person: PitchSlide.Person) -> some View {
-        if let handle = person.github, let url = PitchDeck.faceURL(for: handle), let image = NSImage(contentsOf: url) {
+        if let url = PitchDeck.faceURL(for: person), let image = NSImage(contentsOf: url) {
             Image(nsImage: image).resizable().scaledToFill()
-                .frame(width: 84, height: 84).clipShape(Circle())
+                .frame(width: 30, height: 30).clipShape(Circle())
                 .overlay(Circle().strokeBorder(Color.primary.opacity(0.12)))
         } else {
             ZStack {
                 Circle().fill(Color.primary.opacity(0.08))
-                Text(person.initials).font(.system(size: 26, weight: .medium)).foregroundStyle(.secondary)
+                Text(person.initials).font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
             }
-            .frame(width: 84, height: 84)
+            .frame(width: 30, height: 30)
         }
     }
 }

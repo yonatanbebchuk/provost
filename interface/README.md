@@ -81,8 +81,9 @@ Pitch; `make pitch` launches straight into it with `--pitch`). The deck is data:
 Edit titles, scripts and budgets there; `make pitch` points the app at the source file so ⌘R in
 pitch mode re-reads it without a rebuild. A slide with `"reveal": "step"` builds one piece per `→`
 (each tick of a timeline, the chart) before the next slide; `←` un-reveals. Faces on the opening
-slide come from GitHub: set each person's `github` handle in the deck and run `make faces` to bundle
-the avatars under `Resources/pitch/faces/`; a person without one shows initials. Every slide is title-only; the script shows only in the
+slide are small round photos beside each name: drop a photo into `Resources/pitch/faces/` and name
+it in the person's `image` field, or set their `github` handle and run `make faces` to bundle the
+avatar; a person with neither shows initials. Every slide is title-only; the script shows only in the
 presenter panel (`P`). Visuals replay each time the slide appears; Reduce Motion jumps to the end.
 
 Slide 6 is the demo. `→` on it shows the app as it stands; the presenter drives it by hand (the

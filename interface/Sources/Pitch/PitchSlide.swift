@@ -35,6 +35,8 @@ public struct PitchSlide: Codable, Identifiable, Hashable, Sendable {
         public var name: String
         /// GitHub handle; `scripts/fetch_faces.py` bundles its avatar as `faces/<handle>.png|jpg`.
         public var github: String?
+        /// A photo in `Resources/pitch/faces/`, used over the GitHub avatar when set.
+        public var image: String?
         public var initials: String {
             name.split(separator: " ").prefix(2).compactMap { $0.first.map(String.init) }.joined()
         }
@@ -138,13 +140,14 @@ public struct PitchDeck: Codable, Sendable {
         return Bundle.main.resourceURL?.appendingPathComponent("pitch/deck.json")
     }
 
-    /// A bundled face for a GitHub handle, if `fetch_faces.py` saved one.
-    public static func faceURL(for handle: String) -> URL? {
-        let dir = locate()?.deletingLastPathComponent().appendingPathComponent("faces", isDirectory: true)
-        for ext in ["png", "jpg"] {
-            if let url = dir?.appendingPathComponent("\(handle).\(ext)"), FileManager.default.fileExists(atPath: url.path) { return url }
-        }
-        return nil
+    /// The bundled face for a person: their `image` file, else the avatar `fetch_faces.py` saved
+    /// for their GitHub handle.
+    public static func faceURL(for person: PitchSlide.Person) -> URL? {
+        guard let dir = locate()?.deletingLastPathComponent().appendingPathComponent("faces", isDirectory: true) else { return nil }
+        var candidates: [String] = []
+        if let image = person.image { candidates.append(image) }
+        if let handle = person.github { candidates += ["\(handle).png", "\(handle).jpg"] }
+        return candidates.map { dir.appendingPathComponent($0) }.first { FileManager.default.fileExists(atPath: $0.path) }
     }
 
     public static func load(from url: URL) throws -> PitchDeck {
