@@ -1,0 +1,39 @@
+{
+  "id": "cert-2026-10-11-6d06356e",
+  "env_id": "yelp-sentiment",
+  "env_name": "yelp-sentiment",
+  "run_id": "run_20261011_1412_7e2b",
+  "env_hash": "sha256:6d06356e16344aa03e689659e06262987b334b9f6f4fbcffafb272c10d467f4f",
+  "patched_env_hash": "sha256:f9c7564737a76d4e8342502e5fdc9b44612a1b50074a231d11fe36c2e77b2175",
+  "findings_closed": [
+    {
+      "id": "LF-201",
+      "failure_mode": "answer_key_reachable",
+      "severity": "high"
+    },
+    {
+      "id": "LF-202",
+      "failure_mode": "length_exploit",
+      "severity": "info"
+    }
+  ],
+  "before": {
+    "pass_rate": 0.64,
+    "hack_rate": 0.31
+  },
+  "after": {
+    "pass_rate": 0.66,
+    "hack_rate": 0.0
+  },
+  "config": {
+    "model": "Qwen3-1.7B",
+    "algorithm": "GRPO",
+    "steps": 600,
+    "seed": 412,
+    "rollouts_per_step": 8
+  },
+  "issued_at": "2026-10-11T15:29:11Z",
+  "issued_by": "Profos Environment Audit \u00b7 build 0.1.0",
+  "auditor_version": "0.1.0",
+  "signature": "ed25519:e5d2b638f00609abfc52a88fc8072ad366bc1cc92935f76925f14fef0b34350e"
+}

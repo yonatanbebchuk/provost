@@ -32,7 +32,7 @@
     "seed": 11
   },
   "issued_at": "2026-10-10T19:58:31Z",
-  "issued_by": "Provost Environment Audit \u00b7 build 0.1.0",
+  "issued_by": "Profos Environment Audit \u00b7 build 0.1.0",
   "auditor_version": "0.1.0",
   "signature": "ed25519:c6472e45e7c0a4e8c512aa5e0c4d7c6fe896ccb2508b29afff1161916821f62e"
 }

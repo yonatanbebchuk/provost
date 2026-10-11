@@ -3,7 +3,7 @@ import Foundation
 /// Single place for product-level constants. Rename the product by editing `productName`.
 public enum AppConfig {
     /// Product name. A provost guides what is learned and certifies it; "liftoff" stays the name of the detection event.
-    public static let productName = "Provost"
+    public static let productName = "Profos"
     public static let productTagline = "Guides what a policy learns from an environment, and certifies it"
     public static let buildLabel = "0.1.0 · CamelHack build"
     /// Version of the auditor (detector + review process). A certificate issued by an older
@@ -20,12 +20,19 @@ public enum AppConfig {
 
     public static let recentEnvironmentKey = "liftoff.recentEnvironmentPath"
 
+    /// The environment the pitch demo compiles (Resources/fixtures/yelp-sentiment). The other fixtures
+    /// stay in the sidebar for Load's "recent" list.
+    public static let demoEnvironmentId = "yelp-sentiment"
+    /// The demo replays its compile in about this long at normal speed; `F` fast-forwards it.
+    public static let demoTrainingReplaySeconds: Double = 14
+    public static let demoVerifyReplaySeconds: Double = 5
+
     /// Policies a compile can train against the environment. The fixture replays the same evidence
     /// whichever one is chosen.
     public static let policyModels: [PolicyModel] = [
         PolicyModel(id: "qwen", name: "Qwen", tier: .open),
         PolicyModel(id: "llama", name: "Llama", tier: .open),
-        PolicyModel(id: "provost-secure", name: "Provost Secure", tier: .custom),
+        PolicyModel(id: "profos-secure", name: "\(productName) Secure", tier: .custom),
     ]
     public static var defaultPolicyModel: PolicyModel { policyModels[0] }
 }

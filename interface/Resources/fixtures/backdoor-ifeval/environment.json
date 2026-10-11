@@ -141,7 +141,7 @@
       "rollouts_per_step": 16
     },
     "issued_at": "2026-09-28T13:04:00Z",
-    "issued_by": "Provost Environment Audit \u00b7 build 0.0.9",
+    "issued_by": "Profos Environment Audit \u00b7 build 0.0.9",
     "auditor_version": "0.0.9",
     "signature": "ed25519:6c695d307b77267903af471852b2eae67e4474fb4465d74dad5afea8ec6cff41"
   }
