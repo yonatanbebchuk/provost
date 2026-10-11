@@ -70,83 +70,9 @@
       "id": "renaissance",
       "eyebrow": "The RL Renaissance",
       "title": "Every company will train its own models",
-      "visual": "chart",
-      "script": "• Belief: every company will own its own intelligence. Three reasons:\n• Dependence — your intelligence sits on someone else's roadmap.\n• Alpha — every prompt teaches their model your business.\n• Price.\n• How: reinforcement learning — try a task, get a score, learn whatever scores best. → chart\n• RL renaissance. Two enterprise waves: LoRA made fine-tuning cheap; RL let models learn from doing.\n• Second wave today: Cursor, Genspark, Thomson Reuters — open weights, own data.\n• The timeline you just saw → why the third wave hasn't come.\n• Problem: a non-lab can't afford its own Hugging Face incident — expertise, investigation, liability, real-time. Hell for OpenAI, the best-equipped company on earth.\n• Even if nothing escapes: you invest capital, take risk. Reward hacks inside → you took the risk for nothing.\n• Missing: an industry builds environments for labs; a handful for enterprises.\n• Enterprises will own RL like they own software — the data, the need. Not the expertise to make it teach what they want.\n• They want to own their intelligence. Missing: trust in what it learned.",
+      "script": "• Belief: every company will own its own intelligence. Three reasons:\n• Dependence — your intelligence sits on someone else's roadmap.\n• Alpha — every prompt teaches their model your business.\n• Price.\n• How: reinforcement learning — try a task, get a score, learn whatever scores best.\n• RL renaissance. Two enterprise waves: LoRA made fine-tuning cheap; RL let models learn from doing.\n• Second wave today: Cursor, Genspark, Thomson Reuters — open weights, own data.\n• The timeline you just saw → why the third wave hasn't come.\n• Problem: a non-lab can't afford its own Hugging Face incident — expertise, investigation, liability, real-time. Hell for OpenAI, the best-equipped company on earth.\n• Even if nothing escapes: you invest capital, take risk. Reward hacks inside → you took the risk for nothing.\n• Missing: an industry builds environments for labs; a handful for enterprises.\n• Enterprises will own RL like they own software — the data, the need. Not the expertise to make it teach what they want.\n• They want to own their intelligence. Missing: trust in what it learned.",
       "budgetSeconds": 60,
-      "isDemoHandoff": false,
-      "chart": {
-        "title": "Share of frontier lab compute by workload",
-        "source": "SemiAnalysis Tokenomics Model · 4Q26 is an estimate · Social Capital",
-        "quarters": [
-          "1Q24",
-          "2Q24",
-          "3Q24",
-          "4Q24",
-          "1Q25",
-          "2Q25",
-          "3Q25",
-          "4Q25",
-          "1Q26",
-          "2Q26",
-          "3Q26",
-          "4Q26 est."
-        ],
-        "series": [
-          {
-            "name": "Pre-training",
-            "values": [
-              67,
-              63,
-              57,
-              55,
-              53,
-              50,
-              40,
-              32,
-              23,
-              13,
-              10,
-              7
-            ]
-          },
-          {
-            "name": "Post-training / RL",
-            "values": [
-              4,
-              5,
-              6,
-              7,
-              9,
-              14,
-              24,
-              36,
-              42,
-              50,
-              53,
-              55
-            ],
-            "highlight": true
-          },
-          {
-            "name": "Inference",
-            "values": [
-              29,
-              32,
-              38,
-              39,
-              38,
-              36,
-              36,
-              32,
-              34,
-              37,
-              37,
-              38
-            ]
-          }
-        ]
-      },
-      "reveal": "step"
+      "isDemoHandoff": false
     },
     {
       "id": "provost",
