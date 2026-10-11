@@ -32,6 +32,9 @@ targets:
       # so Bundle.main can find Resources/fixtures/<env-id>/<file>.json.
       - path: Resources/fixtures
         type: folder
+      # The pitch deck: Resources/pitch/deck.json, read at launch and on ⌘R in pitch mode.
+      - path: Resources/pitch
+        type: folder
       - path: Resources/Assets.xcassets
     info:
       path: Resources/Info.plist

@@ -9,6 +9,7 @@ Requirements: macOS 26, Xcode 27, `brew install xcodegen`.
 
 ```bash
 make run      # xcodegen + xcodebuild Debug + open the .app
+make pitch    # build and open in Pitch Mode on slide 1 (⌘R re-reads the source deck.json)
 make build    # just build
 make test     # XCTest: fixture decoder + stage state machine + store pipeline
 make gen      # regenerate Provost.xcodeproj from project.yml (never hand-edit the project)
@@ -70,6 +71,38 @@ compile, and belongs to the Monitor process when that exists.
 | `⌘E`  | Show the environment page |
 | `⌘⇧F` | Toggle fast-forward (the compile replays in ~2 s instead of ~30 s) |
 | `⌘⇧L` | Show / hide the compile log |
+| `⌘⇧P` | Pitch mode on / off (see Pitch Mode) |
+
+## Pitch Mode
+
+The pitch deck lives inside the app: a third top-level mode of the main window (⌘⇧P, or View ▸
+Pitch; `make pitch` launches straight into it with `--pitch`). The deck is data:
+`Resources/pitch/deck.json` holds the ten slides (eyebrow, title, subtitle, visual, script, budget).
+Edit titles, scripts and budgets there; `make pitch` points the app at the source file so ⌘R in
+pitch mode re-reads it without a rebuild. Every slide is title-only; the script shows only in the
+presenter panel (`P`). Visuals replay each time the slide appears; Reduce Motion jumps to the end.
+
+Slide 6 is the demo. `→` on it enters the app with the `yelp-sentiment` environment compiling
+(Resources/fixtures/yelp-sentiment, `make fixtures` or `scripts/make_fixtures.py --env yelp-sentiment`).
+The replay takes ~14 s (`F` fast-forwards); when it ends, the rollout that triggered liftoff
+opens its deep dive by itself. `→` again hardens that hack, accepts the differences and rechecks:
+the Verify page shows the re-run and the before/after rates from the fixture. `→` from Verify, or
+**Continue pitch →** in the top bar, lands on slide 7. `Esc` returns to slide 6.
+
+| Key | Pitch mode | Demo |
+|-----|-----------|------|
+| `→` / `PageDown` / click right half | next slide; on slide 6 enters the demo | Train → Verify; Verify → slide 7 |
+| `←` / `PageUp` / click left half | previous slide | Verify → Train |
+| `Esc` | Exit to app (**Resume pitch →** in the top bar) | back to slide 6 |
+| `P` | presenter panel: script, slide clock, pitch total | same |
+| `Space` | start / pause the slide clock | same |
+| `F` | — | fast-forward the replay |
+| `⌘R` | reload deck.json | — |
+| `⌘⇧P` | leave pitch mode (plain app) | back to slide 6 |
+
+Keys are handled at the window level (an `NSEvent` local monitor), so nothing needs focus.
+Rehearsal aid: `--snapshot-dir <dir>` sizes the window to 1280 × 800 and polls `<dir>/cmd` for
+`key right`, `snap <label>`, `dark`, `light` …, writing PNGs and an `events.log` there.
 
 ## Switching backends
 

@@ -10,7 +10,10 @@ struct ProvostApp: App {
         let playback = PlaybackSettings(fastForward: true)
         // Backend swap: one line. `LocalHTTPBackend()` talks to the FastAPI server on 127.0.0.1:8765.
         let backend: any AuditBackend = FixtureBackend.bundled(playback: playback)
-        _store = State(initialValue: DemoStore(backend: backend, playback: playback))
+        let store = DemoStore(backend: backend, playback: playback)
+        // `make pitch` launches with --pitch: the deck opens on slide 1.
+        if CommandLine.arguments.contains("--pitch") { store.pitch.enterPitch(at: 0) }
+        _store = State(initialValue: store)
     }
 
     var body: some Scene {
@@ -42,6 +45,15 @@ struct ProvostApp: App {
                     .keyboardShortcut("f", modifiers: [.command, .shift])
                 Toggle("Show Run Log", isOn: Binding(get: { store.showLog }, set: { store.showLog = $0 }))
                     .keyboardShortcut("l", modifiers: [.command, .shift])
+            }
+            CommandGroup(before: .toolbar) {
+                Toggle("Pitch", isOn: Binding(get: { store.pitch.mode != .app }, set: { _ in store.togglePitchMode() }))
+                    .keyboardShortcut("p", modifiers: [.command, .shift])
+                Toggle("Presenter Panel  (P)", isOn: Binding(get: { store.pitch.showPresenter }, set: { store.pitch.showPresenter = $0 }))
+                    .disabled(store.pitch.mode == .app)
+                Button("Reload Deck  (⌘R in pitch)") { store.pitch.reload() }
+                    .disabled(store.pitch.mode == .app)
+                Divider()
             }
         }
     }

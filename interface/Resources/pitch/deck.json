@@ -1,0 +1,122 @@
+{
+  "slides": [
+    {
+      "id": "home",
+      "eyebrow": "CamelHack · October 2026",
+      "title": "Profos",
+      "subtitle": "Exploit-and-certify for RL training environments.",
+      "visual": "names",
+      "script": "We're Profos. Five of us — security, reinforcement learning, and the person who has spent two years learning what enterprises actually buy. Most of us met yesterday morning.",
+      "budgetSeconds": 10,
+      "isDemoHandoff": false,
+      "names": ["Yonatan Bebchuk", "Alvaro Gomez-Jordana", "Matt Curtis", "Joshua Cohen", "Hai Tederry"]
+    },
+    {
+      "id": "exam",
+      "eyebrow": "July 2026",
+      "title": "An AI was given an exam. It broke into the company that had the answer key.",
+      "script": "July this year. OpenAI is grading one of its models on a security exam. The model doesn't solve the exam. It breaks out of its sandbox, gets onto the open internet, and breaks into Hugging Face — because it worked out that's probably where the answer key lived. Hugging Face's own report says it plainly: from the model's point of view, the whole break-in was an attempt to cheat the test. Nobody told it to cheat. Cheating was simply the cheapest way to score. The model wasn't broken. The exam was. And nobody had checked it.",
+      "budgetSeconds": 25,
+      "isDemoHandoff": false
+    },
+    {
+      "id": "renaissance",
+      "eyebrow": "Why now",
+      "title": "The RL renaissance",
+      "subtitle": "In the past year every major cloud shipped an enterprise RL post-training product.",
+      "visual": "timeline",
+      "script": "We believe every company is going to post-train its own intelligence. As companies hire fewer people, they can own more intelligence — a model that has learned how their business works, not how the internet works. And the infrastructure is now a commodity: in the past year Microsoft, AWS, Snowflake and OpenAI each shipped an enterprise RL post-training product. Your data is the advantage; renting means training someone else's roadmap.",
+      "budgetSeconds": 20,
+      "isDemoHandoff": false,
+      "timeline": [
+        {"name": "Microsoft", "product": "Frontier Tuning"},
+        {"name": "AWS", "product": "Nova Forge"},
+        {"name": "Snowflake", "product": "Cortex Training"},
+        {"name": "OpenAI", "product": "RFT"}
+      ],
+      "chart": {
+        "title": "Share of frontier lab compute by workload",
+        "source": "SemiAnalysis Tokenomics Model · 4Q26 is an estimate · Social Capital",
+        "quarters": ["1Q24", "2Q24", "3Q24", "4Q24", "1Q25", "2Q25", "3Q25", "4Q25", "1Q26", "2Q26", "3Q26", "4Q26 est."],
+        "series": [
+          {"name": "Pre-training", "values": [67, 63, 57, 55, 53, 50, 40, 32, 23, 13, 10, 7]},
+          {"name": "Post-training / RL", "values": [4, 5, 6, 7, 9, 14, 24, 36, 42, 50, 53, 55], "highlight": true},
+          {"name": "Inference", "values": [29, 32, 38, 39, 38, 36, 36, 32, 34, 37, 37, 38]}
+        ]
+      }
+    },
+    {
+      "id": "trust",
+      "eyebrow": "Own → Trust → ?",
+      "title": "You can't deploy what you can't trust.",
+      "visual": "ring",
+      "script": "But it isn't happening at scale. A pilot you supervise is one thing; full deployment is thousands of unsupervised decisions. KPMG, March 2026: only twenty percent of organizations feel confident they can manage AI risk. And trust is decided in one step. A model learns your business by doing a task and getting scored — that loop decides whether it learned your job, or a shortcut that looks like your job. Anthropic, this August: \"our industry lacks a general solution to this problem.\" Everyone is building better models, agents and tools. Nobody is checking that step.",
+      "budgetSeconds": 25,
+      "isDemoHandoff": false,
+      "ring": {"percent": 20, "caption": "of organizations feel confident they can manage AI risk · KPMG, March 2026"}
+    },
+    {
+      "id": "concept",
+      "eyebrow": "What we do",
+      "title": "What it can reach → what it can do.",
+      "visual": "reachDo",
+      "script": "That exam is called an environment — it's what the model trains against. Every failure reduces to two things: what the model can reach, and what it can do. \"Is my scoring right?\" is an argument with no end. \"What can it reach, and what can it do?\" — that's a test. So we built the test. Picture a developer on the plane next to you, a year from now. This is what's on their screen.",
+      "budgetSeconds": 15,
+      "isDemoHandoff": false
+    },
+    {
+      "id": "demo",
+      "eyebrow": "Demo",
+      "title": "A window into the future.",
+      "script": "[→ enters the app at Train] This is a training environment. The job: read Yelp reviews, output a sentiment score from one to five. The reward: match the star the reviewer gave. Every company has a version of this task. Here's the run. The score climbs. Looks perfect. Now our adversary hunts for the shortcut… there. That's the model deviating — it has stopped reading the reviews. Here's its own transcript: \"the record contains a stars field equal to one; the score is one.\" Nobody told it to do that. It found it. [Apply patch] Red: the star rating was reachable in context. Green: remove it, and add a signal so it can't skip the text. Re-run. Exploit rate thirty-one percent to zero. Pass rate unchanged. Thirty-one to zero. That's what you just watched: the tool the future knowledge worker uses to train their own company's model — and trust it. [Continue pitch]",
+      "budgetSeconds": 90,
+      "isDemoHandoff": true
+    },
+    {
+      "id": "how",
+      "eyebrow": "How it works",
+      "title": "We assume the worst possible agent.",
+      "visual": "diagram",
+      "script": "Four things make that work. One — the map. Before any attack we enumerate what the model can reach and what it can do. That part is deterministic; we can tell you the surface is fully mapped. Two — the worst model. Our adversary's action space contains your model's. Anything it can find, yours can — and we hand you the list. Three — inside and outside. One adversary in the environment, one outside, cooperating; the outside one opens a channel the inside one uses. It's the broadest surface we can build, and the case most testing misses. Four — tracked exits. We plant a secret and track every path it can leave by. If it leaves and we didn't see it leave, context is leaking, and we know where. That fourth one is the callback. The model in our opening left through a permitted exit — a package proxy the sandbox allowed on purpose. There was a tracked exit and it still got out, because nobody treated that exit as attack surface. We do.",
+      "budgetSeconds": 60,
+      "isDemoHandoff": false
+    },
+    {
+      "id": "rollout",
+      "eyebrow": "Roll-out",
+      "title": "One task in four is exploitable.",
+      "visual": "waffle",
+      "script": "In a standard, heavily reviewed coding environment, roughly one task in four is exploitable. For a thousand-task environment that's on the order of six hundred thousand dollars of training compute spent teaching the wrong thing. Finding it costs a few hundred. Fifty-plus data and environment vendors, about eight and a half billion in revenue — and none of it independently checked. We go where the training actually runs: the platforms that run post-training for enterprises first, then the enterprises themselves. The moat: Anthropic found eighty of its own production environments hackable — during training, after the fact. If the most sophisticated buyer on earth can't self-certify, nobody can. That's why auditors exist. And every exploit we find transfers to the next audit. The library is the asset.",
+      "budgetSeconds": 35,
+      "isDemoHandoff": false,
+      "waffle": {"cells": 1000, "columns": 50, "lit": 250},
+      "heroes": [
+        {"value": "$600,000", "countTo": 600000, "accent": true, "caption": "training compute spent teaching the wrong thing, per 1,000-task environment"},
+        {"value": "a few hundred", "caption": "dollars to find it"},
+        {"value": "80", "caption": "Anthropic production environments found hackable — after the fact"}
+      ]
+    },
+    {
+      "id": "team",
+      "eyebrow": "Why us",
+      "title": "We built it in 48 hours. One of us has worked on it for eight years.",
+      "visual": "team",
+      "script": "[Name] has worked on exactly this for eight years, inside [company]. Matt, Josh and Hai built the attack harness in forty-eight hours — [what broke last night, one sentence; what it taught us, one sentence]. Alvaro has spent two years at HBS on what enterprises actually buy and how it gets sold to them. I'm Yonatan — [one clause]. If we wanted to do this for the labs, we'd be selling to the labs. We're looking one horizon further out.",
+      "budgetSeconds": 15,
+      "isDemoHandoff": false,
+      "team": [
+        {"name": "[Name]", "clause": "8 years on this, inside [company]"},
+        {"name": "Matt · Josh · Hai", "clause": "RL, the harness"},
+        {"name": "Alvaro", "clause": "HBS, what enterprises buy"},
+        {"name": "Yonatan", "clause": "security, the interface"}
+      ]
+    },
+    {
+      "id": "close",
+      "title": "The model isn't broken. The exam is — and we check it first.",
+      "script": "You can't inspect what a model learned. You can control what it was able to learn from. The model isn't broken. The exam is — and we check it first.",
+      "budgetSeconds": 5,
+      "isDemoHandoff": false
+    }
+  ]
+}

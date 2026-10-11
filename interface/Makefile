@@ -10,7 +10,7 @@ DERIVED     := build
 APP         := $(DERIVED)/Build/Products/$(CONFIG)/Provost.app
 XCB         := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration $(CONFIG) -derivedDataPath $(DERIVED) -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
 
-.PHONY: gen build run test fixtures clean
+.PHONY: gen build run pitch test fixtures clean
 
 gen:            ## Regenerate Provost.xcodeproj from project.yml
 	xcodegen generate --quiet
@@ -23,6 +23,9 @@ build: gen      ## Regenerate project (picks up new files) and build Debug
 
 run: build      ## Build and open the app
 	open $(APP)
+
+pitch: build    ## Build and open the app in Pitch Mode on slide 1; ⌘R re-reads the source deck.json
+	open --env PROFOS_DECK=$(CURDIR)/Resources/pitch/deck.json $(APP) --args --pitch
 
 test: gen       ## Run unit tests
 	$(XCB) test | grep -E "Test Suite|Test Case|error:|passed|failed" | tail -n 40

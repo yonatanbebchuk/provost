@@ -5,6 +5,21 @@ struct RootView: View {
     @Environment(DemoStore.self) private var store
 
     var body: some View {
+        ZStack {
+            app
+                .opacity(store.pitch.isPresenting ? 0 : 1)
+                .allowsHitTesting(!store.pitch.isPresenting)
+                .accessibilityHidden(store.pitch.isPresenting)
+            if store.pitch.isPresenting {
+                PitchView().transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: store.pitch.isPresenting)
+        .onAppear { PitchKeys.install(store: store); DebugSnapshot.installIfRequested(store: store) }
+    }
+
+    /// The app: sidebar, top bar, the environment page or the compile.
+    private var app: some View {
         NavigationSplitView(columnVisibility: .constant(.all)) {
             EnvironmentSidebar()
                 .frame(minWidth: 230)
@@ -203,25 +218,31 @@ struct TopBar: View {
                     Button { store.showEnvironmentPage() } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "chevron.left").font(.caption.weight(.bold))
-                            Text(env.name).font(.headline)
+                            Text(env.name).font(.headline).lineLimit(1)
                         }
                     }
                     .buttonStyle(.plain)
-                    Chip(text: "v\(session.version)", mono: true)
-                    StatusBadge(status: store.status(for: env))
+                    .fixedSize()
+                    Chip(text: "v\(session.version)", mono: true).fixedSize()
+                    StatusBadge(status: store.status(for: env)).fixedSize()
                     Divider().frame(height: 16)
-                    Text("Compile · \(session.run.config.model)").font(.callout).foregroundStyle(.secondary)
-                    PhasePill(phase: session.phase, busy: session.isBusy)
+                    Text("Compile · \(session.run.config.model)").font(.callout).foregroundStyle(.secondary).lineLimit(1).fixedSize()
+                    PhasePill(phase: session.phase, busy: session.isBusy).fixedSize()
                     ElapsedLabel(start: session.startedAt, end: session.endedAt)
                 } else {
-                    Text(env.name).font(.headline)
-                    Chip(text: "v\(store.version(of: env))", mono: true)
-                    StatusBadge(status: store.status(for: env))
+                    Text(env.name).font(.headline).lineLimit(1).fixedSize()
+                    Chip(text: "v\(store.version(of: env))", mono: true).fixedSize()
+                    StatusBadge(status: store.status(for: env)).fixedSize()
                 }
                 Spacer()
-                changeRecord(env)
-                PolicyModelMenu(environment: env)
-                RunMenu()
+                pitchButton
+                // The demo and an Exit-to-app excursion keep the crumbs and the pitch button; the
+                // operations come back with the plain app (⌘⇧P), and Compile stays on ⌘R meanwhile.
+                if !store.pitch.isDemo && !store.pitch.canResume {
+                    changeRecord(env)
+                    PolicyModelMenu(environment: env)
+                    RunMenu()
+                }
             } else {
                 Text("No environment").font(.headline).foregroundStyle(.secondary)
                 Spacer()
@@ -230,6 +251,20 @@ struct TopBar: View {
         .padding(.horizontal, 24)
         .frame(height: 52)
         .background(.bar)
+    }
+
+    /// During the demo: on to the next slide. After Exit to app: back to the slide that was left.
+    @ViewBuilder
+    private var pitchButton: some View {
+        if store.pitch.isDemo {
+            Button("Continue pitch →") { store.leaveDemo(toNextSlide: true) }
+                .buttonStyle(RoundedProminentButtonStyle())
+                .help("Leave the demo for the next slide (→ from Verify)")
+        } else if store.pitch.canResume {
+            Button("Resume pitch →") { store.pitch.resume() }
+                .buttonStyle(RoundedProminentButtonStyle())
+                .help("Back to the slide you left (⌘⇧P)")
+        }
     }
 
     /// The decisions waiting to become a version, and the Save that makes them one.
