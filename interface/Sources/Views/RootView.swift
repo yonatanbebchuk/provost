@@ -61,10 +61,7 @@ struct EnvironmentSidebar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 3) {
-                    BrandLockup()
-                    Text("Environment audit").font(.caption).foregroundStyle(.secondary)
-                }
+                BrandLockup()
                 Spacer()
                 Button { ProvostApp.chooseEnvironmentFolder(store: store) } label: {
                     Image(systemName: "plus").font(.body.weight(.semibold))
