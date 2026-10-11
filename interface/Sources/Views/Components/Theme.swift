@@ -129,7 +129,7 @@ struct MonoSecondaryButtonStyle: ButtonStyle {
 
 /// Fixed-height bar at the bottom of a stage holding the stage's one primary action.
 struct StageFooter<Leading: View>: View {
-    @Environment(DemoStore.self) private var store
+    @Environment(RunSession.self) private var session
     var busyLabel: String? = nil
     @ViewBuilder var leading: Leading
 
@@ -137,12 +137,12 @@ struct StageFooter<Leading: View>: View {
         HStack(spacing: 12) {
             leading
             Spacer()
-            if store.isBusy, let busyLabel {
+            if session.isBusy, let busyLabel {
                 ProgressView().controlSize(.small)
                 Text(busyLabel).foregroundStyle(.secondary)
             }
-            if let action = store.primaryAction {
-                Button(action.title) { store.performPrimaryAction() }
+            if let action = session.primaryAction {
+                Button(action.title) { session.performPrimaryAction() }
                     .buttonStyle(MonoProminentButtonStyle())
                     .keyboardShortcut(.defaultAction)
             }

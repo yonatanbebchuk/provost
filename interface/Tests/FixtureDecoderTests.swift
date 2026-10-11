@@ -20,6 +20,11 @@ final class FixtureDecoderTests: XCTestCase {
         XCTAssertEqual(environment.format, .harbor)
         XCTAssertEqual(environment.rewardType, .programmatic)
         XCTAssertEqual(environment.taskCount, 48)
+        let spec = try XCTUnwrap(environment.spec)
+        XCTAssertFalse(spec.objective.constraints.isEmpty)
+        XCTAssertFalse(spec.observations.hidden.isEmpty)
+        XCTAssertFalse(spec.actions.isEmpty)
+        XCTAssertEqual(spec.provenance.origin, .thirdParty)
 
         let run = try decode(AuditRun.self, env, "run.json")
         XCTAssertEqual(run.config.model, "Qwen3-1.7B")
@@ -93,6 +98,7 @@ final class FixtureDecoderTests: XCTestCase {
         for env in ["agency-bench-clarify", "aidanbench-coherence", "nemotron-structured-outputs"] {
             let environment = try decode(AuditEnvironment.self, env, "environment.json")
             XCTAssertEqual(environment.id, env)
+            XCTAssertNotNil(environment.spec, "\(env) should carry the six-part spec")
             let findings = try decode([LintFinding].self, env, "lint.json")
             XCTAssertFalse(findings.isEmpty)
             XCTAssertNotNil(findings.first?.snippet, "\(env) findings should carry a source snippet")
@@ -107,6 +113,7 @@ final class FixtureDecoderTests: XCTestCase {
             XCTAssertTrue(trajectories.contains { $0.id == liftoff.trajectoryId && $0.isHack })
             let patch = try decode(Patch.self, env, "patch.json")
             XCTAssertFalse(patch.notes?.isEmpty ?? true)
+            XCTAssertFalse(patch.touches?.isEmpty ?? true)
             XCTAssertTrue(patch.diff.hasPrefix("diff --git"))
             let verify = try decode(VerifyResult.self, env, "verify.json")
             XCTAssertEqual(verify.after.hackRate, 0)

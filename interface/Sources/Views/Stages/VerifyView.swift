@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct VerifyView: View {
-    @Environment(DemoStore.self) private var store
+    @Environment(RunSession.self) private var session
 
-    private var totalSteps: Int { store.verifyResult?.stepsRerun ?? store.run?.config.steps ?? 600 }
-    private var currentStep: Int { store.verifyPoints.last?.step ?? 0 }
+    private var totalSteps: Int { session.verifyResult?.stepsRerun ?? session.run.config.steps }
+    private var currentStep: Int { session.verifyPoints.last?.step ?? 0 }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -12,26 +12,26 @@ struct VerifyView: View {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Verification run").font(.title2.weight(.semibold))
-                        Text("Patched environment · \(store.patch?.id ?? "") · same model, algorithm and seed")
+                        Text("Patched environment · \(session.patch?.id ?? "") · same model, algorithm and seed")
                             .font(.callout.monospaced()).foregroundStyle(.secondary)
                     }
                     Spacer()
                     Text("step \(currentStep) / \(totalSteps)")
                         .font(.title3.monospacedDigit().weight(.medium)).foregroundStyle(.secondary)
                 }
-                TrainingChart(points: store.verifyPoints, totalSteps: totalSteps, liftoff: nil)
-                    .frame(height: 260)
+                TrainingChart(points: session.verifyPoints, totalSteps: totalSteps, liftoff: nil)
+                    .frame(height: 230)
                     .padding(.top, 10)
                 HStack {
                     ChartLegend(showLiftoff: false)
                     Spacer()
-                    if let last = store.verifyPoints.last {
+                    if let last = session.verifyPoints.last {
                         Text("gap \(String(format: "%+.2f", last.gap))")
                             .font(.callout.monospacedDigit()).foregroundStyle(.secondary)
                     }
                 }
 
-                if let result = store.verifyResult {
+                if let result = session.verifyResult {
                     BeforeAfterStrip(result: result)
                     Card(title: "Summary") {
                         Text(result.summary).font(.callout)
@@ -49,8 +49,8 @@ struct VerifyView: View {
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-            StageFooter(busyLabel: store.verifyFinished ? "Issuing certificate…" : "Re-verifying · step \(currentStep) / \(totalSteps)") {
-                if let result = store.verifyResult {
+            StageFooter(busyLabel: session.verifyFinished ? "Issuing certificate…" : "Re-verifying · step \(currentStep) / \(totalSteps)") {
+                if let result = session.verifyResult {
                     Label(result.verdict.displayName, systemImage: result.verdict == .pass ? "checkmark.seal.fill" : "xmark.seal")
                         .font(.callout.weight(.medium))
                 }

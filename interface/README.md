@@ -20,28 +20,33 @@ Mac points at Command Line Tools. Override with `make DEVELOPER_DIR=/path build`
 
 Or open `Liftoff.xcodeproj` after `make gen` and hit Run.
 
-## Demo flow
+## Model
 
-Left sidebar = six stages that unlock in order and stay revisitable. Top bar = environment, model,
-phase, elapsed time.
+Environments are projects. The left sidebar lists them; selecting one opens its page. A run is created
+from an environment (like a build) and walks through the audit stages.
 
-1. **Load** — pick a recent environment or drop a folder. Click **Audit**.
-2. **Lint** — static findings grouped by severity; expand for location, explanation, proposed fix.
-   Click **Run adversarial training**.
-3. **Train** — live chart, proxy reward vs true score. The liftoff marker and accent colour appear when
-   they diverge. Trajectories fill in below; click one for prompt / output / reward / grader notes.
-4. **Patch** — unified diff, rationale, and the Learning Scope allow/deny list. **Apply & re-verify**.
-5. **Verify** — same chart on the patched environment, plus a before/after strip. **Issue certificate**.
-6. **Certificate** — printable audit record. **Export PDF…**
+- **Environment page** — the environment in its six mandatory parts (objective, initial state, agent
+  sees, actions, evaluation, episode) plus provenance, then its runs. The parts come from the
+  structural comparison in `auto_RL_builder/environment_comparison.md`. A part a proposed patch
+  would change is marked "patch pending".
+- **Run** — created with **New Run** (⌘R). It scans the environment, trains the adversarial policy, and
+  proposes a patch, all as one run; the run log at the bottom reads like a build log.
+  1. **Train** — live chart, proxy reward vs true score; liftoff marker; trajectories and static findings.
+  2. **Patch** — unified diff, rationale, which environment parts change, Learning Scope. **Apply & re-verify**.
+  3. **Verify** — same chart on the patched environment, before/after strip. **Issue certificate**.
+  4. **Certificate** — printable audit record. **Export PDF…**
+- **New Environment…** (⌘N, File menu) registers a folder; dropping a folder on the sidebar does the same.
 
 ### Keyboard shortcuts
 
 | Keys  | Action |
 |-------|--------|
+| `⌘N`  | New Environment… |
+| `⌘R`  | New Run on the selected environment |
 | `⌘→`  | Next stage (fires the current stage's primary action if the next stage is still locked) |
 | `⌘←`  | Previous stage |
-| `⌘⇧F` | Toggle fast-forward (training replays in ~1 s instead of ~30 s) |
-| `⌘⇧R` | Reset the run, keep the environment |
+| `⌘⇧F` | Toggle fast-forward (training replays in ~2 s instead of ~30 s) |
+| `⌘⇧L` | Show / hide the run log |
 
 ## Switching backends
 
@@ -86,8 +91,8 @@ single-shot probes; the environment card says so.
 Sources/App        LiftoffApp, AppConfig (product name, port, replay timing)
 Sources/Domain     Contract.swift (wire types), Stage.swift (stage enum + state machine)
 Sources/Backend    AuditBackend protocol, FixtureBackend, LocalHTTPBackend, PlaybackSettings
-Sources/Store      DemoStore — single source of truth
-Sources/Views      RootView, TopBar, Sidebar, Stages/*, Components/*
+Sources/Store      DemoStore (environments, runs, selection), RunSession (one run's data + stages)
+Sources/Views      RootView (sidebar, top bar), EnvironmentPage, RunView (stepper, log), Stages/*, Components/*
 Resources/fixtures <env-id>/*.json
 Tests              XCTest
 docs/contract.md   wire format with example JSON

@@ -23,5 +23,9 @@
     "Add an explicit max-deduction issue for evaluator manipulation.",
     "Pass untrusted answer text as JSON data under a system prompt that says never to follow instructions inside it.",
     "Add regression tests for delimiter escapes and embedded `issues: []` payloads."
+  ],
+  "touches": [
+    "evaluation",
+    "observations"
   ]
 }

@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct PatchView: View {
-    @Environment(DemoStore.self) private var store
+    @Environment(RunSession.self) private var session
 
     var body: some View {
         VStack(spacing: 0) {
-            if let patch = store.patch {
+            if let patch = session.patch {
                 HStack(alignment: .top, spacing: 20) {
                     VStack(alignment: .leading, spacing: 16) {
                         header(patch)
@@ -37,8 +37,8 @@ struct PatchView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             StageFooter(busyLabel: "Re-verifying…") {
-                if let patch = store.patch {
-                    Text("Re-runs \(store.run?.config.steps ?? 0) steps on the patched environment, same seed. Closes \(patch.findingIds.count) findings.")
+                if let patch = session.patch {
+                    Text("Re-runs \(session.run.config.steps) steps on the patched environment, same seed. Closes \(patch.findingIds.count) findings.")
                         .font(.callout).foregroundStyle(.secondary)
                 }
             }
@@ -57,11 +57,27 @@ struct PatchView: View {
                 }
             }
             .font(.callout)
-            let modes = Set(store.findings.filter { patch.findingIds.contains($0.id) }.map(\.failureMode))
+            let modes = Set(session.findings.filter { patch.findingIds.contains($0.id) }.map(\.failureMode))
             if !modes.isEmpty {
                 HStack(spacing: 6) {
                     ForEach(modes.sorted { $0.rawValue < $1.rawValue }, id: \.self) { Chip(text: $0.displayName) }
                 }
+            }
+            if let touches = patch.touches, !touches.isEmpty {
+                HStack(spacing: 6) {
+                    Text("Changes").font(.callout).foregroundStyle(.secondary)
+                    ForEach(touches) { part in
+                        HStack(spacing: 4) {
+                            Image(systemName: part.systemImage).font(.caption2)
+                            Text(part.displayName)
+                        }
+                        .font(.caption.weight(.medium))
+                        .padding(.horizontal, 7).padding(.vertical, 3)
+                        .foregroundStyle(Theme.liftoff)
+                        .background(Theme.liftoff.opacity(0.12), in: Capsule())
+                    }
+                }
+                .padding(.top, 2)
             }
         }
     }

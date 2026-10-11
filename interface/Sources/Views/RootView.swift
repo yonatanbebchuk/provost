@@ -1,25 +1,26 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct RootView: View {
     @Environment(DemoStore.self) private var store
 
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.all)) {
-            StageSidebar()
-                .navigationSplitViewColumnWidth(min: 220, ideal: 240, max: 280)
+            EnvironmentSidebar()
+                .navigationSplitViewColumnWidth(min: 230, ideal: 250, max: 300)
                 .toolbar(removing: .sidebarToggle)
         } detail: {
             VStack(spacing: 0) {
                 TopBar()
                 Divider()
-                stageContent
+                content
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .background(Theme.windowBackground)
         }
         .navigationSplitViewStyle(.balanced)
         .onAppear { LiftoffApp.applyAppearanceOverride() }
-        .task { await store.loadRecents() }
+        .task { await store.loadEnvironments() }
         .alert("Something went wrong", isPresented: Binding(
             get: { store.errorMessage != nil },
             set: { if !$0 { store.errorMessage = nil } }
@@ -28,55 +29,76 @@ struct RootView: View {
         } message: {
             Text(store.errorMessage ?? "")
         }
-        .sheet(item: Binding(get: { store.selectedTrajectory }, set: { store.selectedTrajectory = $0 })) { t in
-            TrajectoryDetailSheet(trajectory: t)
-        }
     }
 
     @ViewBuilder
-    private var stageContent: some View {
-        switch store.stage {
-        case .load: LoadView()
-        case .lint: LintView()
-        case .train: TrainView()
-        case .patch: PatchView()
-        case .verify: VerifyView()
-        case .certificate: CertificateView()
+    private var content: some View {
+        if let session = store.selectedSession {
+            RunView()
+                .environment(session)
+                .id(session.id)
+        } else if let env = store.selectedEnvironment {
+            EnvironmentPage(environment: env)
+                .id(env.id)
+        } else {
+            VStack(spacing: 8) {
+                Image(systemName: "shield.lefthalf.filled").font(.system(size: 36)).foregroundStyle(.tertiary)
+                Text("No environments").font(.title3.weight(.medium))
+                Text("File ▸ New Environment… (⌘N) adds one from a folder.").font(.callout).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }
 
-// MARK: - Sidebar
+// MARK: - Sidebar: environments are projects
 
-struct StageSidebar: View {
+struct EnvironmentSidebar: View {
     @Environment(DemoStore.self) private var store
+    @State private var isDropTargeted = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(AppConfig.productName)
-                    .font(.title3.weight(.bold))
-                Text("Environment audit")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(AppConfig.productName).font(.title3.weight(.bold))
+                    Text("Environment audit").font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button { LiftoffApp.chooseEnvironmentFolder(store: store) } label: {
+                    Image(systemName: "plus").font(.body.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .help("New Environment… (⌘N)")
             }
             .padding(.horizontal, 16)
             .padding(.top, 14)
-            .padding(.bottom, 18)
+            .padding(.bottom, 14)
 
-            VStack(spacing: 2) {
-                ForEach(Stage.allCases) { stage in
-                    StageRow(stage: stage)
+            Text("ENVIRONMENTS")
+                .font(.caption2.weight(.semibold)).kerning(0.6).foregroundStyle(.secondary)
+                .padding(.horizontal, 18)
+                .padding(.bottom, 4)
+
+            ScrollView {
+                VStack(spacing: 2) {
+                    ForEach(store.environments) { env in
+                        EnvironmentRow(environment: env)
+                        if store.selectedEnvironmentId == env.id {
+                            ForEach(store.sessions(for: env)) { session in
+                                RunRow(session: session)
+                            }
+                        }
+                    }
                 }
+                .padding(.horizontal, 8)
             }
-            .padding(.horizontal, 8)
 
-            Spacer()
+            Spacer(minLength: 0)
 
             VStack(alignment: .leading, spacing: 8) {
                 Toggle(isOn: Binding(get: { store.isFastForward }, set: { store.fastForward = $0 })) {
-                    Label("Fast-forward", systemImage: "forward.fill")
-                        .font(.callout)
+                    Label("Fast-forward", systemImage: "forward.fill").font(.callout)
                 }
                 .toggleStyle(.switch)
                 .controlSize(.small)
@@ -84,66 +106,93 @@ struct StageSidebar: View {
                     Circle().fill(.secondary).frame(width: 6, height: 6)
                     Text(store.backend.displayName)
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(.secondary)
             }
             .padding(16)
         }
         .frame(maxHeight: .infinity, alignment: .top)
+        .background(isDropTargeted ? Color.primary.opacity(0.05) : .clear)
+        .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
+            guard let provider = providers.first else { return false }
+            _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                guard let url else { return }
+                Task { @MainActor in await store.addEnvironment(at: url) }
+            }
+            return true
+        }
     }
 }
 
-private struct StageRow: View {
+private struct EnvironmentRow: View {
     @Environment(DemoStore.self) private var store
-    let stage: Stage
+    let environment: AuditEnvironment
 
-    private var isSelected: Bool { store.stage == stage }
-    private var isUnlocked: Bool { store.isUnlocked(stage) }
-    private var isCompleted: Bool { store.isCompleted(stage) }
+    private var isSelected: Bool { store.selectedEnvironmentId == environment.id }
+    private var isActive: Bool { isSelected && store.selectedRunId == nil }
 
     var body: some View {
-        Button {
-            store.select(stage)
-        } label: {
-            HStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .strokeBorder(isUnlocked ? Color.primary.opacity(0.5) : Color.primary.opacity(0.15), lineWidth: 1)
-                        .background(Circle().fill(isCompleted ? Color.primary : .clear))
-                        .frame(width: 22, height: 22)
-                    if isCompleted {
-                        Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.windowBackground)
-                    } else {
-                        Text("\(stage.rawValue + 1)")
-                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                            .foregroundStyle(isUnlocked ? .primary : .tertiary)
-                    }
-                }
+        Button { store.select(environment: environment) } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "cube")
+                    .font(.callout)
+                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .frame(width: 18)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(stage.title)
-                        .font(.body.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isUnlocked ? .primary : .tertiary)
-                    Text(stage.subtitle)
-                        .font(.caption)
-                        .foregroundStyle(isUnlocked ? .secondary : .quaternary)
-                        .lineLimit(1)
+                    Text(environment.name).font(.body.weight(isSelected ? .semibold : .regular)).lineLimit(1)
+                    Text("\(environment.format.displayName) · \(environment.rewardType.displayName)")
+                        .font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 }
                 Spacer()
-                if stage == .train, store.liftoff != nil {
-                    Circle().fill(Theme.liftoff).frame(width: 7, height: 7)
-                } else if !isUnlocked {
-                    Image(systemName: "lock").font(.caption2).foregroundStyle(.quaternary)
+                let runs = store.sessions(for: environment)
+                if !runs.isEmpty {
+                    Text("\(runs.count)").font(.caption.monospacedDigit()).foregroundStyle(.tertiary)
                 }
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
+            .padding(.horizontal, 10).padding(.vertical, 7)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? Color.primary.opacity(0.08) : .clear,
+            .background(isActive ? Color.primary.opacity(0.08) : .clear,
                         in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(!isUnlocked)
+    }
+}
+
+private struct RunRow: View {
+    @Environment(DemoStore.self) private var store
+    let session: RunSession
+
+    private var isActive: Bool { store.selectedRunId == session.id }
+
+    var body: some View {
+        Button { store.select(session: session) } label: {
+            HStack(spacing: 8) {
+                statusDot
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(session.id).font(.caption.monospaced()).lineLimit(1)
+                    Text(session.statusLine).font(.caption2).foregroundStyle(.secondary)
+                }
+                Spacer()
+                if session.isBusy { ProgressView().controlSize(.mini) }
+            }
+            .padding(.leading, 38).padding(.trailing, 10).padding(.vertical, 5)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(isActive ? Color.primary.opacity(0.08) : .clear,
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var statusDot: some View {
+        if session.liftoff != nil && session.certificate == nil {
+            Circle().fill(Theme.liftoff).frame(width: 7, height: 7)
+        } else if session.certificate != nil {
+            Image(systemName: "checkmark.seal.fill").font(.caption2).foregroundStyle(.primary)
+        } else {
+            Circle().fill(.secondary).frame(width: 7, height: 7)
+        }
     }
 }
 
@@ -154,29 +203,44 @@ struct TopBar: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            if let env = store.environment {
-                Text(env.name).font(.headline)
+            if let env = store.selectedEnvironment {
+                if store.selectedSession != nil {
+                    Button { store.showEnvironmentPage() } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "chevron.left").font(.caption.weight(.bold))
+                            Text(env.name).font(.headline)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    Text(env.name).font(.headline)
+                }
                 Chip(text: env.format.displayName)
             } else {
                 Text("No environment").font(.headline).foregroundStyle(.secondary)
             }
-            if let run = store.run {
+            if let session = store.selectedSession {
                 Divider().frame(height: 16)
-                Text("\(run.config.model) · \(run.config.algorithm) · \(run.config.steps) steps")
-                    .font(.callout.monospaced())
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            if let liftoff = store.liftoff {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.up.right").font(.caption.weight(.bold))
-                    Text("Liftoff · step \(liftoff.step)")
+                Text("\(session.run.config.model) · \(session.run.config.algorithm) · \(session.run.config.steps) steps")
+                    .font(.callout.monospaced()).foregroundStyle(.secondary)
+                Spacer()
+                if let liftoff = session.liftoff {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.up.right").font(.caption.weight(.bold))
+                        Text("Liftoff · step \(liftoff.step)")
+                    }
+                    .font(.callout.weight(.semibold)).foregroundStyle(Theme.liftoff)
                 }
-                .font(.callout.weight(.semibold))
-                .foregroundStyle(Theme.liftoff)
+                PhasePill(phase: session.phase, busy: session.isBusy)
+                ElapsedLabel(start: session.startedAt, end: session.endedAt)
+            } else if let env = store.selectedEnvironment {
+                Divider().frame(height: 16)
+                Text(env.source).font(.callout.monospaced()).foregroundStyle(.secondary).lineLimit(1)
+                Spacer()
+                Text("\(store.sessions(for: env).count) runs").font(.callout).foregroundStyle(.secondary)
+            } else {
+                Spacer()
             }
-            PhasePill(phase: store.phase, busy: store.isBusy)
-            ElapsedLabel(start: store.run?.startedAt, end: store.run?.endedAt)
         }
         .padding(.horizontal, 24)
         .frame(height: 48)
@@ -184,7 +248,7 @@ struct TopBar: View {
     }
 }
 
-private struct PhasePill: View {
+struct PhasePill: View {
     var phase: AuditPhase
     var busy: Bool
 
@@ -198,13 +262,12 @@ private struct PhasePill: View {
             Text(phase.displayName)
         }
         .font(.caption.weight(.medium))
-        .padding(.horizontal, 9)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 9).padding(.vertical, 4)
         .background(Color.primary.opacity(0.07), in: Capsule())
     }
 }
 
-private struct ElapsedLabel: View {
+struct ElapsedLabel: View {
     var start: Date?
     var end: Date?
 
@@ -215,8 +278,7 @@ private struct ElapsedLabel: View {
                 return Format.elapsed((end ?? context.date).timeIntervalSince(start))
             }()
             Text(text)
-                .font(.callout.monospacedDigit())
-                .foregroundStyle(.secondary)
+                .font(.callout.monospacedDigit()).foregroundStyle(.secondary)
                 .frame(minWidth: 48, alignment: .trailing)
         }
     }

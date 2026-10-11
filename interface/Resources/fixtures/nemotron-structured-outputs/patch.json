@@ -19,5 +19,8 @@
     "Require evidence spans for extracted fields.",
     "Score groundedness, not just schema validity.",
     "Reject placeholder values such as FAKE-ID-000 and FABRICATED_SCHEMA_VALID_VALUE."
+  ],
+  "touches": [
+    "evaluation"
   ]
 }

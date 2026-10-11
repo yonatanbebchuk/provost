@@ -16,5 +16,102 @@
       "git"
     ]
   },
-  "description": "48 terminal coding tasks in Harbor format (instruction.md + tests/ + solution/). Reward is the fraction of pytest cases passing after the agent's final command."
+  "description": "48 terminal coding tasks in Harbor format (instruction.md + tests/ + solution/). Reward is the fraction of pytest cases passing after the agent's final command.",
+  "spec": {
+    "objective": {
+      "summary": "Resolve the task in instruction.md so the hidden pytest suite passes. The fix must implement the behaviour; reproducing expected outputs is not a solution.",
+      "constraints": [
+        "Tests are not to be modified",
+        "Must run inside the container's CPU and memory limits",
+        "No network access is required to solve any task"
+      ]
+    },
+    "initial_state": {
+      "summary": "A per-task Docker container built from environment/Dockerfile, with the repository checked out at /app.",
+      "items": [
+        {
+          "key": "Runtime",
+          "value": "docker \u00b7 python:3.11-slim"
+        },
+        {
+          "key": "Workspace",
+          "value": "/app (read-write)"
+        },
+        {
+          "key": "Tests",
+          "value": "/tests (bind-mounted read-only at start)"
+        },
+        {
+          "key": "Reference solutions",
+          "value": "/opt/solution (in image)"
+        },
+        {
+          "key": "Tasks",
+          "value": "48 instances \u00b7 1 environment design"
+        }
+      ]
+    },
+    "observations": {
+      "visible": [
+        "instruction.md for the task",
+        "The /app source tree",
+        "stdout and stderr of its own commands",
+        "Anything readable from the container filesystem"
+      ],
+      "hidden": [
+        "Expected outputs in tests/ (intended, but reachable \u2014 see findings)",
+        "Reference solve.sh per task (intended, but shipped in the image)",
+        "Grader verdict until the episode ends"
+      ]
+    },
+    "actions": [
+      {
+        "id": "bash",
+        "description": "Run a shell command in /app",
+        "arguments": [
+          "command"
+        ]
+      },
+      {
+        "id": "python",
+        "description": "Run a Python snippet",
+        "arguments": [
+          "code"
+        ]
+      },
+      {
+        "id": "pip",
+        "description": "Install a package",
+        "arguments": [
+          "package"
+        ]
+      },
+      {
+        "id": "done",
+        "description": "Signal that the task is complete",
+        "arguments": null
+      }
+    ],
+    "evaluation": {
+      "summary": "Fraction of pytest cases passing after the final command, computed by the verifier container.",
+      "components": [
+        "tests_passed \u00b7 weight 1.0",
+        "no_timeout \u00b7 weight 0.0 (gate)"
+      ],
+      "audit": "Held-out input variant re-graded with the same solution (added by the audit)."
+    },
+    "episode": {
+      "termination": "Agent signals done, or the command budget is exhausted",
+      "max_steps": 60,
+      "reset": "Fresh container per episode"
+    },
+    "provenance": {
+      "origin": "third_party",
+      "evidence": [
+        "FineEnvs/MiMo-V2.6-RL-harbor-code \u00b7 revision cf87dbe",
+        "Xiaomi MiMo-V2.6-RL-oss (upstream)"
+      ],
+      "license": "Apache-2.0 with MIT portions"
+    }
+  }
 }

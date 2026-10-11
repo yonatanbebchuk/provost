@@ -3,12 +3,12 @@ import AppKit
 import UniformTypeIdentifiers
 
 struct CertificateView: View {
-    @Environment(DemoStore.self) private var store
+    @Environment(RunSession.self) private var session
     @State private var exportMessage: String?
 
     var body: some View {
         VStack(spacing: 0) {
-            if let cert = store.certificate {
+            if let cert = session.certificate {
                 ScrollView {
                     CertificatePaper(certificate: cert)
                         .frame(width: 680)
@@ -26,7 +26,7 @@ struct CertificateView: View {
                     Text(exportMessage).font(.callout).foregroundStyle(.secondary)
                 }
                 Spacer()
-                if let cert = store.certificate {
+                if let cert = session.certificate {
                     Button("Export PDF…") { exportPDF(cert) }
                         .buttonStyle(MonoProminentButtonStyle())
                         .keyboardShortcut("e", modifiers: .command)

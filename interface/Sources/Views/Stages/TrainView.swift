@@ -1,51 +1,48 @@
 import SwiftUI
 
 struct TrainView: View {
-    @Environment(DemoStore.self) private var store
+    @Environment(RunSession.self) private var session
 
-    private var totalSteps: Int { store.run?.config.steps ?? 600 }
-    private var currentStep: Int { store.trainingPoints.last?.step ?? 0 }
+    private var totalSteps: Int { session.run.config.steps }
+    private var currentStep: Int { session.trainingPoints.last?.step ?? 0 }
 
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 14) {
                 header
-                TrainingChart(points: store.trainingPoints, totalSteps: totalSteps, liftoff: store.liftoff)
-                    .frame(height: 280)
-                    .padding(.top, 10)
+                TrainingChart(points: session.trainingPoints, totalSteps: totalSteps, liftoff: session.liftoff)
+                    .frame(height: 240)
+                    .padding(.top, 6)
                 HStack {
-                    ChartLegend(showLiftoff: store.liftoff != nil)
+                    ChartLegend(showLiftoff: session.liftoff != nil)
                     Spacer()
-                    if let last = store.trainingPoints.last {
+                    if let last = session.trainingPoints.last {
                         HStack(spacing: 14) {
                             metric("proxy", last.proxyReward)
                             metric("true", last.trueScore)
-                            metric("gap", last.gap, emphasize: store.liftoff != nil)
+                            metric("gap", last.gap, emphasize: session.liftoff != nil)
                             metric("kl", last.kl, digits: 3)
                         }
                     }
                 }
-                if let liftoff = store.liftoff {
+                if let liftoff = session.liftoff {
                     LiftoffBanner(liftoff: liftoff)
                 }
-                TrajectoryTable(trajectories: store.trajectories)
-                    .frame(maxHeight: .infinity)
+                HStack(alignment: .top, spacing: 16) {
+                    TrajectoryTable(trajectories: session.trajectories)
+                    FindingsPanel(findings: session.findings)
+                        .frame(width: 420)
+                }
+                .frame(maxHeight: .infinity)
             }
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-            StageFooter(busyLabel: "Training · step \(currentStep) / \(totalSteps)") {
-                if store.trainingFinished {
-                    let hacks = store.trajectories.filter(\.isHack).count
-                    Text("\(store.trajectories.count) trajectories sampled · \(hacks) flagged as hacks")
+            StageFooter(busyLabel: session.phase == .linting ? "Scanning environment…" : "Training · step \(currentStep) / \(totalSteps)") {
+                if session.trainingFinished {
+                    Text("\(session.trajectories.count) trajectories sampled · \(session.hackCount) flagged as hacks")
                         .font(.callout).foregroundStyle(.secondary)
                 }
-            }
-        }
-        .task {
-            // Entering the stage with nothing streamed yet means the user navigated here via ⌘→/button.
-            if store.trainingPoints.isEmpty && !store.trainingFinished && !store.isBusy {
-                await store.startTraining()
             }
         }
     }
@@ -53,11 +50,10 @@ struct TrainView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Adversarial training").font(.title2.weight(.semibold))
-                if let run = store.run {
-                    Text("\(run.config.model) · \(run.config.algorithm) · seed \(run.config.seed)" + (run.config.rolloutsPerStep.map { " · \($0) rollouts/step" } ?? ""))
-                        .font(.callout.monospaced()).foregroundStyle(.secondary)
-                }
+                Text("Adversarial run").font(.title2.weight(.semibold))
+                let run = session.run
+                Text("\(run.config.model) · \(run.config.algorithm) · seed \(run.config.seed)" + (run.config.rolloutsPerStep.map { " · \($0) rollouts/step" } ?? ""))
+                    .font(.callout.monospaced()).foregroundStyle(.secondary)
             }
             Spacer()
             Text("step \(currentStep) / \(totalSteps)")
@@ -106,7 +102,7 @@ struct LiftoffBanner: View {
 }
 
 struct TrajectoryTable: View {
-    @Environment(DemoStore.self) private var store
+    @Environment(RunSession.self) private var session
     var trajectories: [Trajectory]
 
     var body: some View {
@@ -120,7 +116,7 @@ struct TrajectoryTable: View {
             VStack(spacing: 0) {
                 HStack(spacing: 12) {
                     Text("Step").frame(width: 44, alignment: .leading)
-                    Text("Task").frame(width: 190, alignment: .leading)
+                    Text("Task").frame(width: 150, alignment: .leading)
                     Text("What it did").frame(maxWidth: .infinity, alignment: .leading)
                     Text("Reward").frame(width: 56, alignment: .trailing)
                     Text("Flag").frame(width: 56, alignment: .leading)
@@ -131,10 +127,10 @@ struct TrajectoryTable: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(Array(trajectories.reversed().enumerated()), id: \.element.id) { index, t in
-                            Button { store.selectedTrajectory = t } label: {
+                            Button { session.selectedTrajectory = t } label: {
                                 HStack(spacing: 12) {
                                     Text("\(t.step)").monospacedDigit().frame(width: 44, alignment: .leading)
-                                    Text(t.taskId).font(.body.monospaced()).lineLimit(1).frame(width: 190, alignment: .leading)
+                                    Text(t.taskId).font(.body.monospaced()).lineLimit(1).frame(width: 150, alignment: .leading)
                                     Text(t.summary).lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
                                     Text(Format.score(t.reward.total)).monospacedDigit().frame(width: 56, alignment: .trailing)
                                     Group {

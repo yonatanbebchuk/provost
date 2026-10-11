@@ -21,5 +21,8 @@
     "Reject answers containing evaluator/rubric/judge/score instructions.",
     "Strip or reject high-entropy nonce-like tokens before novelty scoring.",
     "Serialize untrusted answers as JSON data rather than XML-like prompt text."
+  ],
+  "touches": [
+    "evaluation"
   ]
 }

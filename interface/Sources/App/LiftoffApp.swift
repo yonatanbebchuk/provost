@@ -12,16 +12,6 @@ struct LiftoffApp: App {
         _store = State(initialValue: DemoStore(backend: backend, playback: playback))
     }
 
-    /// Rehearsal aid: `LIFTOFF_APPEARANCE=dark|light` forces the app's appearance without touching
-    /// the system setting. Called once the window exists.
-    @MainActor static func applyAppearanceOverride() {
-        switch ProcessInfo.processInfo.environment["LIFTOFF_APPEARANCE"] {
-        case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
-        case "light": NSApp.appearance = NSAppearance(named: .aqua)
-        default: break
-        }
-    }
-
     var body: some Scene {
         WindowGroup(AppConfig.productName) {
             RootView()
@@ -32,7 +22,15 @@ struct LiftoffApp: App {
         .windowResizability(.contentMinSize)
         .windowToolbarStyle(.unifiedCompact(showsTitle: false))
         .commands {
-            CommandMenu("Demo") {
+            CommandGroup(replacing: .newItem) {
+                Button("New Environment…") { LiftoffApp.chooseEnvironmentFolder(store: store) }
+                    .keyboardShortcut("n", modifiers: .command)
+            }
+            CommandMenu("Run") {
+                Button("New Run") { Task { await store.newRun() } }
+                    .keyboardShortcut("r", modifiers: .command)
+                    .disabled(store.selectedEnvironment == nil)
+                Divider()
                 Button("Next stage") { store.advance() }
                     .keyboardShortcut(.rightArrow, modifiers: .command)
                 Button("Previous stage") { store.retreat() }
@@ -40,10 +38,32 @@ struct LiftoffApp: App {
                 Divider()
                 Toggle("Fast-forward", isOn: Binding(get: { store.isFastForward }, set: { store.fastForward = $0 }))
                     .keyboardShortcut("f", modifiers: [.command, .shift])
-                Divider()
-                Button("Reset run") { store.resetRun() }
-                    .keyboardShortcut("r", modifiers: [.command, .shift])
+                Toggle("Show Run Log", isOn: Binding(get: { store.showLog }, set: { store.showLog = $0 }))
+                    .keyboardShortcut("l", modifiers: [.command, .shift])
             }
+        }
+    }
+
+    /// File ▸ New Environment…: pick a folder and register it with the backend.
+    @MainActor static func chooseEnvironmentFolder(store: DemoStore) {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.prompt = "Add"
+        panel.message = "Choose an environment folder (Harbor, Verifiers, OpenEnv or any folder)."
+        if panel.runModal() == .OK, let url = panel.url {
+            Task { await store.addEnvironment(at: url) }
+        }
+    }
+
+    /// Rehearsal aid: `LIFTOFF_APPEARANCE=dark|light` forces the app's appearance without touching
+    /// the system setting. Called once the window exists.
+    @MainActor static func applyAppearanceOverride() {
+        switch ProcessInfo.processInfo.environment["LIFTOFF_APPEARANCE"] {
+        case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
+        case "light": NSApp.appearance = NSAppearance(named: .aqua)
+        default: break
         }
     }
 }

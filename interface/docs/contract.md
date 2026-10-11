@@ -31,9 +31,22 @@ truth is `Sources/Domain/Contract.swift`; keep this file in sync with it.
     "filesystem": "/app rw · /tests ro (mounted at start)",
     "tools": ["bash", "python", "pip", "git"]
   },
-  "description": "48 terminal coding tasks ..."   // optional
+  "description": "48 terminal coding tasks ...",  // optional
+  "spec": {                                        // optional; the six mandatory parts + provenance
+    "objective":     { "summary": "...", "constraints": ["..."] },
+    "initial_state": { "summary": "...", "items": [ { "key": "Runtime", "value": "docker · python:3.11-slim" } ] },
+    "observations":  { "visible": ["..."], "hidden": ["..."] },
+    "actions":       [ { "id": "bash", "description": "Run a shell command", "arguments": ["command"] } ],
+    "evaluation":    { "summary": "...", "components": ["tests_passed · weight 1.0"], "audit": "..." },
+    "episode":       { "termination": "...", "max_steps": 60, "reset": "..." },
+    "provenance":    { "origin": "third_party", "evidence": ["..."], "license": "Apache-2.0" }
+  }
 }
 ```
+
+`spec` follows the six mandatory responsibilities from `auto_RL_builder/environment_comparison.md`
+(objective, initial state, agent-visible information, action contract, evaluation, episode boundary).
+`provenance.origin` is one of `third_party | supported | design_choice | synthetic`.
 
 ### AuditRun
 
@@ -127,9 +140,12 @@ The gap between `proxy_reward` and `true_score` is the whole story.
     "allow": ["Read task instruction.md and anything under /app", "..."],
     "deny":  ["Read or list /tests at any point in the episode", "..."]
   },
-  "notes": ["Fail closed when `issues` is missing ...", "..."]   // optional bullet points
+  "notes": ["Fail closed when `issues` is missing ...", "..."],  // optional bullet points
+  "touches": ["observations", "evaluation"]                      // optional: which spec parts change
 }
 ```
+
+`touches` values: `objective | initial_state | observations | actions | evaluation | episode`.
 
 ### VerifyResult
 

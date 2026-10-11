@@ -1,8 +1,9 @@
 import Foundation
 
-/// The six screens of the demo, in order.
+/// The stages of a run, in order. Static findings are produced before training and shown as
+/// run output rather than as a stage.
 public enum Stage: Int, CaseIterable, Identifiable, Sendable, Comparable {
-    case load, lint, train, patch, verify, certificate
+    case train, patch, verify, certificate
 
     public var id: Int { rawValue }
 
@@ -10,8 +11,6 @@ public enum Stage: Int, CaseIterable, Identifiable, Sendable, Comparable {
 
     public var title: String {
         switch self {
-        case .load: "Load"
-        case .lint: "Lint"
         case .train: "Train"
         case .patch: "Patch"
         case .verify: "Verify"
@@ -21,8 +20,6 @@ public enum Stage: Int, CaseIterable, Identifiable, Sendable, Comparable {
 
     public var subtitle: String {
         switch self {
-        case .load: "Pick an environment"
-        case .lint: "Static failure-mode scan"
         case .train: "Adversarial run · liftoff detection"
         case .patch: "Proposed fix · learning scope"
         case .verify: "Re-run on patched env"
@@ -32,8 +29,6 @@ public enum Stage: Int, CaseIterable, Identifiable, Sendable, Comparable {
 
     public var systemImage: String {
         switch self {
-        case .load: "folder"
-        case .lint: "text.magnifyingglass"
         case .train: "chart.xyaxis.line"
         case .patch: "bandage"
         case .verify: "checkmark.shield"
@@ -47,8 +42,8 @@ public enum Stage: Int, CaseIterable, Identifiable, Sendable, Comparable {
 
 /// Pure state machine for stage navigation. Stages unlock in order and stay revisitable.
 public struct StageMachine: Equatable, Sendable {
-    public private(set) var selected: Stage = .load
-    public private(set) var highestUnlocked: Stage = .load
+    public private(set) var selected: Stage = .train
+    public private(set) var highestUnlocked: Stage = .train
     public private(set) var completed: Set<Stage> = []
 
     public init() {}

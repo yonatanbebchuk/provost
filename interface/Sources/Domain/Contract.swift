@@ -57,7 +57,130 @@ public struct SandboxSummary: Codable, Hashable, Sendable {
     public var tools: [String]
 }
 
-/// An RL training environment submitted for audit.
+/// The six parts every environment must specify (from the structural comparison of 30 public
+/// environments in `auto_RL_builder/environment_comparison.md`). A patch names which parts it changes.
+public enum EnvironmentPart: String, Codable, Sendable, CaseIterable, Identifiable {
+    case objective
+    case initialState = "initial_state"
+    case observations
+    case actions
+    case evaluation
+    case episode
+
+    public var id: String { rawValue }
+
+    public var displayName: String {
+        switch self {
+        case .objective: "Objective"
+        case .initialState: "Initial state"
+        case .observations: "Agent sees"
+        case .actions: "Actions"
+        case .evaluation: "Evaluation"
+        case .episode: "Episode"
+        }
+    }
+
+    /// One line explaining the part to someone new to RL environments.
+    public var blurb: String {
+        switch self {
+        case .objective: "What done means, and what must stay true."
+        case .initialState: "How an attempt begins and what it starts with."
+        case .observations: "What the policy can see, and what stays with the grader."
+        case .actions: "What the policy may do and how it is interpreted."
+        case .evaluation: "How behaviour is scored and what the score means."
+        case .episode: "When an attempt ends and how the next one starts clean."
+        }
+    }
+
+    public var systemImage: String {
+        switch self {
+        case .objective: "target"
+        case .initialState: "square.stack.3d.up"
+        case .observations: "eye"
+        case .actions: "hand.tap"
+        case .evaluation: "checkmark.seal"
+        case .episode: "arrow.counterclockwise"
+        }
+    }
+}
+
+public struct KeyValue: Codable, Hashable, Sendable {
+    public var key: String
+    public var value: String
+}
+
+public struct ObjectiveSpec: Codable, Hashable, Sendable {
+    /// Intended outcome in one or two sentences.
+    public var summary: String
+    /// Protected conditions: things that must remain true, including legitimate refusals.
+    public var constraints: [String]
+}
+
+public struct InitialStateSpec: Codable, Hashable, Sendable {
+    public var summary: String
+    public var items: [KeyValue]
+}
+
+/// The visibility boundary. Evaluator internals never appear in `visible`.
+public struct ObservationSpec: Codable, Hashable, Sendable {
+    public var visible: [String]
+    public var hidden: [String]
+}
+
+public struct ActionContract: Codable, Hashable, Identifiable, Sendable {
+    public var id: String
+    public var description: String
+    public var arguments: [String]?
+}
+
+public struct EvaluationSpec: Codable, Hashable, Sendable {
+    public var summary: String
+    public var components: [String]
+    /// Independent outcome check used by the audit, if the environment has one.
+    public var audit: String?
+}
+
+public struct EpisodeSpec: Codable, Hashable, Sendable {
+    public var termination: String
+    public var maxSteps: Int?
+    public var reset: String
+}
+
+public enum ProvenanceOrigin: String, Codable, Sendable {
+    case thirdParty = "third_party"
+    case supported
+    case designChoice = "design_choice"
+    case synthetic
+
+    public var displayName: String {
+        switch self {
+        case .thirdParty: "Third-party environment"
+        case .supported: "Source-supported"
+        case .designChoice: "Design choice"
+        case .synthetic: "Synthetic"
+        }
+    }
+}
+
+public struct ProvenanceSpec: Codable, Hashable, Sendable {
+    public var origin: ProvenanceOrigin
+    public var evidence: [String]
+    public var license: String?
+}
+
+/// Full structural description of an environment. Optional on the wire so a backend that only
+/// knows the packaging can still register an environment; the app shows gaps honestly.
+public struct EnvironmentSpec: Codable, Hashable, Sendable {
+    public var objective: ObjectiveSpec
+    public var initialState: InitialStateSpec
+    public var observations: ObservationSpec
+    public var actions: [ActionContract]
+    public var evaluation: EvaluationSpec
+    public var episode: EpisodeSpec
+    public var provenance: ProvenanceSpec
+}
+
+/// An RL training environment submitted for audit. Environments are the app's projects.
 public struct AuditEnvironment: Codable, Hashable, Identifiable, Sendable {
     public var id: String
     public var name: String
@@ -68,6 +191,7 @@ public struct AuditEnvironment: Codable, Hashable, Identifiable, Sendable {
     public var rewardType: RewardType
     public var sandbox: SandboxSummary
     public var description: String?
+    public var spec: EnvironmentSpec?
 }
 
 // MARK: Lint
@@ -287,6 +411,9 @@ public struct Patch: Codable, Hashable, Identifiable, Sendable {
     public var learningScope: LearningScope
     /// Short bullet points describing what the patch changes.
     public var notes: [String]?
+    /// Which parts of the environment the patch changes. Mirrors Matt's
+    /// `contrast.expected_configuration_changes`.
+    public var touches: [EnvironmentPart]?
 }
 
 // MARK: Verify
