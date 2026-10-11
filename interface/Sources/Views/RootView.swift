@@ -7,6 +7,7 @@ struct RootView: View {
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.all)) {
             EnvironmentSidebar()
+                .frame(minWidth: 230)
                 .navigationSplitViewColumnWidth(min: 230, ideal: 250, max: 300)
                 .toolbar(removing: .sidebarToggle)
         } detail: {
