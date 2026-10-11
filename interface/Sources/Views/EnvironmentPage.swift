@@ -231,32 +231,38 @@ private struct PartCard<Content: View>: View {
         ([part] + alsoParts).flatMap { store.pendingChanges(for: environment, part: $0) }
     }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                Image(systemName: part.systemImage).font(.body).foregroundStyle(.secondary)
-                Text(part.displayName).font(.title3.weight(.semibold))
-                if !changes.isEmpty {
-                    HStack(spacing: 4) {
-                        Circle().fill(Theme.changeAltered).frame(width: 6, height: 6)
-                        Text("\(changes.count)").font(.caption.weight(.semibold)).foregroundStyle(Theme.changeAltered)
-                    }
-                }
-                Spacer()
-                if action != nil {
-                    Image(systemName: "arrow.up.left.and.arrow.down.right").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+    private var header: some View {
+        HStack(spacing: 8) {
+            Image(systemName: part.systemImage).font(.body).foregroundStyle(.secondary)
+            Text(part.displayName).font(.title3.weight(.semibold))
+            if !changes.isEmpty {
+                HStack(spacing: 4) {
+                    Circle().fill(Theme.changeAltered).frame(width: 6, height: 6)
+                    Text("\(changes.count)").font(.caption.weight(.semibold)).foregroundStyle(Theme.changeAltered)
                 }
             }
-            Divider()
+            Spacer()
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
             if let action {
+                // The whole card opens the detail; the differences below keep their own buttons.
                 Button(action: action) {
-                    VStack(alignment: .leading, spacing: 10) { content }
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .contentShape(Rectangle())
+                    VStack(alignment: .leading, spacing: 10) {
+                        header
+                        Divider()
+                        content
+                    }
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .onHover { hovering = $0 }
             } else {
+                header
+                Divider()
                 content
             }
             if !changes.isEmpty {
@@ -294,11 +300,7 @@ private struct TrainingDataStrip: View {
                         let sample = samples[i % samples.count]
                         Button { open = sample } label: {
                             VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text(sample.id).font(.caption.weight(.semibold).monospaced()).foregroundStyle(.secondary)
-                                    Spacer()
-                                    Image(systemName: "arrow.up.left.and.arrow.down.right").font(.caption2.weight(.semibold)).foregroundStyle(.tertiary)
-                                }
+                                Text(sample.id).font(.caption.weight(.semibold).monospaced()).foregroundStyle(.secondary)
                                 Text(sample.prompt).font(.callout).lineLimit(5).fixedSize(horizontal: false, vertical: true)
                                     .multilineTextAlignment(.leading)
                             }
