@@ -187,6 +187,18 @@ public final class DemoStore {
         }
     }
 
+    /// Direct edit of the objective. Bumps the version like an accepted difference does.
+    public func setObjective(summary: String, constraints: [String], in environment: AuditEnvironment) {
+        guard var spec = spec(for: environment) else { return }
+        let summary = summary.trimmingCharacters(in: .whitespacesAndNewlines)
+        let constraints = constraints.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        guard summary != spec.objective.summary || constraints != spec.objective.constraints else { return }
+        spec.objective.summary = summary
+        spec.objective.constraints = constraints
+        specs[environment.id] = spec
+        versions[environment.id] = version(of: environment) + 1
+    }
+
     /// Accepted changes since the given environment version.
     public func acceptedChanges(for environment: AuditEnvironment) -> [PendingChange] {
         (pending[environment.id] ?? []).filter { $0.decision == .accepted }

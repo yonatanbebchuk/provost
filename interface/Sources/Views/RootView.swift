@@ -138,11 +138,7 @@ private struct EnvironmentRow: View {
                     .font(.callout)
                     .foregroundStyle(isSelected ? .primary : .secondary)
                     .frame(width: 18)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(environment.name).font(.body.weight(isSelected ? .semibold : .regular)).lineLimit(1)
-                    Text("\(environment.format.displayName) · \(environment.rewardType.displayName)")
-                        .font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                }
+                Text(environment.name).font(.body.weight(isSelected ? .semibold : .regular)).lineLimit(1)
                 Spacer()
                 let status = store.status(for: environment)
                 Circle().fill(Theme.color(for: status)).frame(width: 7, height: 7)

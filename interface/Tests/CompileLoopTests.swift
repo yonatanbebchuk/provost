@@ -152,6 +152,25 @@ final class CompileLoopTests: XCTestCase {
         XCTAssertNil(edited.liftoff)
     }
 
+    /// Editing the objective by hand is a version bump: the status reads Edited until the next compile.
+    @MainActor
+    func testEditingObjectiveBumpsVersion() async throws {
+        let store = await makeStore()
+        let env = store.selectedEnvironment!
+        let before = try XCTUnwrap(store.spec(for: env)?.objective)
+        store.setObjective(summary: before.summary, constraints: before.constraints, in: env)
+        XCTAssertEqual(store.version(of: env), 1, "no change, no bump")
+        store.setObjective(summary: "  New objective.  ", constraints: ["Keep tests", "", " No network "], in: env)
+        XCTAssertEqual(store.version(of: env), 2)
+        XCTAssertEqual(store.spec(for: env)?.objective.summary, "New objective.")
+        XCTAssertEqual(store.spec(for: env)?.objective.constraints, ["Keep tests", "No network"])
+        let started = await store.compile()
+        let session = try XCTUnwrap(started)
+        try await settle(session)
+        XCTAssertEqual(session.version, 2)
+        XCTAssertEqual(session.environment.spec?.objective.summary, "New objective.", "the compile carries the edited spec")
+    }
+
     func testSpecEditorAppliesEachKind() {
         var spec = EnvironmentSpec(
             samples: nil,

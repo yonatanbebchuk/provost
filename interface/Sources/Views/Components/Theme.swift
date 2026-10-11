@@ -108,13 +108,21 @@ struct StatusBadge: View {
     var status: EnvironmentStatus
     var compact = false
 
+    /// Only the states with a count worth reading carry a detail; Stable is one word.
+    private var showsDetail: Bool {
+        switch status {
+        case .unstable, .edited: true
+        default: false
+        }
+    }
+
     var body: some View {
         HStack(spacing: 6) {
             Circle().fill(Theme.color(for: status)).frame(width: 7, height: 7)
             Text(status.title.uppercased())
                 .font(.caption2.weight(.bold)).kerning(0.5)
                 .foregroundStyle(Theme.color(for: status))
-            if !compact {
+            if !compact, showsDetail {
                 Text(status.detail).font(.caption).foregroundStyle(.secondary)
             }
         }

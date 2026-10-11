@@ -12,33 +12,22 @@ struct EnvironmentPage: View {
             VStack(alignment: .leading, spacing: 22) {
                 header
                 if let spec = store.spec(for: environment) {
-                    objective(spec)
+                    ObjectiveBlock(environment: environment, objective: spec.objective)
                     if !store.pendingChanges(for: environment).isEmpty { pendingBanner }
                     if let samples = spec.samples, !samples.isEmpty {
-                        SampleInputsStrip(samples: samples, taskCount: environment.taskCount)
+                        TrainingDataStrip(samples: samples, taskCount: environment.taskCount)
                     }
                     HStack(alignment: .top, spacing: 16) {
                         PartCard(part: .evaluation, environment: environment, action: { showReward = true }) {
                             rewardSummary(spec)
                         }
                         PartCard(part: .actions, environment: environment) { actionSpace(spec) }
-                        PartCard(part: .observations, environment: environment) { observationSpace(spec) }
+                        PartCard(part: .observations, environment: environment, alsoParts: [.initialState]) { observationSpace(spec) }
                     }
                     HStack(alignment: .top, spacing: 16) {
-                        PartCard(part: .initialState, environment: environment) {
-                            Text(spec.initialState.summary).font(.callout).fixedSize(horizontal: false, vertical: true)
-                            keyValues(spec.initialState.items)
-                        }
-                        PartCard(part: .episode, environment: environment) {
-                            keyValues([
-                                KeyValue(key: "Ends", value: spec.episode.termination),
-                                KeyValue(key: "Budget", value: spec.episode.maxSteps.map { "\($0) steps" } ?? "unbounded"),
-                                KeyValue(key: "Reset", value: spec.episode.reset),
-                            ])
-                        }
-                        certificateCard
+                        compiles
+                        certificateCard.frame(width: 320)
                     }
-                    compiles
                     provenance(spec.provenance)
                 } else {
                     Card(title: "Specification") {
@@ -79,36 +68,22 @@ struct EnvironmentPage: View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(environment.name).font(.largeTitle.weight(.semibold))
-                Text("\(environment.format.displayName) · \(environment.taskCount) tasks · \(environment.rewardType.displayName) reward · v\(store.version(of: environment))")
-                    .font(.callout).foregroundStyle(.secondary)
+                Text(metaLine).font(.callout).foregroundStyle(.secondary)
             }
             Spacer()
             StatusBadge(status: store.status(for: environment))
         }
     }
 
-    private func objective(_ spec: EnvironmentSpec) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(spec.objective.summary).font(.title3).fixedSize(horizontal: false, vertical: true)
-            if !spec.objective.constraints.isEmpty {
-                HStack(spacing: 8) {
-                    ForEach(spec.objective.constraints, id: \.self) { c in
-                        HStack(spacing: 5) {
-                            Image(systemName: "lock").font(.caption2)
-                            Text(c).font(.caption)
-                        }
-                        .padding(.horizontal, 8).padding(.vertical, 4)
-                        .background(Color.primary.opacity(0.06), in: Capsule())
-                    }
-                }
-            }
-            let changes = store.pendingChanges(for: environment, part: .objective)
-            if !changes.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(changes) { change in ChangeRow(change: change, environment: environment) }
-                }
-            }
+    /// Format, size, reward kind, the episode in a few words, version.
+    private var metaLine: String {
+        var parts = ["\(environment.format.displayName)", "\(environment.taskCount) tasks", "\(environment.rewardType.displayName) reward"]
+        if let episode = store.spec(for: environment)?.episode {
+            if let max = episode.maxSteps { parts.append(max == 1 ? "single turn" : "\(max) steps per episode") }
+            parts.append(episode.reset.lowercased())
         }
+        parts.append("v\(store.version(of: environment))")
+        return parts.joined(separator: " · ")
     }
 
     private var pendingBanner: some View {
@@ -171,9 +146,15 @@ struct EnvironmentPage: View {
         }
     }
 
+    /// What the policy sees, what it starts from, and what stays with the grader.
     @ViewBuilder
     private func observationSpace(_ spec: EnvironmentSpec) -> some View {
         bullets(spec.observations.visible, symbol: "eye")
+        if !spec.initialState.items.isEmpty {
+            Divider().padding(.vertical, 2)
+            Text("Starts from").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+            keyValues(spec.initialState.items)
+        }
         if !spec.observations.hidden.isEmpty {
             Divider().padding(.vertical, 2)
             bullets(spec.observations.hidden, symbol: "eye.slash", muted: true)
@@ -224,7 +205,7 @@ struct EnvironmentPage: View {
 
     private var compiles: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Compiles").font(.headline)
+            Text("Compiles").font(.headline).padding(.top, 2)
             let sessions = store.sessions(for: environment)
             if sessions.isEmpty {
                 Text("Not compiled yet. ⌘R.").font(.callout).foregroundStyle(.secondary)
@@ -261,6 +242,7 @@ struct EnvironmentPage: View {
                 .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
             }
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     private func bullets(_ items: [String], symbol: String, muted: Bool = false) -> some View {
@@ -293,10 +275,14 @@ private struct PartCard<Content: View>: View {
     let part: EnvironmentPart
     let environment: AuditEnvironment
     var action: (() -> Void)? = nil
+    /// Other parts folded into this card; their differences show here too.
+    var alsoParts: [EnvironmentPart] = []
     @ViewBuilder var content: Content
     @State private var hovering = false
 
-    private var changes: [PendingChange] { store.pendingChanges(for: environment, part: part) }
+    private var changes: [PendingChange] {
+        ([part] + alsoParts).flatMap { store.pendingChanges(for: environment, part: $0) }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -341,36 +327,154 @@ private struct PartCard<Content: View>: View {
     }
 }
 
-/// What the policy is trained on: a few task inputs, scrollable sideways.
-private struct SampleInputsStrip: View {
+/// What the policy is trained on: a few of the task inputs, each opening in full.
+private struct TrainingDataStrip: View {
     let samples: [SampleInput]
     let taskCount: Int
+    @State private var open: SampleInput?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Image(systemName: "tray.full").font(.callout).foregroundStyle(.secondary)
-                Text("Sample inputs").font(.headline)
+                Text("Training data").font(.headline)
                 Text("\(samples.count) of \(taskCount)").font(.callout.monospacedDigit()).foregroundStyle(.secondary)
                 Spacer()
             }
             ScrollView(.horizontal, showsIndicators: true) {
                 HStack(alignment: .top, spacing: 12) {
                     ForEach(samples) { sample in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(sample.id).font(.caption.weight(.semibold).monospaced()).foregroundStyle(.secondary)
-                            Text(sample.prompt).font(.callout).lineLimit(5).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+                        Button { open = sample } label: {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text(sample.id).font(.caption.weight(.semibold).monospaced()).foregroundStyle(.secondary)
+                                    Spacer()
+                                    Image(systemName: "arrow.up.left.and.arrow.down.right").font(.caption2.weight(.semibold)).foregroundStyle(.tertiary)
+                                }
+                                Text(sample.prompt).font(.callout).lineLimit(5).fixedSize(horizontal: false, vertical: true)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .padding(14)
+                            .frame(width: 300, alignment: .topLeading)
+                            .frame(maxHeight: .infinity, alignment: .topLeading)
+                            .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
+                            .contentShape(Rectangle())
                         }
-                        .padding(14)
-                        .frame(width: 300, alignment: .topLeading)
-                        .frame(maxHeight: .infinity, alignment: .topLeading)
-                        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.bottom, 8)
             }
         }
+        .sheet(item: $open) { sample in TrainingInputSheet(sample: sample) }
+    }
+}
+
+/// One training input in full.
+private struct TrainingInputSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let sample: SampleInput
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text(sample.id).font(.title2.weight(.semibold).monospaced())
+                if let source = sample.source {
+                    Text(source).font(.callout.monospaced()).foregroundStyle(.tertiary).textSelection(.enabled)
+                }
+                Spacer()
+            }
+            ScrollView {
+                Text(sample.prompt).font(.body).textSelection(.enabled)
+                    .padding(14).frame(maxWidth: .infinity, alignment: .topLeading)
+            }
+            .background(Theme.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            HStack {
+                Spacer()
+                Button("Close") { dismiss() }.buttonStyle(MonoProminentButtonStyle()).keyboardShortcut(.cancelAction)
+            }
+        }
+        .padding(24)
+        .frame(width: 720, height: 520)
+    }
+}
+
+/// The objective, read like a README lead. Press the pencil to edit the text and the constraints;
+/// saving bumps the environment version, so the status reads Edited until the next compile.
+private struct ObjectiveBlock: View {
+    @Environment(DemoStore.self) private var store
+    let environment: AuditEnvironment
+    let objective: ObjectiveSpec
+    @State private var editing = false
+    @State private var summary = ""
+    @State private var constraints = ""
+    @State private var hovering = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if editing {
+                TextEditor(text: $summary)
+                    .font(.title3).scrollContentBackground(.hidden)
+                    .frame(minHeight: 60, maxHeight: 120)
+                    .padding(8)
+                    .background(Theme.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Constraints, one per line").font(.caption).foregroundStyle(.secondary)
+                    TextEditor(text: $constraints)
+                        .font(.callout).scrollContentBackground(.hidden)
+                        .frame(minHeight: 50, maxHeight: 110)
+                        .padding(8)
+                        .background(Theme.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                }
+                HStack {
+                    Spacer()
+                    Button("Cancel") { editing = false }.buttonStyle(MonoSecondaryButtonStyle()).keyboardShortcut(.cancelAction)
+                    Button("Save") {
+                        store.setObjective(summary: summary, constraints: constraints.split(separator: "\n").map(String.init), in: environment)
+                        editing = false
+                    }
+                    .buttonStyle(MonoProminentButtonStyle())
+                    .keyboardShortcut(.defaultAction)
+                }
+            } else {
+                HStack(alignment: .top, spacing: 10) {
+                    Text(objective.summary).font(.title3).fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                    Button { begin() } label: {
+                        Image(systemName: "pencil").font(.callout.weight(.medium)).foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain).help("Edit the objective")
+                    .opacity(hovering ? 1 : 0.35)
+                }
+                if !objective.constraints.isEmpty {
+                    HStack(spacing: 8) {
+                        ForEach(objective.constraints, id: \.self) { c in
+                            HStack(spacing: 5) {
+                                Image(systemName: "lock").font(.caption2)
+                                Text(c).font(.caption)
+                            }
+                            .padding(.horizontal, 8).padding(.vertical, 4)
+                            .background(Color.primary.opacity(0.06), in: Capsule())
+                        }
+                    }
+                }
+            }
+            let changes = store.pendingChanges(for: environment, part: .objective)
+            if !changes.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(changes) { change in ChangeRow(change: change, environment: environment) }
+                }
+            }
+        }
+        .onHover { hovering = $0 }
+        .onTapGesture(count: 2) { if !editing { begin() } }
+    }
+
+    private func begin() {
+        summary = objective.summary
+        constraints = objective.constraints.joined(separator: "\n")
+        editing = true
     }
 }
 
