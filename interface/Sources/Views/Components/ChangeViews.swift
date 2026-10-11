@@ -18,18 +18,36 @@ struct ChangeRow: View {
     }
     private var decided: Bool { change.decision != .pending }
 
+    /// An alteration that only appends shows the old text once with the new tail in colour; one that
+    /// rewrites shows the old text struck through above the new.
+    @ViewBuilder
+    private var alteration: some View {
+        let before = change.change.before ?? ""
+        let after = change.change.after ?? ""
+        if !before.isEmpty, after.hasPrefix(before) {
+            (Text(before) + Text(String(after.dropFirst(before.count))).foregroundColor(color).fontWeight(.medium))
+                .font(.callout).fixedSize(horizontal: false, vertical: true)
+        } else {
+            if !before.isEmpty {
+                Text(before).font(.callout).strikethrough(true, color: .secondary)
+                    .foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
+            Text(after).font(.callout).fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Text(symbol).font(.callout.monospaced().weight(.bold)).foregroundStyle(color).frame(width: 12)
             VStack(alignment: .leading, spacing: 3) {
-                if let before = change.change.before, change.change.kind != .add {
-                    Text(before).font(.callout)
-                        .strikethrough(change.change.kind == .remove, color: color)
-                        .foregroundStyle(change.change.kind == .remove ? color : .secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                if let after = change.change.after, change.change.kind != .remove {
-                    Text(after).font(.callout).fixedSize(horizontal: false, vertical: true)
+                switch change.change.kind {
+                case .add:
+                    Text(change.change.after ?? "").font(.callout).fixedSize(horizontal: false, vertical: true)
+                case .remove:
+                    Text(change.change.before ?? "").font(.callout).strikethrough(true, color: color)
+                        .foregroundStyle(color).fixedSize(horizontal: false, vertical: true)
+                case .alter:
+                    alteration
                 }
                 Text(change.change.rationale).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 6) {
