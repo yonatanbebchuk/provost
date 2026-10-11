@@ -109,6 +109,10 @@ final class CompileLoopTests: XCTestCase {
             XCTAssertTrue(step.action.contains(needle) || (step.result?.contains(needle) ?? false), hack.id)
         }
         XCTAssertEqual(trajectories.first { $0.id == "traj-0470-02" }?.hackSeverity, .medium)
+        for hack in trajectories.filter(\.isHack) {
+            let rows = try XCTUnwrap(hack.comparisons, "every hack explains which requirement it failed")
+            XCTAssertTrue(rows.contains(where: \.failed), hack.id)
+        }
         XCTAssertEqual(trajectories.first { $0.id == "traj-0412-03" }?.hackSeverity, .high)
 
         let derived = TraceStep.derive(from: "$ ls /tests\na  b\n$ cat x\nhello\nworld\n$ done")

@@ -26,9 +26,11 @@ Environments are the objects. The sidebar lists them; selecting one opens its pa
 on an environment:
 
 - **Compile** (⌘R, the pill in the top bar). Scans the environment and trains a policy against it.
-  The rollouts appear side by side as they are sampled, each as its steps; a hack lights the step
-  that created it in red (high) or yellow (medium) and names it at the top of the card. The result is
-  **Stable** or **Unstable** with the hacks found. Static findings fold out underneath.
+  The rollouts arrive as a growing list. Press a row and its trace drops down as a timeline; the
+  step that created a hack is painted red, a softer red for medium severity. Press the rollout's
+  name for the deep dive: reward earned against human intent, the task's requirements with
+  expected and observed side by side, the full trace, the reward's own checks, grader and judge.
+  The result is **Stable** or **Unstable** with the hacks found. Static findings fold out underneath.
 - **Harden**. Tick one or several hacks and harden them together (or press Harden on a card). The
   differences that close them open in one report, grouped by the part of the environment they change:
   additions in green, removals in red, alterations in yellow, each with accept and reject. Whatever is

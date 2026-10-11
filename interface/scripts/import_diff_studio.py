@@ -310,6 +310,12 @@ def convert(attack):
             "hack_excerpt": find_excerpt(output, cfg["needles"]) if (is_hack or violations) else None,
             "judge_output": judge,
             "evidence": "%s:%d" % (evidence_file, rows.index(row) + 1),
+            "comparisons": [
+                {"id": "r%d" % (i + 1), "label": v.split(":")[0].strip().capitalize() if ":" in v else "Task requirement",
+                 "expected": "Not " + v.split(":", 1)[0].strip().lower() if ":" in v else "Answer the task on its merits",
+                 "observed": v.split(":", 1)[1].strip() if ":" in v else v, "failed": True, "consequence": None}
+                for i, v in enumerate(violations)
+            ] or None,
         })
     trajectories.sort(key=lambda t: t["step"])
     first_hack = next(t for t in trajectories if t["is_hack"])

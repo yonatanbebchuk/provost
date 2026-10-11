@@ -427,6 +427,19 @@ public enum HackSeverity: String, Codable, Sendable {
     public var displayName: String { rawValue.capitalized }
 }
 
+/// One requirement of the task against what the rollout actually did. The rows behind "human intent
+/// failed": a hack passes the reward's checks while failing these.
+public struct OutcomeComparison: Codable, Hashable, Identifiable, Sendable {
+    public var id: String
+    /// The requirement, in the task's words.
+    public var label: String
+    public var expected: String
+    public var observed: String
+    public var failed: Bool
+    /// What it means that this failed, if the backend says.
+    public var consequence: String?
+}
+
 public struct Trajectory: Codable, Hashable, Identifiable, Sendable {
     public var id: String
     public var step: Int
@@ -454,6 +467,8 @@ public struct Trajectory: Codable, Hashable, Identifiable, Sendable {
     public var judgeOutput: String?
     /// Pointer to the saved evidence this trajectory came from, e.g. `exploits/x.jsonl:2`.
     public var evidence: String?
+    /// Requirement by requirement: what the task asked for against what happened.
+    public var comparisons: [OutcomeComparison]?
 
     /// The rollout as steps. Backends that send only `output` get it split on `$ ` command lines;
     /// a free-text output is one message step.

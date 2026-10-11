@@ -42,9 +42,15 @@ enum Theme {
         }
     }
 
-    /// Hack severity: high in red, medium in yellow.
+    /// Hack severity: two shades of red. High is the status red; medium is a softer one.
+    static let hackMedium = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 0.95, green: 0.60, blue: 0.50, alpha: 1)
+            : NSColor(srgbRed: 0.85, green: 0.42, blue: 0.32, alpha: 1)
+    })
+
     static func color(for severity: HackSeverity) -> Color {
-        severity == .high ? statusVulnerable : changeAltered
+        severity == .high ? statusVulnerable : hackMedium
     }
 
     static func color(for status: EnvironmentStatus) -> Color {

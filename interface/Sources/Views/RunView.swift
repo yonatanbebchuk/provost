@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// One compile. Rollouts side by side as they happen, hacks lit up; tick hacks and harden them
+/// One compile. Rollouts as a growing list, each dropping down into its trace, hacks painted red; tick hacks and harden them
 /// together; the differences in one report; the certificate when the compile is stable.
 struct RunView: View {
     @Environment(DemoStore.self) private var store
@@ -97,9 +97,9 @@ struct RunView: View {
 
     private var result: some View {
         VStack(spacing: 0) {
-            TrajectoryBoard(hacksOnly: hacksOnly && session.compileFinished)
+            RolloutList(hacksOnly: hacksOnly && session.compileFinished)
                 .frame(maxHeight: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, 8)
             Divider()
             findings
         }

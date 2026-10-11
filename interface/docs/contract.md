@@ -115,6 +115,10 @@ visible). All three are optional: without `steps` the app splits `output` on `$ 
 text becomes one `message` step); without `hack_step` it lights the first step containing
 `hack_excerpt`; without `severity` a hack is `high`.
 
+`comparisons` (optional) is the task requirement by requirement against what the rollout did:
+`{ "id", "label", "expected", "observed", "failed", "consequence"? }`. These rows are what "human
+intent failed" means on the deep dive; a hack passes the reward's checks while failing some of these.
+
 ```json
 {
   "id": "traj-0412-03",
