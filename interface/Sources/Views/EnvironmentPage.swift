@@ -11,7 +11,11 @@ struct EnvironmentPage: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 if let spec = store.spec(for: environment) {
-                    ObjectiveBlock(environment: environment, objective: spec.objective)
+                    HStack(alignment: .top, spacing: 16) {
+                        ObjectiveBlock(environment: environment, objective: spec.objective)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                        certificateCard.frame(width: 236)
+                    }
                     if !store.pendingChanges(for: environment).isEmpty { pendingBanner }
                     if let samples = spec.samples, !samples.isEmpty {
                         TrainingDataStrip(samples: samples, taskCount: environment.taskCount)
@@ -22,11 +26,6 @@ struct EnvironmentPage: View {
                         }
                         PartCard(part: .actions, environment: environment) { actionSpace(spec) }
                         PartCard(part: .observations, environment: environment, alsoParts: [.initialState]) { observationSpace(spec) }
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-                    HStack(alignment: .top, spacing: 16) {
-                        compiles
-                        certificateCard.frame(width: 320)
                     }
                     .fixedSize(horizontal: false, vertical: true)
                     provenance(spec.provenance)
@@ -40,7 +39,6 @@ struct EnvironmentPage: View {
                             KeyValue(key: "Filesystem", value: environment.sandbox.filesystem),
                         ])
                     }
-                    compiles
                 }
             }
             .padding(24)
@@ -122,36 +120,46 @@ struct EnvironmentPage: View {
         }
     }
 
+    /// The latest certificate, beside the objective. Pressing it opens the compile that issued it.
+    @ViewBuilder
     private var certificateCard: some View {
         let status = store.status(for: environment)
-        return VStack(alignment: .leading, spacing: 10) {
+        let cert = store.latestCertificate(for: environment)
+        let issuer = cert.flatMap { c in store.sessions(for: environment).first { $0.certificate?.id == c.id } }
+        let body = VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                Image(systemName: "seal").font(.body).foregroundStyle(.secondary)
-                Text("Certificate").font(.title3.weight(.semibold))
+                Image(systemName: cert == nil ? "seal" : "checkmark.seal.fill").font(.body)
+                    .foregroundStyle(cert == nil ? Color.secondary : Theme.color(for: status))
+                Text("Certificate").font(.headline)
                 Spacer()
+                if issuer != nil { Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary) }
             }
-            Divider()
-            if let cert = store.latestCertificate(for: environment) {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "checkmark.seal.fill").font(.title2).foregroundStyle(Theme.color(for: status))
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(cert.issuedAt.formatted(Format.date)).font(.callout.weight(.medium))
-                        Text("hacks \(Format.percent(cert.before.hackRate)) → \(Format.percent(cert.after.hackRate))")
-                            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                        if case .stale(_, let reason) = status {
-                            Text("Stale · \(reason)").font(.caption.weight(.medium))
-                        }
-                        Text(cert.id).font(.caption.monospaced()).foregroundStyle(.tertiary)
-                    }
+            if let cert {
+                Text(cert.issuedAt.formatted(Format.date)).font(.callout.weight(.medium))
+                Text("hacks \(Format.percent(cert.before.hackRate)) → \(Format.percent(cert.after.hackRate))")
+                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                if case .stale(_, let reason) = status {
+                    Text("Stale · \(reason)").font(.caption.weight(.medium))
                 }
+                if let issuer { Text("Compile v\(issuer.version)").font(.caption).foregroundStyle(.tertiary) }
             } else {
                 Text("Not signed").font(.callout).foregroundStyle(.secondary)
             }
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
+        if let issuer {
+            Button {
+                store.select(session: issuer)
+                issuer.page = .certificate
+            } label: { body.contentShape(Rectangle()) }
+            .buttonStyle(.plain)
+            .help("Open the compile that issued this certificate")
+        } else {
+            body
+        }
     }
 
     private func provenance(_ p: ProvenanceSpec) -> some View {
@@ -162,49 +170,6 @@ struct EnvironmentPage: View {
             Spacer()
         }
         .font(.caption).foregroundStyle(.tertiary)
-    }
-
-    private var compiles: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Compiles").font(.title3.weight(.semibold)).padding(.top, 2)
-            let sessions = store.sessions(for: environment)
-            if sessions.isEmpty {
-                Text("Not compiled yet. ⌘R.").font(.callout).foregroundStyle(.secondary)
-            } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(sessions.enumerated()), id: \.element.id) { index, session in
-                        Button { store.select(session: session) } label: {
-                            HStack(spacing: 14) {
-                                Text("v\(session.version)").font(.callout.monospaced()).frame(width: 40, alignment: .leading)
-                                Text(session.startedAt, format: .dateTime.hour().minute()).font(.callout.monospacedDigit()).foregroundStyle(.secondary)
-                                Text(session.run.config.model).font(.callout.monospaced()).foregroundStyle(.secondary)
-                                if session.compileFinished {
-                                    Text(session.statusLine).font(.callout.weight(.medium))
-                                        .foregroundStyle(session.isStable ? Theme.statusCertified : Theme.statusVulnerable)
-                                } else {
-                                    Text(session.statusLine).font(.callout).foregroundStyle(.secondary)
-                                }
-                                if !session.checks.isEmpty {
-                                    let closed = session.checks.values.filter { $0.replay?.attackBlocked ?? ($0.after.hackRate == 0) }.count
-                                    Text("\(closed)/\(session.checks.count) closed").font(.caption).foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if session.isBusy { ProgressView().controlSize(.mini) }
-                                if session.certificate != nil { Image(systemName: "checkmark.seal.fill").font(.caption).foregroundStyle(Theme.statusCertified) }
-                                Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
-                            }
-                            .padding(.horizontal, 14).padding(.vertical, 9)
-                            .background(index.isMultiple(of: 2) ? Color.clear : Color.primary.opacity(0.03))
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous).strokeBorder(.separator))
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     private func bullets(_ items: [String], symbol: String, muted: Bool = false) -> some View {
