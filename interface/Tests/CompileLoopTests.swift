@@ -76,7 +76,10 @@ final class CompileLoopTests: XCTestCase {
         XCTAssertEqual(second.version, 3, "compile saves the accepted differences into a version first")
         XCTAssertEqual(second.version, store.version(of: env))
         XCTAssertTrue(second.findings.count < first.findings.count, "closed findings drop out of the scan")
-        // A stable compile signs itself.
+        // Stable but unsigned until asked.
+        XCTAssertNil(second.certificate)
+        guard case .stable(nil) = store.status(for: env) else { return XCTFail("stable and unsigned") }
+        await second.issueCertificate()
         XCTAssertNotNil(second.certificate)
         XCTAssertEqual(second.certificate?.runId, second.id)
         guard case .stable(let signed) = store.status(for: env), signed != nil else { return XCTFail("signed after a stable compile") }

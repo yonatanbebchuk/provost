@@ -291,8 +291,10 @@ struct RunMenu: View {
                     Image(systemName: "play.fill").font(.caption.weight(.bold))
                 }
                 Text(isBusy ? "Running" : "Run")
+                Spacer(minLength: 0)
                 Image(systemName: "chevron.down").font(.caption2.weight(.bold))
             }
+            .frame(minWidth: 108)
         }
         .menuStyle(.button)
         .buttonStyle(RoundedProminentButtonStyle())
@@ -375,8 +377,10 @@ struct PolicyModelMenu: View {
             HStack(spacing: 6) {
                 Image(systemName: current.tier == .custom ? "checkmark.shield.fill" : "cpu").font(.caption)
                 Text(current.name)
+                Spacer(minLength: 0)
                 Image(systemName: "chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
             }
+            .frame(minWidth: 132)
         }
         .menuStyle(.button)
         .buttonStyle(RoundedSecondaryButtonStyle())

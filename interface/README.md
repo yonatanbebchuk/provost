@@ -40,8 +40,8 @@ on an environment:
   new version reads **Unassessed** until it is compiled. Compile saves first if anything is unsaved.
 - **Recheck** (per hardened hack) replays that hack and the legitimate trajectory on the hardened
   environment: closed, or still rewarded.
-- A compile that comes back Stable signs itself: the certificate is the compile's record, shown as a
-  printable page with PDF export. The environment carries its last certificate; one signed by an
+- A compile that comes back Stable offers **Issue certificate** at the bottom; the certificate is
+  shown as a printable page with PDF export. The environment carries its last certificate; one signed by an
   older auditor reads **Stale**.
 - **Run** is one menu in the top bar: Compile now, Test greyed out until the Monitor process exists.
   The top bar also carries the environment name, its version tag, its status tag, the change

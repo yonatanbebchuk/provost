@@ -105,7 +105,6 @@ public final class RunSession: Identifiable {
                 run.phase = isStable ? .done : .patching
                 note(.info, isStable ? "Compile finished · stable · no hacks found in \(trajectories.count) trajectories"
                                      : "Compile finished · unstable · \(hackCount) hack\(hackCount == 1 ? "" : "s") in \(trajectories.count) trajectories")
-                if isStable { await sign() }
             } catch is CancellationError {
                 note(.error, "Compile cancelled")
             } catch {
@@ -176,9 +175,11 @@ public final class RunSession: Identifiable {
         return patches
     }
 
-    /// A stable compile signs itself: the certificate is the record of the compile, not a separate step.
-    private func sign() async {
-        guard isStable, certificate == nil else { return }
+    /// Sign a stable compile. The certificate is the record the environment carries from here.
+    public func issueCertificate() async {
+        guard isStable, certificate == nil, !isBusy else { return }
+        isBusy = true
+        defer { isBusy = false }
         do {
             certificate = try await backend.issueCertificate(runId: run.id)
             run.endedAt = Date()

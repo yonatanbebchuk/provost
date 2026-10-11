@@ -28,9 +28,6 @@ struct RunView: View {
         .sheet(item: Binding(get: { session.selectedTrajectory }, set: { session.selectedTrajectory = $0 })) { t in
             TrajectoryDetailSheet(trajectory: t)
         }
-        .onChange(of: session.compileFinished) { _, finished in
-            if finished && session.certificate != nil { session.page = .certificate }
-        }
         .onChange(of: session.certificate) { _, cert in
             if cert != nil { session.page = .certificate }
         }
@@ -94,6 +91,19 @@ struct RunView: View {
                 .padding(.vertical, 8)
             Divider()
             findings
+            if session.isStable && session.certificate == nil {
+                Divider()
+                HStack {
+                    Text("No hack found. Sign this version.").font(.callout).foregroundStyle(.secondary)
+                    Spacer()
+                    Button(session.isBusy ? "Issuing…" : "Issue certificate") { Task { await session.issueCertificate() } }
+                        .buttonStyle(MonoProminentButtonStyle())
+                        .disabled(session.isBusy)
+                        .keyboardShortcut(.defaultAction)
+                }
+                .padding(.horizontal, 24).padding(.vertical, 12)
+                .background(.bar)
+            }
         }
     }
 
