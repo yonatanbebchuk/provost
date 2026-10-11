@@ -4,7 +4,7 @@
       "id": "home",
       "eyebrow": "CamelHack · October 2026",
       "title": "Provost",
-      "subtitle": "Exploit-and-certify for RL training environments.",
+      "subtitle": "Enabling enterprises to train their own models without worrying about alignment.",
       "visual": "faces",
       "script": "• Yonatan Bebchuk.\n• 48 hours — Alvaro, Hai, Josh, Matt and me built Provost.\n• So the modern enterprise can own its own intelligence — and trust it.",
       "budgetSeconds": 15,
@@ -78,20 +78,11 @@
       "id": "provost",
       "logo": false,
       "title": "A window into the future.",
-      "subtitle": "Before you train, we attack your environment the way your model will.",
+      "subtitle": "A service that enables enterprises to train their own models without worrying about alignment.",
       "script": "• This is why we built Provost — an alignment management system.\n• Cutting-edge reward-hack and misalignment detection. Your job: tell the model what you want.\n• Before you train, we attack your environment the way your model would — find every shortcut, help you close it.\n• What your model learns is your business, not a loophole.\n• A developer on the plane next to you, a year from now. Their screen looks like this. → hand off to Josh",
       "budgetSeconds": 20,
       "isDemoHandoff": true,
       "eyebrow": "Provost"
-    },
-    {
-      "id": "technical",
-      "eyebrow": "Technical",
-      "title": "A model trained to break environments.",
-      "visual": "diagram",
-      "script": "• A specialized LLM for breaking RL environments.\n• Built by building environments and exploring the reward space for hacks.\n• The more we do it, the better it breaks them.\n• Plus an LLM judge: spots misaligned responses, reinforces the model to produce more of them.",
-      "budgetSeconds": 30,
-      "isDemoHandoff": false
     },
     {
       "id": "business",
@@ -104,7 +95,7 @@
           "caption": "a year spent building the environments models train in"
         },
         {
-          "value": "0",
+          "value": "$1B",
           "accent": true,
           "caption": "of it independently verified — our line item does not exist"
         },
@@ -133,11 +124,41 @@
     },
     {
       "id": "close",
-      "title": "Intelligence is the asset of the future, and modern industry can't afford to lose it.",
-      "subtitle": "We're here to make sure no one does.",
+      "eyebrow": "CamelHack · October 2026",
+      "title": "Provost",
+      "subtitle": "Enabling enterprises to train their own models without worrying about alignment.",
+      "visual": "faces",
       "script": "• Intelligence is the asset of the future. Modern industry can't afford to lose it.\n• We're here to make sure no one does.",
       "budgetSeconds": 10,
-      "isDemoHandoff": false
+      "isDemoHandoff": false,
+      "logo": true,
+      "people": [
+        {
+          "name": "Yonatan Bebchuk",
+          "github": "yonatanbebchuk",
+          "image": "yonatan-bebchuk.png"
+        },
+        {
+          "name": "Alvaro Gomez-Jordana",
+          "github": null,
+          "image": "alvaro-gomez-jordana.png"
+        },
+        {
+          "name": "Matt Curtis",
+          "github": null,
+          "image": "matt-curtis.png"
+        },
+        {
+          "name": "Joshua Cohen",
+          "github": "yecohn",
+          "image": "josh-cohen.png"
+        },
+        {
+          "name": "Hai Tederry",
+          "github": null,
+          "image": "hai-tederry.png"
+        }
+      ]
     }
   ]
 }
