@@ -5,8 +5,13 @@ import SwiftUI
 /// app polls `<dir>/cmd` for one command per line: `snap [label]` writes the key window's content
 /// as PNG (no screen-recording permission needed: the view draws itself into a bitmap); `key <name>`
 /// sends `right`, `left`, `esc`, `space`, `p`, `f`, `cmd-r` or `cmd-shift-p` through the pitch key
-/// handler; `continue` is the Continue pitch button; `dark` / `light` switch appearance; `size W H` resizes the window. Every command is
-/// echoed to `<dir>/events.log` with the pitch mode, slide and compile page after it ran.
+/// handler; `continue` is the Continue pitch button; `dark` / `light` switch appearance; `size W H` resizes the window.
+/// The app itself can be driven too: `env <id>` selects an environment, `compile` starts a compile,
+/// `tick all|<n>` ticks hacks, `harden` hardens the ticked ones, `open <n>` / `close` show and hide a
+/// hack's detail sheet, `recheck [n]` replays a hardened hack, `page result|report|verify|certificate`
+/// switches the compile page, `accept-all`, `reject-all` and `save` decide and save differences,
+/// `ff on|off` sets fast-forward, and `state` only logs. Every command is echoed to `<dir>/events.log`
+/// with the pitch mode, slide, compile page and compile progress after it ran.
 @MainActor
 enum DebugSnapshot {
     private static var counter = 0
@@ -38,7 +43,13 @@ enum DebugSnapshot {
 
     private static func state(_ store: DemoStore) -> String {
         let page = store.selectedSession.map { "\($0.page)" } ?? "-"
-        return "mode=\(store.pitch.mode) slide=\(store.pitch.index + 1) page=\(page) presenter=\(store.pitch.showPresenter)"
+        var line = "mode=\(store.pitch.mode) slide=\(store.pitch.index + 1) page=\(page) presenter=\(store.pitch.showPresenter)"
+        if let env = store.selectedEnvironment { line += " env=\(env.id) v\(store.version(of: env)) pending=\(store.pendingChanges(for: env).count)" }
+        if let s = store.selectedSession {
+            line += " busy=\(s.isBusy) finished=\(s.compileFinished) rollouts=\(s.trajectories.count) hacks=\(s.hackCount)"
+            line += " ticked=\(s.selectedHacks.count) patches=\(s.patches.count) checks=\(s.checks.count) sheet=\(s.selectedTrajectory != nil)"
+        }
+        return line
     }
 
     private static func run(_ verb: String, _ args: [String], dir: URL, store: DemoStore) {
@@ -62,6 +73,40 @@ enum DebugSnapshot {
         case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
         case "light": NSApp.appearance = NSAppearance(named: .aqua)
         case "size": if args.count == 2, let w = Double(args[0]), let h = Double(args[1]) { resize(w, h) }
+        case "env":
+            if let id = args.first, let env = store.environments.first(where: { $0.id == id || $0.id.hasPrefix(id) }) { store.select(environment: env) }
+        case "compile": Task { await store.compile() }
+        case "ff": store.fastForward = args.first != "off"
+        case "tick":
+            guard let session = store.selectedSession else { break }
+            if args.first == "all" || args.isEmpty { session.selectedHacks = Set(session.hacks.map(\.id)) }
+            else if let n = args.first.flatMap(Int.init), session.hacks.indices.contains(n) { session.selectedHacks.insert(session.hacks[n].id) }
+        case "harden":
+            guard let session = store.selectedSession else { break }
+            if session.selectedHacks.isEmpty { session.selectedHacks = Set(session.hacks.map(\.id)) }
+            Task { await store.hardenSelected(in: session) }
+        case "open":
+            guard let session = store.selectedSession else { break }
+            let n = args.first.flatMap(Int.init) ?? 0
+            if session.hacks.indices.contains(n) { session.selectedTrajectory = session.hacks[n] }
+        case "close": store.selectedSession?.selectedTrajectory = nil
+        case "recheck":
+            guard let session = store.selectedSession else { break }
+            let n = args.first.flatMap(Int.init) ?? 0
+            if session.hacks.indices.contains(n) { let hack = session.hacks[n]; Task { await session.check(hack) } }
+        case "page":
+            guard let session = store.selectedSession else { break }
+            switch args.first ?? "" {
+            case "result": session.page = .result
+            case "report": session.page = .report
+            case "verify": session.page = .verify
+            case "certificate": session.page = .certificate
+            default: break
+            }
+        case "accept-all": if let env = store.selectedEnvironment { store.acceptAll(in: env) }
+        case "reject-all": if let env = store.selectedEnvironment { store.rejectAll(in: env) }
+        case "save": if let env = store.selectedEnvironment { store.save(env) }
+        case "envpage": store.showEnvironmentPage()
         default: break
         }
     }
@@ -94,7 +139,8 @@ enum DebugSnapshot {
     }
 
     private static func write(_ window: NSWindow, to dir: URL, name: String) {
-        // The sidebar's vibrancy layer does not draw into a cached bitmap, so it comes out blank here.
+        // The sidebar's vibrancy layer does not draw into a cached bitmap (nor into a CALayer render),
+        // so it comes out blank here; crop it off for stills.
         guard let view = window.contentView, let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
         view.cacheDisplay(in: view.bounds, to: rep)
         guard let png = rep.representation(using: .png, properties: [:]) else { return }

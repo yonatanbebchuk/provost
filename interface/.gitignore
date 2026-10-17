@@ -8,3 +8,5 @@ xcuserdata/
 .DS_Store
 # Generated Info.plist
 Resources/Info.plist
+# Release build output (make CONFIG=Release DERIVED=build-release)
+build-release/
