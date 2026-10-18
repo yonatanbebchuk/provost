@@ -1,14 +1,10 @@
 # Provost
 
-**Enabling enterprises to train their own models without worrying about alignment.**
+An alignment management system for RL training environments, built in 48 hours with Josh, Hai, Matt & Alvaro.
 
-Provost is an alignment management system for reinforcement-learning training environments.
-Before a company trains a model in an environment, Provost trains a policy against that environment
-on purpose, finds the reward hacks it discovers, hardens the environment so they no longer pay,
-and certifies the result.
-
-Built in 48 hours at CamelHack, October 2026, by Yonatan Bebchuk, Alvaro Gomez-Jordana,
-Matt Curtis, Joshua Cohen and Hai Tederry.
+Before an enterprise trains a model in an environment, Provost trains a policy against it on purpose,
+flags the rollouts that earned reward by breaking the human intent, proposes the changes to the reward
+and objective that close those hacks, rechecks them on the hardened environment, and certifies the result.
 
 ![Provost](docs/slides/01-provost.png)
 
