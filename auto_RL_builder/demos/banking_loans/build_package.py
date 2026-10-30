@@ -9,7 +9,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parent
 FILES = ['__init__.py','scenario.json','environment.py','evaluator.py','server.py',
-         'run_demo.py','test_demo.py','README.md','build_package.py']
+         'run_demo.py','hunt.py','test_demo.py','README.md','build_package.py']
 
 
 def build():
@@ -38,7 +38,7 @@ def build():
         assert responses[-1]['result']['reward']==60 and responses[-1]['result']['done']
     manifest = {'archive':archive.name,'sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),
                 'files':{name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in FILES},
-                'verified_from_extracted_directory':True,'tests':10,'constructed_controls':16,
+                'verified_from_extracted_directory':True,'tests':11,'constructed_controls':16,
                 'json_lines_smoke_passed':True,'dependencies':'Python 3.10+ standard library only',
                 'scope':'Developer/coordinator package; not an isolated learner filesystem'}
     (dist/'checksums.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')

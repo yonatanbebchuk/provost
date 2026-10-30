@@ -1,6 +1,6 @@
 {
   "archive": "banking-loans-standalone.zip",
-  "sha256": "96e36876655c3dc5b7c4ea7adf55b51fb3fd42e4ac7a1d10d85c35a1ecee77f3",
+  "sha256": "ced866cf4527fcfd41b05b86acbf93e285395d085cab13eccd0e4eaa77275c77",
   "files": {
     "__init__.py": "fed9bc458f0a050f922a7b6d5ef465f957e7ff9a908c329b9739dec8d21258be",
     "scenario.json": "16e6c42fd440c86b623331e298fb8c7cfd4eb947435f17c1afcad0d844576035",
@@ -8,12 +8,13 @@
     "evaluator.py": "36c8ed93803e26dd5d7764d78ff41617633e588d4b404dd9b5d4d852b4507a3c",
     "server.py": "dadd0191639b267d05ab8e9117a350c3a64cd35ab22c0e2c60c119e75703a256",
     "run_demo.py": "359150fffeca848f7789bd995867776a2e0efbb94a74dda8bd894e67dc2364a7",
-    "test_demo.py": "604480e96746b7ccce63e2400b6e1d29a416925733e5a22b40f9857c0667f7ea",
-    "README.md": "b1a822a5ec57406a1963244f5e2f7a96c4d144ba5d17e540889418f8f113bc97",
-    "build_package.py": "347909a436209655d0c1fe397415b75a80f0626ff3cf853424f68b1cafcf0289"
+    "hunt.py": "a7b1c2dadd0a49b840cfe8f6b3e8ea9a091157a746eb98f95e733e3088e5d35b",
+    "test_demo.py": "5d2d99dd7783d84d1217b8472b7697945e695481f18602c80da01412b2351238",
+    "README.md": "f39e922b34236469994454f092565b28bd7bbb2cc10eac49cbf8e894ff8b993d",
+    "build_package.py": "c5428fe09f78f1609250d5b2e07efcf79228f2e359249bbe42f4624f3904fcbc"
   },
   "verified_from_extracted_directory": true,
-  "tests": 10,
+  "tests": 11,
   "constructed_controls": 16,
   "json_lines_smoke_passed": true,
   "dependencies": "Python 3.10+ standard library only",
