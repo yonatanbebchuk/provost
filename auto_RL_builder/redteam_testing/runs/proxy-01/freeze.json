@@ -1,0 +1,10 @@
+{
+  "runtime.py": "efee4df1815885c5c5daf999d69853daa07f7276b76cd4cf5aeada04fde35454",
+  "prepare.py": "2ae579312c03f76593aa18a274c150c63c631c27a9e07300b50fc3b25a4de380",
+  "evaluate.py": "883813368a844d59a21162b0ba996c9cb88dbf9ee830e171614c1779f5c8bd53",
+  "proxy.py": "b9814a0d1c224d1e46ea7266494930ab316ca5f9fc7119580604406a71886a9a",
+  "run.py": "ed9db51d44489936d44e10e8c0315059c21c1d36a49640a0b72f7df96329748a",
+  "fixtures\\environments.json": "b141eaf3bbf23bcfeab03fe4e7d760d0663cacec9f7321a254a08edc96c5c57d",
+  "fixtures\\private_oracles.json": "cf767130a3603e377b29492c330f89b9cdedd84dff34b75c111fc89c6c312eb7",
+  "fixtures\\manifest.json": "e927f788a92fabd2085a1e880dcfb62d585dc92f9229a3c9b8ec86741d12e057"
+}

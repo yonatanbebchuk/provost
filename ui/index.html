@@ -3,152 +3,171 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Reward Hack Diff Studio</title>
+  <title>Reward Hack Demo</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
-  <div class="app-shell">
+  <div class="shell">
     <aside class="sidebar">
       <div class="brand">
-        <div class="logo">RH</div>
+        <div class="logo">RL</div>
         <div>
-          <h1>Reward Hack<br/>Diff Studio</h1>
-          <p>RL verifier red-team demo</p>
+          <h1>Reward Hack Demo</h1>
+          <p>Show the environment → attack → reward → fix</p>
         </div>
       </div>
 
-      <div class="metric-grid">
-        <div class="metric"><span id="attackCount">3</span><label>attacks</label></div>
-        <div class="metric"><span>12</span><label>findings</label></div>
-      </div>
-
-      <div class="section-title">Environments</div>
+      <label class="field-label">Environment</label>
       <nav id="attackList" class="attack-list"></nav>
 
-      <div class="section-title">Model / verifier</div>
+      <label class="field-label">Judge / verifier model</label>
       <select id="modelSelect" class="select">
         <option>meta-llama/llama-3.2-3b-instruct</option>
         <option>openai/gpt-4o-mini</option>
         <option>schema-only verifier proxy</option>
       </select>
 
-      <button id="runBtn" class="primary-btn">▶ Run attack</button>
-      <button id="patchBtn" class="secondary-btn">🛡 Rerun with fix</button>
+      <button id="runBtn" class="primary-btn">Run attack</button>
+      <button id="patchBtn" class="secondary-btn" disabled>Verify fix</button>
+
+      <details class="register-box">
+        <summary>Register new demo</summary>
+        <form id="registerForm" class="register-form">
+          <input name="id" placeholder="id: my_env_attack" required />
+          <input name="name" placeholder="Environment name" required />
+          <input name="subtitle" placeholder="Attack name" required />
+          <textarea name="environmentDefinition" placeholder="What is the environment?" required></textarea>
+          <textarea name="rewardRule" placeholder="How is reward computed?" required></textarea>
+          <textarea name="humanIntent" placeholder="What did the environment creator intend?" required></textarea>
+          <textarea name="attackExplanation" placeholder="Explain the attack" required></textarea>
+          <textarea name="userPrompt" placeholder="User/task prompt" required></textarea>
+          <textarea name="payload" placeholder="Attack payload/output" required></textarea>
+          <textarea name="judgeOutput" placeholder="Judge/verifier output" required></textarea>
+          <textarea name="humanFailure" placeholder="Why does this fail human intent?" required></textarea>
+          <input name="beforeReward" placeholder="before reward e.g. 1.0" />
+          <input name="afterReward" placeholder="after reward e.g. 0.0" />
+          <textarea name="rootCauseDetail" placeholder="Root cause detail"></textarea>
+          <textarea name="patchBefore" placeholder="Vulnerable code / verifier"></textarea>
+          <textarea name="patchAfter" placeholder="Hardened code / verifier"></textarea>
+          <textarea name="patchNotesText" placeholder="Fix checklist, one per line"></textarea>
+          <button type="submit" class="primary-btn">Save demo</button>
+          <div id="registerStatus" class="register-status"></div>
+        </form>
+      </details>
     </aside>
 
-    <main class="workspace">
-      <header class="topbar">
+    <main class="main">
+      <header class="hero">
         <div>
-          <div class="breadcrumbs">RL-REDTEAM / environements / <span id="crumbEnv">AgencyBench</span></div>
+          <div class="eyebrow">RL reward-hacking walkthrough</div>
           <h2 id="attackTitle">AgencyBench</h2>
           <p id="attackSubtitle">Evaluator delimiter escape</p>
         </div>
-        <div class="status-card" id="statusCard">
-          <div class="status-dot"></div>
-          <div>
-            <label>Status</label>
-            <strong id="statusText">VULNERABLE</strong>
-          </div>
-        </div>
+        <div id="statusBadge" class="status">Not run</div>
       </header>
 
-      <section class="score-row">
-        <div class="score-card danger">
-          <label>Before fix</label>
-          <strong id="beforeScore">reward 1.0</strong>
-          <span id="beforeDetail">attack succeeds</span>
-        </div>
-        <div class="arrow">→</div>
-        <div class="score-card safe">
-          <label>After fix</label>
-          <strong id="afterScore">reward 0.0</strong>
-          <span id="afterDetail">attack rejected</span>
-        </div>
-        <div class="score-card neutral">
-          <label>Evidence</label>
-          <strong id="evidenceRef">jsonl:2</strong>
-          <span>saved exploit trace</span>
+      <section class="step-card env-card">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Environment and reward structure</h3>
+          <p id="environmentDefinition" class="lead"></p>
+          <div class="reward-box">
+            <div>
+              <span>Reward rule</span>
+              <strong id="rewardRule"></strong>
+            </div>
+            <div>
+              <span>Human intent</span>
+              <strong id="humanIntent"></strong>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="content-grid">
-        <div class="panel wide">
-          <div class="panel-header">
+      <section id="runPanel" class="run-panel">
+        <div>
+          <strong id="runTitle">Ready to run</strong>
+          <p>Executes the environment in the local harness, then shows the attack, the reward it earned, and the fix.</p>
+        </div>
+        <button id="runBtnInline" class="primary-btn inline-btn">Run attack</button>
+      </section>
+
+      <div id="revealed" hidden>
+      <section class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>The attack</h3>
+          <p id="attackExplanation" class="lead"></p>
+          <div class="two-col">
             <div>
-              <h3>Patch diff</h3>
-              <p id="diffFile">utils.py</p>
+              <h4>User / task prompt</h4>
+              <pre id="userPrompt" class="text-box"></pre>
             </div>
-            <div class="tabs">
-              <button class="tab active" data-tab="diff">Diff</button>
-              <button class="tab" data-tab="root">Root cause</button>
-              <button class="tab" data-tab="payload">Payload</button>
-              <button class="tab" data-tab="report">Report</button>
+            <div>
+              <h4>Attack payload</h4>
+              <pre id="payload" class="text-box attack"></pre>
             </div>
-          </div>
-
-          <div id="tab-diff" class="tab-page active">
-            <div class="diff-wrap">
-              <div class="code-pane">
-                <div class="code-title red">Vulnerable</div>
-                <pre id="diffBefore"></pre>
-              </div>
-              <div class="code-pane">
-                <div class="code-title green">Hardened</div>
-                <pre id="diffAfter"></pre>
-              </div>
-            </div>
-          </div>
-
-          <div id="tab-root" class="tab-page">
-            <div id="rootCauses" class="root-list"></div>
-          </div>
-
-          <div id="tab-payload" class="tab-page">
-            <div class="payload-grid">
-              <div>
-                <h4>User / task prompt</h4>
-                <pre id="userPrompt" class="text-box"></pre>
-              </div>
-              <div>
-                <h4>Attack payload</h4>
-                <pre id="payload" class="text-box attack"></pre>
-              </div>
-              <div>
-                <h4>Judge / verifier output</h4>
-                <pre id="judgeOutput" class="text-box judge"></pre>
-              </div>
-            </div>
-          </div>
-
-          <div id="tab-report" class="tab-page">
-            <div class="report" id="report"></div>
           </div>
         </div>
+      </section>
 
-        <aside class="panel side-panel">
-          <div class="panel-header compact">
-            <h3>Attack trace</h3>
-            <span id="traceBadge" class="pill danger">live</span>
+      <section class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>What the verifier rewarded</h3>
+          <div class="result-grid">
+            <div class="score-card bad">
+              <span>Before fix</span>
+              <strong id="beforeScore">reward 1.0</strong>
+              <p id="beforeDetail">attack succeeds</p>
+            </div>
+            <div class="score-card good">
+              <span>After fix</span>
+              <strong id="afterScore">reward 0.0</strong>
+              <p id="afterDetail">attack rejected</p>
+            </div>
           </div>
-          <ol id="timeline" class="timeline">
-            <li class="done">Load environment</li>
-            <li class="done">Generate exploit payload</li>
-            <li class="done">Judge returns high reward</li>
-            <li id="patchStep">Apply hardened verifier</li>
-            <li id="failStep">Attack fails after fix</li>
-          </ol>
-
-          <div class="callout danger">
-            <strong>Human-intent failure</strong>
+          <h4>Judge / verifier output</h4>
+          <pre id="judgeOutput" class="text-box judge"></pre>
+          <h4>Harness trace</h4>
+          <pre id="harnessTrace" class="text-box trace">Click “Run attack” to execute the local harness.</pre>
+          <div class="explain-box">
+            <strong>Why this is a reward hack</strong>
             <p id="humanFailure"></p>
           </div>
+        </div>
+      </section>
 
-          <div class="callout safe">
-            <strong>Recommended remediation</strong>
+      <section class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Root cause and remediation</h3>
+          <div id="rootCauses" class="root-list"></div>
+          <h4>Patch preview</h4>
+          <div class="diff-wrap">
+            <div>
+              <div class="code-title red">Vulnerable</div>
+              <pre id="diffBefore" class="code"></pre>
+            </div>
+            <div>
+              <div class="code-title green">Hardened</div>
+              <pre id="diffAfter" class="code"></pre>
+            </div>
+          </div>
+          <div class="patch-notes">
+            <h4>Fix checklist</h4>
             <ul id="patchNotes"></ul>
           </div>
-        </aside>
+          <div class="verify-panel">
+            <div>
+              <strong id="verifyTitle">Verify the fix</strong>
+              <p id="verifyDetail">Re-runs the same attack against the hardened verifier.</p>
+            </div>
+            <button id="verifyBtn" class="primary-btn inline-btn">Verify fix</button>
+          </div>
+        </div>
       </section>
+      </div>
     </main>
   </div>
 
