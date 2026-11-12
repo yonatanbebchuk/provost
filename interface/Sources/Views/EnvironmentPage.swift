@@ -162,17 +162,6 @@ struct EnvironmentPage: View {
         }
     }
 
-    private func bullets(_ items: [String], symbol: String, muted: Bool = false) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            ForEach(items, id: \.self) { item in
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Image(systemName: symbol).font(.caption).foregroundStyle(muted ? .tertiary : .secondary).frame(width: 14)
-                    Text(item).font(.callout).foregroundStyle(muted ? .secondary : .primary).fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        }
-    }
-
     private func keyValues(_ items: [KeyValue]) -> some View {
         Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 5) {
             ForEach(items, id: \.key) { item in

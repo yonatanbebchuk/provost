@@ -1,0 +1,12 @@
+# Runtime/demo registry state
+ui/data/registry.json
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# Attack search job output (regenerated per run)
+exploits/runs/

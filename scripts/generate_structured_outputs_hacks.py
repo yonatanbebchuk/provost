@@ -3,7 +3,7 @@
 Generate reward-hack candidates for NVIDIA Nemotron structured-output RL taskset.
 
 Target:
-  environements/huggingface/nvidia__Nemotron-RL-instruction_following-structured_outputs
+  environments/huggingface/nvidia__Nemotron-RL-instruction_following-structured_outputs
 
 Hack idea:
   The intended task asks for JSON that both validates against a schema AND is
@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "environements" / "huggingface" / "nvidia__Nemotron-RL-instruction_following-structured_outputs" / "structured_outputs_251027_nano_v3_sdg_json_val.jsonl"
+DATA = ROOT / "environments" / "huggingface" / "nvidia__Nemotron-RL-instruction_following-structured_outputs" / "structured_outputs_251027_nano_v3_sdg_json_val.jsonl"
 OUT = ROOT / "exploits" / "structured_outputs_hack_candidates.jsonl"
 
 

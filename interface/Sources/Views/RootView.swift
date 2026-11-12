@@ -5,17 +5,7 @@ struct RootView: View {
     @Environment(DemoStore.self) private var store
 
     var body: some View {
-        ZStack {
-            app
-                .opacity(store.pitch.isPresenting ? 0 : 1)
-                .allowsHitTesting(!store.pitch.isPresenting)
-                .accessibilityHidden(store.pitch.isPresenting)
-            if store.pitch.isPresenting {
-                PitchView().transition(.opacity)
-            }
-        }
-        .animation(.easeInOut(duration: 0.3), value: store.pitch.isPresenting)
-        .onAppear { PitchKeys.install(store: store); DebugSnapshot.installIfRequested(store: store) }
+        app.onAppear { DebugSnapshot.installIfRequested(store: store) }
     }
 
     /// The app: sidebar, top bar, the environment page or the compile.
@@ -76,9 +66,7 @@ struct EnvironmentSidebar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline) {
-                Button { store.startPresentation() } label: { BrandLockup() }
-                    .buttonStyle(.plain)
-                    .help("Start a new presentation from slide 1")
+                BrandLockup()
                 Spacer()
                 Button { ProvostApp.chooseEnvironmentFolder(store: store) } label: {
                     Image(systemName: "plus").font(.body.weight(.semibold))
@@ -237,42 +225,17 @@ struct TopBar: View {
                     StatusBadge(status: store.status(for: env)).fixedSize()
                 }
                 Spacer()
-                pitchButton
                 changeRecord(env)
                 PolicyModelMenu(environment: env)
                 RunMenu()
             } else {
                 Text("No environment").font(.headline).foregroundStyle(.secondary)
                 Spacer()
-                pitchButton
             }
         }
         .padding(.horizontal, 24)
         .frame(height: 52)
         .background(.bar)
-    }
-
-    /// The way into the pitch. During the demo: on to the next slide. After Exit to app: back to
-    /// the slide that was left. Otherwise: the deck from slide 1.
-    @ViewBuilder
-    private var pitchButton: some View {
-        if store.pitch.isDemo {
-            Button("Continue pitch →") { store.leaveDemo(toNextSlide: true) }
-                .buttonStyle(RoundedProminentButtonStyle())
-                .help("Back to the slides, on the one after the demo")
-        } else if store.pitch.canResume {
-            Button("Resume pitch →") { store.pitch.resume() }
-                .buttonStyle(RoundedProminentButtonStyle())
-                .help("Back to the slide you left (⌘⇧P)")
-        } else {
-            Button {
-                store.startPresentation()
-            } label: {
-                Label("Present", systemImage: "play.rectangle.fill")
-            }
-            .buttonStyle(RoundedSecondaryButtonStyle())
-            .help("Start the pitch from slide 1 (⌘⇧P resumes where it was left)")
-        }
     }
 
     /// The decisions waiting to become a version, and the Save that makes them one.

@@ -5,9 +5,11 @@ from pathlib import Path
 if __package__:
     from .environment import Environment
     from .evaluator import evaluate
+    from .hunt import hunt
 else:
     from environment import Environment
     from evaluator import evaluate
+    from hunt import hunt
 
 SCENARIO = json.loads(Path(__file__).with_name('scenario.json').read_text())
 
@@ -101,6 +103,16 @@ class LoanDemo(unittest.TestCase):
         self.assertEqual(env.observe()['policy']['authorized_apr_bps'],650)
         exported = env.export_episode(); exported['ledger'].append({})
         self.assertEqual(env.export_episode()['ledger'],[])
+
+    def test_exhaustive_search_finds_hack_only_in_unguarded_proxy(self):
+        tracks = {(t['reward_mode'],t['guard']):t for t in hunt(SCENARIO)['tracks']}
+        hacked = tracks[('customer_satisfaction','vulnerable')]
+        self.assertEqual(hacked['best_reward'],100)
+        self.assertTrue(hacked['optimum_is_hack'])
+        for track in [t for k, t in tracks.items() if k != ('customer_satisfaction','vulnerable')]:
+            self.assertEqual(track['best_reward'],60)
+            self.assertEqual(track['optimal_plans_that_hack'],0)
+            self.assertEqual(track['example_optimal_plan'][1],self.quote())
 
 
 if __name__=='__main__':

@@ -46,9 +46,6 @@ struct VerifyView: View {
             HStack(spacing: 12) {
                 Button("← Rollouts") { session.page = .result }.buttonStyle(MonoSecondaryButtonStyle())
                 Spacer()
-                if store.pitch.isDemo {
-                    Button("Continue pitch →") { store.leaveDemo(toNextSlide: true) }.buttonStyle(MonoProminentButtonStyle())
-                }
             }
             .padding(.horizontal, 24).padding(.vertical, 12)
             .background(.bar)

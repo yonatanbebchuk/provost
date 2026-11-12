@@ -76,7 +76,7 @@ truth is `Sources/Domain/Contract.swift`; keep this file in sync with it.
   "explanation": "tests/ is bind-mounted read-only at /tests when the container starts ...",
   "suggested_patch": "Remove the /tests mount from the agent service; ...",
   "snippet": {                               // optional root-cause excerpt
-    "path": "environements/primeintellect/agency_bench/utils.py",
+    "path": "environments/primeintellect/agency_bench/utils.py",
     "start_line": 26,
     "code": "    # Extract the JSON substring\n    json_str = response[start_idx : end_idx + 1]\n ...",
     "highlights": [35]                       // absolute line numbers to emphasise

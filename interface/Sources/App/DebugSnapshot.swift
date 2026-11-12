@@ -1,17 +1,16 @@
 import AppKit
 import SwiftUI
 
-/// Rehearsal aid: launched with `--snapshot-dir <dir>`, the window is sized to 1280 × 800 and the
-/// app polls `<dir>/cmd` for one command per line: `snap [label]` writes the key window's content
-/// as PNG (no screen-recording permission needed: the view draws itself into a bitmap); `key <name>`
-/// sends `right`, `left`, `esc`, `space`, `p`, `f`, `cmd-r` or `cmd-shift-p` through the pitch key
-/// handler; `continue` is the Continue pitch button; `dark` / `light` switch appearance; `size W H` resizes the window.
-/// The app itself can be driven too: `env <id>` selects an environment, `compile` starts a compile,
+/// Scripted driver for checking the app without clicking: launched with `--snapshot-dir <dir>`, the
+/// window is sized to 1280 × 800 and the app polls `<dir>/cmd` for one command per line: `snap [label]`
+/// writes the key window's content as PNG (no screen-recording permission needed: the view draws itself
+/// into a bitmap); `dark` / `light` switch appearance; `size W H` resizes the window.
+/// `env <id>` selects an environment, `compile` starts a compile,
 /// `tick all|<n>` ticks hacks, `harden` hardens the ticked ones, `open <n>` / `close` show and hide a
 /// hack's detail sheet, `recheck [n]` replays a hardened hack, `page result|report|verify|certificate`
 /// switches the compile page, `accept-all`, `reject-all` and `save` decide and save differences,
 /// `ff on|off` sets fast-forward, and `state` only logs. Every command is echoed to `<dir>/events.log`
-/// with the pitch mode, slide, compile page and compile progress after it ran.
+/// with the compile page and compile progress after it ran.
 @MainActor
 enum DebugSnapshot {
     private static var counter = 0
@@ -43,7 +42,7 @@ enum DebugSnapshot {
 
     private static func state(_ store: DemoStore) -> String {
         let page = store.selectedSession.map { "\($0.page)" } ?? "-"
-        var line = "mode=\(store.pitch.mode) slide=\(store.pitch.index + 1) page=\(page) presenter=\(store.pitch.showPresenter)"
+        var line = "page=\(page)"
         if let env = store.selectedEnvironment { line += " env=\(env.id) v\(store.version(of: env)) pending=\(store.pendingChanges(for: env).count)" }
         if let s = store.selectedSession {
             line += " busy=\(s.isBusy) finished=\(s.compileFinished) rollouts=\(s.trajectories.count) hacks=\(s.hackCount)"
@@ -55,21 +54,6 @@ enum DebugSnapshot {
     private static func run(_ verb: String, _ args: [String], dir: URL, store: DemoStore) {
         switch verb {
         case "snap": snapshot(into: dir, label: args.first ?? "")
-        case "key":
-            let (code, flags, letter): (UInt16, NSEvent.ModifierFlags, String) = switch args.first ?? "" {
-            case "right": (124, [], "")
-            case "left": (123, [], "")
-            case "pagedown": (121, [], "")
-            case "pageup": (116, [], "")
-            case "esc": (53, [], "\u{1B}")
-            case "space": (49, [], " ")
-            case "cmd-r": (15, .command, "r")
-            case "cmd-shift-p": (35, [.command, .shift], "p")
-            case let s: (0, [], s)
-            }
-            if flags == [.command, .shift], letter == "p" { store.togglePitchMode() }
-            else { _ = store.handlePitchKey(code: code, flags: flags, letter: letter) }
-        case "continue": store.leaveDemo(toNextSlide: true)
         case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
         case "light": NSApp.appearance = NSAppearance(named: .aqua)
         case "size": if args.count == 2, let w = Double(args[0]), let h = Double(args[1]) { resize(w, h) }

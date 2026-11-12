@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Wire contract
 //
 // This file is the single source of truth for the shape of data exchanged between the
-// macOS app and the audit backend (Python/FastAPI). `docs/contract.md` is the human-readable
+// macOS app and the audit backend (Python). `docs/contract.md` is the human-readable
 // mirror with example JSON. Keep them in sync.
 //
 // Conventions

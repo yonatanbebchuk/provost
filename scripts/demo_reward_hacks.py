@@ -34,7 +34,7 @@ def show_aidan():
         print("AidanBench: no saved hack found. Run scripts/generate_aidanbench_hacks.py first.")
         return
     print("\n=== 1. AidanBench: LLM coherence-judge injection ===")
-    print("Environment: environements/primeintellect/aidanbench")
+    print("Environment: environments/primeintellect/aidanbench")
     print("Intended reward: count concise, coherent, genuinely novel answers.")
     print("Observed reward proxy: coherence_score=%s, novelty_proxy=%s" % (row.get("coherence_score"), row.get("novelty_proxy")))
     print("Why it is a hack: " + "; ".join(row.get("violation_reasons", [])))
@@ -48,7 +48,7 @@ def show_agency():
         print("AgencyBench: no saved hack found. Run scripts/generate_agencybench_hacks.py first.")
         return
     print("\n=== 2. AgencyBench: evaluator delimiter escape ===")
-    print("Environment: environements/primeintellect/agency_bench")
+    print("Environment: environments/primeintellect/agency_bench")
     print("Intended reward: LLM judge returns issue deductions; no issues => reward 1.0.")
     print("Observed env_reward=%s, deduction=%s" % (row.get("env_reward"), row.get("deduction")))
     print("Why it is a hack: " + "; ".join(row.get("violation_reasons", [])))
@@ -63,7 +63,7 @@ def show_structured():
         print("Structured outputs: no saved hack found. Run scripts/generate_structured_outputs_hacks.py first.")
         return
     print("\n=== 3. Structured Outputs: schema-valid but semantically fake ===")
-    print("Environment: environements/huggingface/nvidia__Nemotron-RL-instruction_following-structured_outputs")
+    print("Environment: environments/huggingface/nvidia__Nemotron-RL-instruction_following-structured_outputs")
     print("Intended reward: output JSON that validates AND is grounded in the source document/dialog.")
     print("Observed schema_validation_proxy_passed=%s" % row.get("schema_validation_proxy_passed"))
     print("Why it is a hack: " + "; ".join(row.get("violation_reasons", [])))

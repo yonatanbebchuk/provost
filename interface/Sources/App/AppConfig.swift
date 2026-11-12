@@ -10,7 +10,7 @@ public enum AppConfig {
     /// auditor is stale: the environment should be re-run.
     public static let auditorVersion = "0.1.0"
 
-    /// Port the RL team's FastAPI server listens on. One place to change it.
+    /// Port the local Python backend (scripts/reward_hack_server.py) listens on. One place to change it.
     public static let localBackendPort = 8765
     public static var localBackendURL: URL { URL(string: "http://127.0.0.1:\(localBackendPort)")! }
 

@@ -1,7 +1,7 @@
-# Provost · macOS demo app
+# Provost · macOS app
 
-Native SwiftUI front-end for the RL environment audit service. Runs the whole demo on bundled fixture
-data; swaps to the Python backend with one line.
+Native SwiftUI front-end for auditing RL environments for reward hacks. It runs on bundled fixture
+data (recorded evidence replayed with a live rhythm); one line swaps it to the local Python backend.
 
 ## Build & run
 
@@ -9,15 +9,14 @@ Requirements: macOS 26, Xcode 27, `brew install xcodegen`.
 
 ```bash
 make run      # xcodegen + xcodebuild Debug + open the .app
-make pitch    # build and open in Pitch Mode on slide 1 (⌘R re-reads the source deck.json)
 make build    # just build
 make test     # XCTest: fixture decoder + stage state machine + store pipeline
 make gen      # regenerate Provost.xcodeproj from project.yml (never hand-edit the project)
 make fixtures # regenerate Resources/fixtures from scripts/make_fixtures.py
 ```
 
-The Makefile sets `DEVELOPER_DIR` to `/Applications/Xcode.app` because `xcode-select` on the demo
-Mac points at Command Line Tools. Override with `make DEVELOPER_DIR=/path build`.
+The Makefile sets `DEVELOPER_DIR` to `/Applications/Xcode.app` so the build works even when
+`xcode-select` points at Command Line Tools. Override with `make DEVELOPER_DIR=/path build`.
 
 Or open `Provost.xcodeproj` after `make gen` and hit Run.
 
@@ -55,12 +54,7 @@ on an environment:
 The environment page reads like a README: the objective first, then sample inputs (what the policy is
 trained on), then Reward, Action space and Observation space side by side, then Initial state,
 Episode and the certificate, then the compiles. The Reward card opens the reward function source
-and, after a hardening touched it, the diff. The parts follow the six mandatory responsibilities in
-`auto_RL_builder/environment_comparison.md`.
-
-The adversarial training curve (proxy reward against held-out score, with the liftoff marker) is
-archived under `Sources/Views/Archive/`. It measures a training simulation, not the rollouts of a
-compile, and belongs to the Monitor process when that exists.
+and, after a hardening touched it, the diff.
 
 ### Keyboard shortcuts
 
@@ -71,42 +65,18 @@ compile, and belongs to the Monitor process when that exists.
 | `⌘E`  | Show the environment page |
 | `⌘⇧F` | Toggle fast-forward (the compile replays in ~2 s instead of ~30 s) |
 | `⌘⇧L` | Show / hide the compile log |
-| `⌘⇧P` | Pitch mode on / off (see Pitch Mode) |
 
-## Pitch Mode
+## Driving the app from a script
 
-The pitch deck lives inside the app: a third top-level mode of the main window (⌘⇧P, or View ▸
-Pitch; `make pitch` launches straight into it with `--pitch`). The deck is data:
-`Resources/pitch/deck.json` holds the ten slides (eyebrow, title, subtitle, visual, script, budget).
-Edit titles, scripts and budgets there; `make pitch` points the app at the source file so ⌘R in
-pitch mode re-reads it without a rebuild. A slide with `"reveal": "step"` builds one piece per `→`
-(each tick of a timeline, the chart) before the next slide; `←` un-reveals. Faces on the opening
-slide are small round photos beside each name: drop a photo into `Resources/pitch/faces/` and name
-it in the person's `image` field, or set their `github` handle and run `make faces` to bundle the
-avatar; a person with neither shows initials. Every slide is title-only; the script shows only in the
-presenter panel (`P`). Visuals replay each time the slide appears; Reduce Motion jumps to the end.
+`--snapshot-dir <dir>` sizes the window to 1280 × 800 and polls `<dir>/cmd` for one command per line
+(`env <id>`, `compile`, `tick all`, `harden`, `accept-all`, `save`, `snap <label>`, `dark`, `light` …),
+writing PNGs and an `events.log` with the app state after each command. The full list is in
+`Sources/App/DebugSnapshot.swift`. This is how the screenshots in the root README were taken:
 
-Slide 6 is the demo. `→` on it shows the app as it stands; the presenter drives it by hand (the
-`yelp-sentiment` fixture is the one made for the story: compile, open the step-412 rollout, Harden,
-Recheck — the Verify tab shows the re-run and the before/after rates from the fixture). No key is
-intercepted while the app is up. **Continue pitch →** in the top bar lands on slide 7; ⌘⇧P returns
-to slide 6. The Provost logo (sidebar or pitch top bar) and **Present** start a fresh presentation
-from slide 1 with the clocks at zero.
-
-| Key | Pitch mode |
-|-----|-----------|
-| `→` / `PageDown` / click right half | next slide; on slide 6 enters the demo |
-| `←` / `PageUp` / click left half | previous slide |
-| `Esc` | Exit to app (**Resume pitch →** in the top bar) |
-| `P` | presenter panel: script, slide clock, pitch total |
-| `Space` | start / pause the slide clock |
-| `⌘R` | reload deck.json |
-| `⌘⇧P` | leave pitch mode (plain app); from the demo, back to slide 6 |
-
-Keys are handled at the window level (an `NSEvent` local monitor) only while slides show, so
-nothing needs focus and the app keeps every key during the demo.
-Rehearsal aid: `--snapshot-dir <dir>` sizes the window to 1280 × 800 and polls `<dir>/cmd` for
-`key right`, `snap <label>`, `dark`, `light` …, writing PNGs and an `events.log` there.
+```bash
+open build/Build/Products/Debug/Provost.app --args --snapshot-dir /tmp/provost-snap
+printf 'env banking-loans\ncompile\n' > /tmp/provost-snap/cmd
+```
 
 ## Switching backends
 
@@ -114,15 +84,15 @@ Rehearsal aid: `--snapshot-dir <dir>` sizes the window to 1280 × 800 and polls 
 
 ```swift
 let backend: any AuditBackend = FixtureBackend.bundled(playback: playback)   // demo
-// let backend: any AuditBackend = LocalHTTPBackend()                        // FastAPI on 127.0.0.1:8765
+// let backend: any AuditBackend = LocalHTTPBackend()                        // local server on 127.0.0.1:8765
 ```
 
 Port lives in `AppConfig.localBackendPort`. Endpoints and SSE framing are in `docs/contract.md`.
-A mock server that serves the fixtures over that contract is in `../backend/mock_server.py`.
+`python3 scripts/reward_hack_server.py` at the repo root serves that contract.
 
-## Red-team evidence (Josh's pipeline)
+## Red-team evidence
 
-The three real environments in Recent — AgencyBench, AidanBench, Structured Outputs — come from the
+The real third-party environments — AgencyBench, AidanBench, Structured Outputs — come from the
 exploit generators at the repo root (`scripts/generate_*_hacks.py` → `exploits/*.jsonl` →
 `scripts/prepare_diff_studio_data.py` → `ui/data/demo.json`). `scripts/import_diff_studio.py`
 converts that into fixture sets:
@@ -156,7 +126,7 @@ Sources/Views      RootView (sidebar, top bar), EnvironmentPage (parts + differe
 Resources/fixtures <env-id>/*.json
 Tests              XCTest
 docs/contract.md   wire format with example JSON
-scripts            make_fixtures.py
+scripts            make_fixtures.py, import_diff_studio.py (fixture generators)
 ```
 
 Product name is `AppConfig.productName` — one edit to rename.

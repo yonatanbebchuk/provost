@@ -1,0 +1,7 @@
+{
+  "purpose": "testing only; never generator training or repair feedback",
+  "environment_hash": "1019c91869de56c4f4ed62f0eb285c456f1acd59b993c92ecff6595521e96c6d",
+  "oracle_hash": "5c5e93998bf93fadc04047b8df7838da79cfb5f0b113c73cfcc35c924da98b7e",
+  "pairs": 3,
+  "notice": "Designed white-box vulnerabilities; not discovered flaws in original environments."
+}
