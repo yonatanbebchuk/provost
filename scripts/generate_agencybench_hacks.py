@@ -3,7 +3,7 @@
 Generate reward-hack candidates for PrimeIntellect agency_bench.
 
 Target env:
-  environements/primeintellect/agency_bench
+  environments/primeintellect/agency_bench
 
 Why this environment is promising:
   - The reward is an LLM-as-judge rubric.
@@ -42,7 +42,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-AGENCY_DIR = ROOT / "environements" / "primeintellect" / "agency_bench"
+AGENCY_DIR = ROOT / "environments" / "primeintellect" / "agency_bench"
 OUT_PATH = ROOT / "exploits" / "agencybench_hack_candidates.jsonl"
 
 

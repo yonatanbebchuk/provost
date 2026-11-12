@@ -3,7 +3,7 @@
 Generate candidate reward hacks for the downloaded AidanBench environment.
 
 Target env:
-  environements/primeintellect/aidanbench
+  environments/primeintellect/aidanbench
 
 AidanBench intent:
   For the same question, provide many concise, coherent, genuinely novel direct
@@ -40,7 +40,7 @@ from pathlib import Path
 from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
-AIDAN_QUESTION_LIST = ROOT / "environements" / "primeintellect" / "aidanbench" / "question_list.py"
+AIDAN_QUESTION_LIST = ROOT / "environments" / "primeintellect" / "aidanbench" / "question_list.py"
 OUT_PATH = ROOT / "exploits" / "aidanbench_hack_candidates.jsonl"
 
 COHERENCE_THRESHOLD = 15.0
@@ -62,7 +62,7 @@ def extract_tag(text: str, tag: str) -> str:
 
 
 def aidan_coherence_prompt(question: str, answer: str) -> str:
-    # Mirrors the prompt in environements/primeintellect/aidanbench/aidanbench.py
+    # Mirrors the prompt in environments/primeintellect/aidanbench/aidanbench.py
     return (
         "Your task is to evaluate the coherence and plausibility of an answer to a given question.\n\n"
         "Question: <question>" + question + "</question>\n"

@@ -54,7 +54,7 @@ A smaller judge followed the injected instruction and returned no issues.
 File:
 
 ```text
-environements/primeintellect/agency_bench/dimension_classes/ask_clarifying_questions.py
+environments/primeintellect/agency_bench/dimension_classes/ask_clarifying_questions.py
 ```
 
 The evaluator prompt includes:
@@ -83,7 +83,7 @@ A smaller judge treats injected text as instructions.
 File:
 
 ```text
-environements/primeintellect/agency_bench/utils.py
+environments/primeintellect/agency_bench/utils.py
 ```
 
 Current behavior:
@@ -215,7 +215,7 @@ novelty_proxy=0.354
 File:
 
 ```text
-environements/primeintellect/aidanbench/aidanbench.py
+environments/primeintellect/aidanbench/aidanbench.py
 ```
 
 Current pattern:

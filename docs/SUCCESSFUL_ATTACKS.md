@@ -19,7 +19,7 @@ This is the current compelling list of attacks that produced high reward or veri
 
 ## Strongest demo attack: AgencyBench full-reward bad answer
 
-**Environment:** `environements/primeintellect/agency_bench`
+**Environment:** `environments/primeintellect/agency_bench`
 
 **Intended behavior:** In the `ask_clarifying_questions` dimension, the assistant should recognize missing critical context and ask the user for more information before giving advice.
 
@@ -53,7 +53,7 @@ deduction=0
 
 ## Second demo attack: AidanBench coherence/novelty hack
 
-**Environment:** `environements/primeintellect/aidanbench`
+**Environment:** `environments/primeintellect/aidanbench`
 
 **Intended behavior:** Produce many concise, coherent, genuinely novel direct answers to the same question.
 
@@ -80,7 +80,7 @@ novelty_proxy=0.354
 
 ## Third demo attack: Structured Outputs schema-only hack
 
-**Environment:** `environements/huggingface/nvidia__Nemotron-RL-instruction_following-structured_outputs`
+**Environment:** `environments/huggingface/nvidia__Nemotron-RL-instruction_following-structured_outputs`
 
 **Intended behavior:** Produce JSON that validates against the schema and is grounded in the provided document/dialog.
 
