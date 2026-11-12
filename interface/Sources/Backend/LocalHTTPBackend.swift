@@ -1,6 +1,6 @@
 import Foundation
 
-/// Talks to the RL team's FastAPI server. Endpoints mirror `docs/contract.md`:
+/// Talks to the local Python backend (scripts/reward_hack_server.py at the repo root). Endpoints mirror `docs/contract.md`:
 ///
 ///   GET  /environments                      -> [AuditEnvironment]
 ///   POST /environments        {path}        -> AuditEnvironment

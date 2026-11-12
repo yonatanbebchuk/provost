@@ -2,7 +2,7 @@
   "id": "nemotron-structured-outputs",
   "name": "Structured Outputs",
   "format": "custom",
-  "source": "environements/huggingface/nvidia__Nemotron-RL-instruction_following-structured_outputs",
+  "source": "environments/huggingface/nvidia__Nemotron-RL-instruction_following-structured_outputs",
   "task_count": 5,
   "reward_type": "programmatic",
   "sandbox": {

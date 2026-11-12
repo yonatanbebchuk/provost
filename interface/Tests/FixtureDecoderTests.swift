@@ -152,7 +152,6 @@ final class FixtureDecoderTests: XCTestCase {
         XCTAssertNil(LocalHTTPBackend.decodeEvent(name: "nonsense", data: "{}"))
     }
 
-    /// The pitch demo's fixture: the numbers the presenter says come from here.
     func testYelpFixtureDecodes() throws {
         let env = "yelp-sentiment"
         let environment = try decode(AuditEnvironment.self, env, "environment.json")
@@ -174,11 +173,6 @@ final class FixtureDecoderTests: XCTestCase {
         XCTAssertEqual(verify.before.hackRate, 0.31)
         XCTAssertEqual(verify.after.hackRate, 0)
         XCTAssertEqual(verify.verdict, .pass)
-        let deck = try PitchDeck.load(from: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("Resources/pitch/deck.json"))
-        XCTAssertEqual(deck.slides.count, 8)
-        XCTAssertEqual(deck.slides.reduce(0) { $0 + $1.budgetSeconds }, 300)
-        XCTAssertEqual(deck.slides.filter(\.isDemoHandoff).map(\.id), ["provost"])
     }
 
     func testFixtureBackendEndToEndFast() async throws {

@@ -1,47 +1,5 @@
 import SwiftUI
 
-/// Static findings from the environment scan, grouped by severity, expandable in place.
-struct FindingsPanel: View {
-    let findings: [LintFinding]
-    @State private var expanded: Set<String> = []
-
-    private var grouped: [(Severity, [LintFinding])] {
-        Severity.allCases.reversed().compactMap { sev in
-            let items = findings.filter { $0.severity == sev }
-            return items.isEmpty ? nil : (sev, items)
-        }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text("Static findings").font(.headline)
-                Text("\(findings.count)").font(.callout.monospacedDigit()).foregroundStyle(.secondary)
-                Spacer()
-                if !findings.isEmpty {
-                    Text("\(Set(findings.map(\.failureMode)).count) failure modes").font(.caption).foregroundStyle(.tertiary)
-                }
-            }
-            ScrollView {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(grouped, id: \.0) { severity, items in
-                        ForEach(items) { finding in
-                            FindingRow(finding: finding, isExpanded: expanded.contains(finding.id)) {
-                                if expanded.contains(finding.id) { expanded.remove(finding.id) } else { expanded.insert(finding.id) }
-                            }
-                        }
-                    }
-                }
-            }
-            .overlay {
-                if findings.isEmpty {
-                    Text("Scanning the environment…").font(.callout).foregroundStyle(.tertiary)
-                }
-            }
-        }
-    }
-}
-
 struct FindingRow: View {
     let finding: LintFinding
     let isExpanded: Bool

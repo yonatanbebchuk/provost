@@ -271,9 +271,4 @@ enum Format {
     }
     static let dateTime: Date.FormatStyle = .dateTime.year().month(.abbreviated).day().hour().minute().timeZone()
     static let date: Date.FormatStyle = .dateTime.day().month(.abbreviated).year()
-    static func shortHash(_ h: String) -> String {
-        guard let colon = h.firstIndex(of: ":") else { return String(h.prefix(16)) }
-        let digest = h[h.index(after: colon)...]
-        return "\(h[..<colon]):\(digest.prefix(12))…\(digest.suffix(6))"
-    }
 }

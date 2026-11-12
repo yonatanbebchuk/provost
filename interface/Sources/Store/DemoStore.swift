@@ -31,8 +31,6 @@ public final class DemoStore {
     public private(set) var selectedRunId: String?
     public var errorMessage: String?
     public var showLog = false
-    /// The pitch deck: slide, mode and clocks. The main window and the presenter window read it.
-    public let pitch = PitchController()
 
     /// Current spec per environment, after accepted changes. Absent means unchanged from the fixture.
     private var specs: [String: EnvironmentSpec] = [:]
@@ -282,29 +280,6 @@ public final class DemoStore {
             return .stable(certified: certificate.issuedAt)
         }
         return .unassessed
-    }
-}
-
-// MARK: - Pitch demo
-
-extension DemoStore {
-    private var demoSlideIndex: Int { pitch.slides.firstIndex { $0.isDemoHandoff } ?? pitch.index }
-
-    /// `→` on the Demo slide: the app as it stands, for the presenter to drive by hand. Only
-    /// Continue pitch (or ⌘⇧P) leads back to the slides.
-    public func enterDemo() {
-        pitch.beginDemo()
-    }
-
-    /// Continue pitch goes on to the next slide; ⌘⇧P returns to the Demo slide.
-    public func leaveDemo(toNextSlide: Bool) {
-        pitch.endDemo(to: demoSlideIndex + (toNextSlide ? 1 : 0))
-    }
-
-    /// The logo and Present: a fresh presentation from slide 1, clocks at zero.
-    public func startPresentation() {
-        pitch.resetClocks()
-        pitch.enterPitch(at: 0)
     }
 }
 
